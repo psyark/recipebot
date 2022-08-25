@@ -23,10 +23,6 @@ const (
 	botChannelID      = "D03SNU2C80H"
 )
 
-var (
-	categories = []string{"主食", "主菜", "副菜", "汁物", "弁当", "おつまみ", "デザート"}
-)
-
 // POSTリクエストに応答する
 func (r *Bot) RespondPostRequest(rw http.ResponseWriter, req *http.Request) error {
 	payload, err := r.getPayload(req)

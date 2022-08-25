@@ -9,20 +9,33 @@ import (
 )
 
 type RecipeBlocksInfo struct {
-	PageID         string
-	PageURL        string
-	Title          string
-	ImageURL       string
-	ShowCategoryUI bool
+	PageID     string
+	PageURL    string
+	Title      string
+	ImageURL   string
+	Category   string
+	Categories []string
 }
 
 func (b *Bot) GetRecipeBlocksInfo(ctx context.Context, pageID string) (*RecipeBlocksInfo, error) {
 	info := &RecipeBlocksInfo{PageID: pageID}
 
+	if db, err := b.notion.RetrieveDatabase(ctx, RECIPE_DB_ID); err != nil {
+		return nil, err
+	} else {
+		for _, prop := range db.Properties {
+			if prop.ID == RECIPE_CATEGORY {
+				for _, opt := range prop.Select.Options {
+					info.Categories = append(info.Categories, opt.Name)
+				}
+			}
+		}
+	}
+
 	if category, err := b.notion.RetrievePagePropertyItem(ctx, pageID, RECIPE_CATEGORY); err != nil {
 		return nil, err
 	} else {
-		info.ShowCategoryUI = category.PropertyItem.Select.Name == ""
+		info.Category = category.PropertyItem.Select.Name
 	}
 
 	if title, err := b.notion.RetrievePagePropertyItem(ctx, pageID, "title"); err != nil {
@@ -74,23 +87,32 @@ func CreateRecipeBlocks(info *RecipeBlocksInfo) []slack.Block {
 		slack.NewSectionBlock(slack.NewTextBlockObject(slack.MarkdownType, "*操作*", false, false), nil, nil),
 	}
 
-	if info.ShowCategoryUI {
+	{
 		catOptions := []*slack.OptionBlockObject{}
-		for _, c := range categories {
+		var initialOption *slack.OptionBlockObject
+		for _, c := range info.Categories {
 			val, _ := json.Marshal([]string{info.PageID, c})
 			opt := slack.NewOptionBlockObject(string(val), slack.NewTextBlockObject(slack.PlainTextType, c, true, false), nil)
 			catOptions = append(catOptions, opt)
+			if c == info.Category {
+				initialOption = opt
+			}
 		}
-		blocks = append(blocks, slack.NewSectionBlock(
+		selectBlock := slack.NewOptionsSelectBlockElement(
+			slack.OptTypeStatic,
+			slack.NewTextBlockObject(slack.PlainTextType, "分類", true, false),
+			actionSetCategory,
+			catOptions...,
+		)
+		if initialOption != nil {
+			selectBlock.InitialOption = initialOption
+		}
+		categoryBlock := slack.NewSectionBlock(
 			slack.NewTextBlockObject(slack.MarkdownType, "このレシピの分類を設定", false, false),
 			nil,
-			slack.NewAccessory(slack.NewOptionsSelectBlockElement(
-				slack.OptTypeStatic,
-				slack.NewTextBlockObject(slack.PlainTextType, "分類", true, false),
-				actionSetCategory,
-				catOptions...,
-			)),
-		))
+			slack.NewAccessory(selectBlock),
+		)
+		blocks = append(blocks, categoryBlock)
 	}
 
 	blocks = append(blocks, slack.NewSectionBlock(
