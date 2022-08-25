@@ -48,8 +48,12 @@ func runMain(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		err := bot.RespondPostRequest(w, r)
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprintln(w, err.Error())
+			if err, ok := err.(*FancyError); ok {
+				bot.slack.PostMessage(botChannelID, slack.MsgOptionText(err.Error(), true))
+			} else {
+				w.WriteHeader(http.StatusInternalServerError)
+				fmt.Fprintln(w, err.Error())
+			}
 		}
 	}
 }

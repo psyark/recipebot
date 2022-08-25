@@ -113,21 +113,25 @@ func (r *Bot) RespondCallbackMessage(req *http.Request, event *slackevents.Messa
 		}
 
 		if err := r.slack.AddReaction("thumbsup", ref); err != nil {
-			return err
+			return &FancyError{err}
 		}
 
 		page, err := r.autoUpdateRecipePage(ctx, url)
 		if err != nil {
-			return err
+			return &FancyError{err}
 		}
 
 		rbi, err := r.GetRecipeBlocksInfo(ctx, page.ID)
 		if err != nil {
-			return err
+			return &FancyError{err}
 		}
 
 		_, _, err = r.slack.PostMessage(event.Channel, slack.MsgOptionBlocks(CreateRecipeBlocks(rbi)...))
-		return err
+		if err != nil {
+			return &FancyError{err}
+		}
+
+		return nil
 	} else {
 		return r.slack.AddReaction("thinking_face", ref)
 	}
