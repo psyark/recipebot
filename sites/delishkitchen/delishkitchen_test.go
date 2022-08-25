@@ -1,0 +1,143 @@
+package delishkitchen
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+)
+
+func ExampleParser() {
+	ctx := context.Background()
+	rcp, err := NewParser().Parse(ctx, "https://delishkitchen.tv/recipes/148173434692567529")
+	if err != nil {
+		panic(err)
+	}
+
+	data, _ := json.MarshalIndent(rcp, "", "  ")
+	fmt.Println(string(data))
+	// output:
+	// {
+	//   "Title": "鶏むね肉と夏野菜の酢豚風",
+	//   "Image": "https://image.delishkitchen.tv/recipe/148173434692567529/1.jpg?version=1624338242\u0026w=460",
+	//   "IngredientGroups": [
+	//     {
+	//       "Name": "",
+	//       "Children": [
+	//         {
+	//           "Name": "鶏むね肉",
+	//           "Amount": "1枚(300g)",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "ピーマン",
+	//           "Amount": "2個",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "なす",
+	//           "Amount": "1本",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "玉ねぎ",
+	//           "Amount": "1/4個",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "酒",
+	//           "Amount": "大さじ1",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "片栗粉",
+	//           "Amount": "大さじ1",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "ごま油",
+	//           "Amount": "大さじ3",
+	//           "Comment": ""
+	//         }
+	//       ]
+	//     },
+	//     {
+	//       "Name": "☆たれ",
+	//       "Children": [
+	//         {
+	//           "Name": "酒",
+	//           "Amount": "大さじ1",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "砂糖",
+	//           "Amount": "小さじ1",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "酢",
+	//           "Amount": "大さじ2",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "しょうゆ",
+	//           "Amount": "大さじ1",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "ケチャップ",
+	//           "Amount": "大さじ2",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "鶏ガラスープの素",
+	//           "Amount": "小さじ1",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "片栗粉",
+	//           "Amount": "小さじ1",
+	//           "Comment": ""
+	//         }
+	//       ]
+	//     }
+	//   ],
+	//   "Steps": [
+	//     {
+	//       "Text": "鶏むね肉は食べやすい大きさに切る。ボウルに入れて酒、片栗粉を加えてもみこむ。",
+	//       "Images": [
+	//         "https://media.delishkitchen.tv/recipe/148173434692567529/steps/1.jpg?version=1624338235"
+	//       ]
+	//     },
+	//     {
+	//       "Text": "ピーマンは半分に切って種とわたを取り除き、食べやすい大きさに切る。なすはヘタをとり、食べやすい大きさに切る。玉ねぎは放射状に3等分に切る。",
+	//       "Images": [
+	//         "https://media.delishkitchen.tv/recipe/148173434692567529/steps/2.jpg?version=1624338235"
+	//       ]
+	//     },
+	//     {
+	//       "Text": "別のボウルに☆を入れて混ぜる(たれ)。",
+	//       "Images": [
+	//         "https://media.delishkitchen.tv/recipe/148173434692567529/steps/3.jpg?version=1624338235"
+	//       ]
+	//     },
+	//     {
+	//       "Text": "フライパンにごま油を入れて熱し、なす、玉ねぎを入れてしんなりするまで中火で炒め、ピーマンを加えて油がなじむ程度に炒めて取り出す。",
+	//       "Images": [
+	//         "https://media.delishkitchen.tv/recipe/148173434692567529/steps/4.jpg?version=1624338235"
+	//       ]
+	//     },
+	//     {
+	//       "Text": "同じフライパンに鶏むね肉を入れ、焼き色がつくまで中火で焼き、上下を返し、弱火で肉に火が通るまで焼く。",
+	//       "Images": [
+	//         "https://media.delishkitchen.tv/recipe/148173434692567529/steps/5.jpg?version=1624338235"
+	//       ]
+	//     },
+	//     {
+	//       "Text": "野菜を戻し入れ、たれを加えてとろみがつくまで炒める。",
+	//       "Images": [
+	//         "https://media.delishkitchen.tv/recipe/148173434692567529/steps/6.jpg?version=1624338235"
+	//       ]
+	//     }
+	//   ]
+	// }
+}
