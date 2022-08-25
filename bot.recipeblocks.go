@@ -79,7 +79,7 @@ func (info *RecipeBlocksInfo) ToSlackBlocks() []slack.Block {
 			info.getThumbnail(),
 		),
 		slack.NewDividerBlock(),
-		slack.NewSectionBlock(slack.NewTextBlockObject(slack.MarkdownType, "*操作*", false, false), nil, nil),
+		slack.NewSectionBlock(slack.NewTextBlockObject(slack.MarkdownType, "*このレシピの操作*", false, false), nil, nil),
 		info.getCategoryBlock(),
 		info.getMenuBlock(),
 		info.getRebuildBlock(),
@@ -114,7 +114,7 @@ func (info *RecipeBlocksInfo) getCategoryBlock() slack.Block {
 		selectBlock.InitialOption = initialOption
 	}
 	return slack.NewSectionBlock(
-		slack.NewTextBlockObject(slack.MarkdownType, "このレシピの分類を設定", false, false),
+		slack.NewTextBlockObject(slack.MarkdownType, "分類を設定する", false, false),
 		nil,
 		slack.NewAccessory(selectBlock),
 	)
@@ -122,7 +122,7 @@ func (info *RecipeBlocksInfo) getCategoryBlock() slack.Block {
 
 func (info *RecipeBlocksInfo) getMenuBlock() slack.Block {
 	return slack.NewSectionBlock(
-		slack.NewTextBlockObject(slack.MarkdownType, "このレシピを<https://www.notion.so/80cf0a5ec25c4b7489f00594362f6e3b|🍽️献立表>に追加する", false, false),
+		slack.NewTextBlockObject(slack.MarkdownType, "<https://www.notion.so/80cf0a5ec25c4b7489f00594362f6e3b|🍽️献立表>に追加する", false, false),
 		nil,
 		slack.NewAccessory(slack.NewButtonBlockElement(
 			actionCreateMenu,
@@ -134,7 +134,7 @@ func (info *RecipeBlocksInfo) getMenuBlock() slack.Block {
 
 func (info *RecipeBlocksInfo) getRebuildBlock() slack.Block {
 	return slack.NewSectionBlock(
-		slack.NewTextBlockObject(slack.MarkdownType, "このレシピを再取得して作り直す", false, false),
+		slack.NewTextBlockObject(slack.MarkdownType, "再取得して作り直す", false, false),
 		nil,
 		slack.NewAccessory(slack.NewButtonBlockElement(
 			actionRebuild,
