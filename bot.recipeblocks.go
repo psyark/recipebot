@@ -68,54 +68,59 @@ func (b *Bot) GetRecipeBlocksInfo(ctx context.Context, pageID string) (*RecipeBl
 	return info, nil
 }
 
-// CreateRecipeBlocks はレシピページのSlack Blocksを作成します
-func CreateRecipeBlocks(info *RecipeBlocksInfo) []slack.Block {
-	var thumbnail *slack.Accessory
-	if info.ImageURL != "" {
-		thumbnail = slack.NewAccessory(slack.NewImageBlockElement(info.ImageURL, "thumbnail"))
-	}
-
-	blocks := []slack.Block{
+// ToSlackBlocks はレシピページのSlack Blocksを作成します
+func (info *RecipeBlocksInfo) ToSlackBlocks() []slack.Block {
+	return []slack.Block{
 		slack.NewSectionBlock(slack.NewTextBlockObject(slack.MarkdownType, "レシピを作ったよ", false, false), nil, nil),
 		slack.NewDividerBlock(),
 		slack.NewSectionBlock(
 			slack.NewTextBlockObject(slack.MarkdownType, fmt.Sprintf("*<%v|%v>*", info.PageURL, info.Title), false, false),
 			nil,
-			thumbnail,
+			info.getThumbnail(),
 		),
 		slack.NewDividerBlock(),
 		slack.NewSectionBlock(slack.NewTextBlockObject(slack.MarkdownType, "*操作*", false, false), nil, nil),
+		info.getCategoryBlock(),
+		info.getMenuBlock(),
 	}
+}
 
-	{
-		catOptions := []*slack.OptionBlockObject{}
-		var initialOption *slack.OptionBlockObject
-		for _, c := range info.Categories {
-			val, _ := json.Marshal([]string{info.PageID, c})
-			opt := slack.NewOptionBlockObject(string(val), slack.NewTextBlockObject(slack.PlainTextType, c, true, false), nil)
-			catOptions = append(catOptions, opt)
-			if c == info.Category {
-				initialOption = opt
-			}
-		}
-		selectBlock := slack.NewOptionsSelectBlockElement(
-			slack.OptTypeStatic,
-			slack.NewTextBlockObject(slack.PlainTextType, "分類", true, false),
-			actionSetCategory,
-			catOptions...,
-		)
-		if initialOption != nil {
-			selectBlock.InitialOption = initialOption
-		}
-		categoryBlock := slack.NewSectionBlock(
-			slack.NewTextBlockObject(slack.MarkdownType, "このレシピの分類を設定", false, false),
-			nil,
-			slack.NewAccessory(selectBlock),
-		)
-		blocks = append(blocks, categoryBlock)
+func (info *RecipeBlocksInfo) getThumbnail() *slack.Accessory {
+	if info.ImageURL != "" {
+		return slack.NewAccessory(slack.NewImageBlockElement(info.ImageURL, "thumbnail"))
 	}
+	return nil
+}
 
-	blocks = append(blocks, slack.NewSectionBlock(
+func (info *RecipeBlocksInfo) getCategoryBlock() slack.Block {
+	catOptions := []*slack.OptionBlockObject{}
+	var initialOption *slack.OptionBlockObject
+	for _, c := range info.Categories {
+		val, _ := json.Marshal([]string{info.PageID, c})
+		opt := slack.NewOptionBlockObject(string(val), slack.NewTextBlockObject(slack.PlainTextType, c, true, false), nil)
+		catOptions = append(catOptions, opt)
+		if c == info.Category {
+			initialOption = opt
+		}
+	}
+	selectBlock := slack.NewOptionsSelectBlockElement(
+		slack.OptTypeStatic,
+		slack.NewTextBlockObject(slack.PlainTextType, "分類", true, false),
+		actionSetCategory,
+		catOptions...,
+	)
+	if initialOption != nil {
+		selectBlock.InitialOption = initialOption
+	}
+	return slack.NewSectionBlock(
+		slack.NewTextBlockObject(slack.MarkdownType, "このレシピの分類を設定", false, false),
+		nil,
+		slack.NewAccessory(selectBlock),
+	)
+}
+
+func (info *RecipeBlocksInfo) getMenuBlock() slack.Block {
+	return slack.NewSectionBlock(
 		slack.NewTextBlockObject(slack.MarkdownType, "このレシピを<https://www.notion.so/80cf0a5ec25c4b7489f00594362f6e3b|🍽️献立表>に追加する", false, false),
 		nil,
 		slack.NewAccessory(slack.NewButtonBlockElement(
@@ -123,6 +128,5 @@ func CreateRecipeBlocks(info *RecipeBlocksInfo) []slack.Block {
 			info.PageID,
 			slack.NewTextBlockObject(slack.PlainTextType, "献立表に追加", true, false),
 		)),
-	))
-	return blocks
+	)
 }

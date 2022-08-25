@@ -122,7 +122,7 @@ func (r *Bot) RespondCallbackMessage(req *http.Request, event *slackevents.Messa
 			return &FancyError{err}
 		}
 
-		_, _, err = r.slack.PostMessage(event.Channel, slack.MsgOptionBlocks(CreateRecipeBlocks(rbi)...))
+		_, _, err = r.slack.PostMessage(event.Channel, slack.MsgOptionBlocks(rbi.ToSlackBlocks()...))
 		if err != nil {
 			return &FancyError{err}
 		}
@@ -176,7 +176,7 @@ func (b *Bot) RespondSetCategory(event *slack.InteractionCallback, selectedValue
 	_, _, _, err = b.slack.UpdateMessage(
 		event.Channel.ID,
 		event.Message.Timestamp,
-		slack.MsgOptionBlocks(CreateRecipeBlocks(rbi)...),
+		slack.MsgOptionBlocks(rbi.ToSlackBlocks()...),
 	)
 	return err
 }
