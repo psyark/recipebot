@@ -1,11 +1,6 @@
 package recipebot
 
 import (
-	"fmt"
-	"net/http"
-	"os"
-
-	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 	"github.com/psyark/notionapi"
 	"github.com/slack-go/slack"
 )
@@ -21,9 +16,17 @@ recipebot
 https://api.slack.com/apps/A03SNSS0S81
 */
 
-func init() {
-	functions.HTTP("main", runMain)
-}
+const (
+	actionSetCategory = "set_category"
+	actionCreateMenu  = "create_menu"
+	actionRebuild     = "rebuild"
+	botMemberID       = "U03SCN7MYEQ"
+	botChannelID      = "D03SNU2C80H"
+	RECIPE_DB_ID      = "ff24a40498c94ac3ac2fa8894ac0d489"
+	RECIPE_ORIGINAL   = "%5CiX%60"
+	RECIPE_EVAL       = "Ha%3Ba"
+	RECIPE_CATEGORY   = "gmv%3A"
+)
 
 // Bot はGoogle Cloud Functionsへの応答を行うクラスです
 type Bot struct {
@@ -35,25 +38,5 @@ func NewBot(slackClient *slack.Client, notionClient *notionapi.Client) *Bot {
 	return &Bot{
 		slack:  slackClient,
 		notion: notionClient,
-	}
-}
-
-func runMain(w http.ResponseWriter, r *http.Request) {
-	bot := NewBot(
-		slack.New(os.Getenv("SLACK_BOT_USER_OAUTH_TOKEN")),
-		notionapi.NewClient(os.Getenv("NOTION_API_KEY")),
-	)
-
-	switch r.Method {
-	case http.MethodPost:
-		err := bot.RespondPostRequest(w, r)
-		if err != nil {
-			if err, ok := err.(*FancyError); ok {
-				bot.slack.PostMessage(botChannelID, slack.MsgOptionText(err.Error(), true))
-			} else {
-				w.WriteHeader(http.StatusInternalServerError)
-				fmt.Fprintln(w, err.Error())
-			}
-		}
 	}
 }

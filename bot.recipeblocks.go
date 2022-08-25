@@ -82,6 +82,7 @@ func (info *RecipeBlocksInfo) ToSlackBlocks() []slack.Block {
 		slack.NewSectionBlock(slack.NewTextBlockObject(slack.MarkdownType, "*操作*", false, false), nil, nil),
 		info.getCategoryBlock(),
 		info.getMenuBlock(),
+		info.getRebuildBlock(),
 	}
 }
 
@@ -127,6 +128,18 @@ func (info *RecipeBlocksInfo) getMenuBlock() slack.Block {
 			actionCreateMenu,
 			info.PageID,
 			slack.NewTextBlockObject(slack.PlainTextType, "献立表に追加", true, false),
+		)),
+	)
+}
+
+func (info *RecipeBlocksInfo) getRebuildBlock() slack.Block {
+	return slack.NewSectionBlock(
+		slack.NewTextBlockObject(slack.MarkdownType, "このレシピを再取得して作り直す", false, false),
+		nil,
+		slack.NewAccessory(slack.NewButtonBlockElement(
+			actionRebuild,
+			info.PageID,
+			slack.NewTextBlockObject(slack.PlainTextType, "作り直す", true, false),
 		)),
 	)
 }
