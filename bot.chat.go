@@ -25,14 +25,11 @@ type chatService struct {
 func (s chatService) PostRecipeBlocks(ctx context.Context, channelID string, pageID string) error {
 	rbi, err := s.getRecipeBlocksInfo(ctx, pageID)
 	if err != nil {
-		return &FancyError{err}
+		return err
 	}
 
 	_, _, err = s.slack.PostMessage(channelID, slack.MsgOptionBlocks(rbi.ToSlackBlocks()...))
-	if err != nil {
-		return &FancyError{err}
-	}
-	return nil
+	return err
 }
 
 func (s chatService) UpdateRecipeBlocks(ctx context.Context, channelID string, timestamp string, pageID string) error {
