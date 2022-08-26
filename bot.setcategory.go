@@ -9,7 +9,7 @@ import (
 
 // レシピのカテゴリー変更
 
-func (b *Bot) RespondSetCategory(event *slack.InteractionCallback, selectedValue string) error {
+func (b *MyBot) RespondSetCategory(event *slack.InteractionCallback, selectedValue string) error {
 	ctx := context.Background()
 
 	pair := [2]string{}

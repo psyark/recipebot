@@ -17,7 +17,7 @@ type RecipeBlocksInfo struct {
 	Categories []string
 }
 
-func (b *Bot) GetRecipeBlocksInfo(ctx context.Context, pageID string) (*RecipeBlocksInfo, error) {
+func (b *MyBot) GetRecipeBlocksInfo(ctx context.Context, pageID string) (*RecipeBlocksInfo, error) {
 	info := &RecipeBlocksInfo{PageID: pageID}
 
 	if db, err := b.notion.RetrieveDatabase(ctx, RECIPE_DB_ID); err != nil {

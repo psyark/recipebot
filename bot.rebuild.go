@@ -7,7 +7,7 @@ import (
 	"github.com/psyark/recipebot/sites/united"
 )
 
-func (b *Bot) RespondRebuild(pageID string) error {
+func (b *MyBot) RespondRebuild(pageID string) error {
 	ctx := context.Background()
 
 	page, err := b.notion.RetrievePage(ctx, pageID)

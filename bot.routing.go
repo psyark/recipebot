@@ -41,7 +41,7 @@ func runMain(w http.ResponseWriter, r *http.Request) {
 }
 
 // POSTリクエストに応答する
-func (b *Bot) RespondPostRequest(rw http.ResponseWriter, req *http.Request) error {
+func (b *MyBot) RespondPostRequest(rw http.ResponseWriter, req *http.Request) error {
 	payload, err := b.getPayload(req)
 	if err != nil {
 		return err
@@ -59,7 +59,7 @@ func (b *Bot) RespondPostRequest(rw http.ResponseWriter, req *http.Request) erro
 
 	switch event.Type {
 	case slackevents.URLVerification:
-		return b.RespondURLVerification(rw, &event)
+		return b.URLVerify(rw, event.Data.(slackevents.EventsAPIURLVerificationEvent))
 
 	case slackevents.CallbackEvent:
 		if err := b.RespondCallback(req, &event); err != nil {
@@ -82,7 +82,7 @@ func (b *Bot) RespondPostRequest(rw http.ResponseWriter, req *http.Request) erro
 	}
 }
 
-func (b *Bot) verifyHeader(header http.Header) error {
+func (b *MyBot) verifyHeader(header http.Header) error {
 	sv, err := slack.NewSecretsVerifier(header, os.Getenv("SLACK_SIGNING_SECRET"))
 	if err != nil {
 		return err
@@ -92,7 +92,7 @@ func (b *Bot) verifyHeader(header http.Header) error {
 }
 
 // SlackのCallbackイベントへの応答
-func (b *Bot) RespondCallback(req *http.Request, event *slackevents.EventsAPIEvent) error {
+func (b *MyBot) RespondCallback(req *http.Request, event *slackevents.EventsAPIEvent) error {
 	switch innerEvent := event.InnerEvent.Data.(type) {
 	case *slackevents.MessageEvent:
 		return b.RespondCallbackMessage(req, innerEvent)
@@ -103,7 +103,7 @@ func (b *Bot) RespondCallback(req *http.Request, event *slackevents.EventsAPIEve
 }
 
 // SlackのBlockActionsへの応答
-func (b *Bot) RespondBlockActions(req *http.Request, event *slack.InteractionCallback) error {
+func (b *MyBot) RespondBlockActions(req *http.Request, event *slack.InteractionCallback) error {
 	for _, ba := range event.ActionCallback.BlockActions {
 		switch ba.ActionID {
 		case actionCreateMenu:
@@ -126,7 +126,7 @@ func (b *Bot) RespondBlockActions(req *http.Request, event *slack.InteractionCal
 	return nil
 }
 
-func (b *Bot) getPayload(req *http.Request) ([]byte, error) {
+func (b *MyBot) getPayload(req *http.Request) ([]byte, error) {
 	switch req.Header.Get("Content-Type") {
 	case "application/x-www-form-urlencoded":
 		if err := req.ParseForm(); err != nil {

@@ -15,7 +15,7 @@ import (
 )
 
 // SlackのCallbackMessageへの応答
-func (b *Bot) RespondCallbackMessage(req *http.Request, event *slackevents.MessageEvent) error {
+func (b *MyBot) RespondCallbackMessage(req *http.Request, event *slackevents.MessageEvent) error {
 	if req.Header.Get("X-Slack-Retry-Num") != "" {
 		return nil // リトライは無視
 	} else if event.User == botMemberID {
@@ -54,7 +54,7 @@ func (b *Bot) RespondCallbackMessage(req *http.Request, event *slackevents.Messa
 	}
 }
 
-func (b *Bot) autoUpdateRecipePage(ctx context.Context, recipeURL string) (*notionapi.Page, error) {
+func (b *MyBot) autoUpdateRecipePage(ctx context.Context, recipeURL string) (*notionapi.Page, error) {
 	rcp, err := united.Parsers.Parse(ctx, recipeURL)
 	if err != nil {
 		return nil, err
@@ -97,7 +97,7 @@ func (b *Bot) autoUpdateRecipePage(ctx context.Context, recipeURL string) (*noti
 	}
 }
 
-func (b *Bot) autoUpdateRecipePageContent(ctx context.Context, pageID string, rcp *recipe.Recipe) error {
+func (b *MyBot) autoUpdateRecipePageContent(ctx context.Context, pageID string, rcp *recipe.Recipe) error {
 	// 以前のブロックを削除
 	pagi, err := b.notion.RetrieveBlockChildren(ctx, pageID)
 	if err != nil {
@@ -120,7 +120,7 @@ func (b *Bot) autoUpdateRecipePageContent(ctx context.Context, pageID string, rc
 	return err
 }
 
-func (b *Bot) updateCategory(ctx context.Context, pageID string, category string) (*notionapi.Page, error) {
+func (b *MyBot) updateCategory(ctx context.Context, pageID string, category string) (*notionapi.Page, error) {
 	return b.notion.UpdatePage(ctx, pageID, &notionapi.UpdatePageOptions{
 		Properties: map[string]notionapi.PropertyValue{
 			"分類": {Type: "select", Select: notionapi.SelectPropertyValueData{Name: category}},

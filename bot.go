@@ -28,14 +28,21 @@ const (
 	RECIPE_CATEGORY   = "gmv%3A"
 )
 
-// Bot はGoogle Cloud Functionsへの応答を行うクラスです
-type Bot struct {
+type Bot interface {
+	URLVerifier
+}
+
+var _ Bot = &MyBot{}
+
+// MyBot はGoogle Cloud Functionsへの応答を行うクラスです
+type MyBot struct {
+	urlVerifier
 	slack  *slack.Client
 	notion *notionapi.Client
 }
 
-func NewBot(slackClient *slack.Client, notionClient *notionapi.Client) *Bot {
-	return &Bot{
+func NewBot(slackClient *slack.Client, notionClient *notionapi.Client) *MyBot {
+	return &MyBot{
 		slack:  slackClient,
 		notion: notionClient,
 	}
