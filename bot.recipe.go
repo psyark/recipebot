@@ -122,7 +122,7 @@ func (s recipeService) updatePageContent(ctx context.Context, pageID string, rcp
 	}
 
 	// 新しいブロックを作成
-	opt := &notionapi.AppendBlockChildrenOptions{Children: ToNotionBlocks(rcp)}
+	opt := &notionapi.AppendBlockChildrenOptions{Children: Recipe(*rcp).NotionBlocks()}
 	_, err = s.client.AppendBlockChildren(ctx, pageID, opt)
 	return err
 }
@@ -136,19 +136,21 @@ func (s recipeService) SetRecipeCategory(ctx context.Context, pageID string, cat
 	return err
 }
 
-func ToNotionBlocks(rcp *recipe.Recipe) []notionapi.Block {
+type Recipe recipe.Recipe
+
+func (rcp Recipe) NotionBlocks() []notionapi.Block {
 	indices := []string{"1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟", "🔢"}
 
 	blocks := []notionapi.Block{}
-	blocks = append(blocks, toHeading1("材料"))
+	blocks = append(blocks, rcp.toHeading1("材料"))
 	for _, group := range rcp.IngredientGroups {
 		if group.Name != "" {
-			blocks = append(blocks, toHeading3(group.Name))
+			blocks = append(blocks, rcp.toHeading3(group.Name))
 		}
 
 		width := group.LongestNameWidth() + 1
 		for _, idg := range group.Children {
-			todo := toToDo(idg.Name + strings.Repeat("　", width-idg.NameWidth()) + idg.Amount)
+			todo := rcp.toToDo(idg.Name + strings.Repeat("　", width-idg.NameWidth()) + idg.Amount)
 			if idg.Comment != "" {
 				comment := toRichTextArray(" （" + idg.Comment + "）")
 				comment[0].Annotations = &notionapi.Annotations{Color: "green"}
@@ -157,18 +159,18 @@ func ToNotionBlocks(rcp *recipe.Recipe) []notionapi.Block {
 			blocks = append(blocks, todo)
 		}
 	}
-	blocks = append(blocks, toHeading1("手順"))
+	blocks = append(blocks, rcp.toHeading1("手順"))
 	for idx, stp := range rcp.Steps {
 		emoji := "🔢"
 		if idx < len(indices) {
 			emoji = indices[idx]
 		}
-		blocks = append(blocks, toCallout(stp.Text, emoji, stp.Images))
+		blocks = append(blocks, rcp.toCallout(stp.Text, emoji, stp.Images))
 	}
 	return blocks
 }
 
-func toHeading1(str string) notionapi.Block {
+func (rcp Recipe) toHeading1(str string) notionapi.Block {
 	return notionapi.Block{
 		Object:   "block",
 		Type:     "heading_1",
@@ -176,7 +178,7 @@ func toHeading1(str string) notionapi.Block {
 	}
 }
 
-func toHeading3(str string) notionapi.Block {
+func (rcp Recipe) toHeading3(str string) notionapi.Block {
 	return notionapi.Block{
 		Object:   "block",
 		Type:     "heading_3",
@@ -184,7 +186,7 @@ func toHeading3(str string) notionapi.Block {
 	}
 }
 
-func toToDo(str string) notionapi.Block {
+func (rcp Recipe) toToDo(str string) notionapi.Block {
 	return notionapi.Block{
 		Object: "block",
 		Type:   "to_do",
@@ -192,7 +194,7 @@ func toToDo(str string) notionapi.Block {
 	}
 }
 
-func toCallout(str string, emoji string, images []string) notionapi.Block {
+func (rcp Recipe) toCallout(str string, emoji string, images []string) notionapi.Block {
 	block := notionapi.Block{
 		Object: "block",
 		Type:   "callout",
@@ -203,12 +205,12 @@ func toCallout(str string, emoji string, images []string) notionapi.Block {
 		},
 	}
 	for _, url := range images {
-		block.Callout.Children = append(block.Callout.Children, toImage(url))
+		block.Callout.Children = append(block.Callout.Children, rcp.toImage(url))
 	}
 	return block
 }
 
-func toImage(url string) notionapi.Block {
+func (rcp Recipe) toImage(url string) notionapi.Block {
 	return notionapi.Block{
 		Object: "block",
 		Type:   "image",
