@@ -37,6 +37,7 @@ const (
 	RECIPE_ORIGINAL   = "%5CiX%60"
 	RECIPE_EVAL       = "Ha%3Ba"
 	RECIPE_CATEGORY   = "gmv%3A"
+	RECIPE_HEADER_ID  = "60a4999c-b1fa-4e3d-9d6b-48034ad7b675"
 )
 
 // Bot はGoogle Cloud Functionsへの応答を行うクラスです
@@ -69,6 +70,7 @@ func init() {
 
 	x := slackbot.New(bot)
 	functions.HTTP("main", x.Handler)
+	// slackbot.RegisterHTTP("main", bot)
 }
 
 // SlackのCallbackMessageへの応答

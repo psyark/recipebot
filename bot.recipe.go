@@ -141,8 +141,16 @@ type Recipe recipe.Recipe
 func (rcp Recipe) NotionBlocks() []notionapi.Block {
 	indices := []string{"1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟", "🔢"}
 
-	blocks := []notionapi.Block{}
-	blocks = append(blocks, rcp.toHeading1("材料"))
+	blocks := []notionapi.Block{
+		{
+			Object: "block",
+			Type:   "synced_block",
+			SyncedBlock: &notionapi.SyncedBlockBlocks{
+				SyncedFrom: &notionapi.SyncedFrom{Type: "block_id", BlockID: RECIPE_HEADER_ID},
+			},
+		},
+		rcp.toHeading1("材料"),
+	}
 	for _, group := range rcp.IngredientGroups {
 		if group.Name != "" {
 			blocks = append(blocks, rcp.toHeading3(group.Name))
