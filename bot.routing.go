@@ -115,8 +115,21 @@ func (b *Bot) RespondBlockActions(req *http.Request, event *slack.InteractionCal
 			if _, _, err := b.slack.PostMessage(event.Channel.ID, slack.MsgOptionText(page.URL, true)); err != nil {
 				return err
 			}
+
 		case actionSetCategory:
-			return b.RespondSetCategory(event, ba.SelectedOption.Value)
+			ctx := context.Background()
+
+			pair := [2]string{}
+			if err := json.Unmarshal([]byte(ba.SelectedOption.Value), &pair); err != nil {
+				return err
+			}
+
+			if err := b.SetRecipeCategory(ctx, pair[0], pair[1]); err != nil {
+				return err
+			}
+
+			return b.UpdateRecipeBlocks(ctx, event.Channel.ID, event.Message.Timestamp, pair[0])
+
 		case actionRebuild:
 			ctx := context.Background()
 			return b.UpdateRecipe(ctx, ba.Value)
