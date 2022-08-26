@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 	"github.com/mvdan/xurls"
 	"github.com/psyark/notionapi"
 	"github.com/psyark/slackbot"
@@ -65,7 +66,9 @@ func init() {
 		slack.New(os.Getenv("SLACK_BOT_USER_OAUTH_TOKEN")),
 		notionapi.NewClient(os.Getenv("NOTION_API_KEY")),
 	)
-	slackbot.RegisterHandler(bot)
+
+	x := slackbot.New(bot)
+	functions.HTTP("main", x.Handler)
 }
 
 // SlackのCallbackMessageへの応答

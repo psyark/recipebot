@@ -216,6 +216,10 @@ github.com/psyark/notionapi v0.0.0-20220822092621-3b048662c38b h1:griGoKFhmYllEN
 github.com/psyark/notionapi v0.0.0-20220822092621-3b048662c38b/go.mod h1:VsD7WSC1v59Iu4upi9fWnxNYlqx0xVzj0WVdLRltV3s=
 github.com/psyark/slackbot v0.0.0-20220826051828-cfe31a2ac5cc h1:M/FSPs/ChMfQH82BXkOFGKsRdVDZU0rwJjNHJjbJvCs=
 github.com/psyark/slackbot v0.0.0-20220826051828-cfe31a2ac5cc/go.mod h1:H1fkDsKVc4rRmZM6ZTc4FWTMVu6tAyaYRDNFtbwpJWg=
+github.com/psyark/slackbot v0.0.0-20220826060704-1cb0ae78cd53 h1:EasWEuqxTcQv0HxvzKRQ5ION/EOsg5mVhP49bfgosVk=
+github.com/psyark/slackbot v0.0.0-20220826060704-1cb0ae78cd53/go.mod h1:H1fkDsKVc4rRmZM6ZTc4FWTMVu6tAyaYRDNFtbwpJWg=
+github.com/psyark/slackbot v0.0.0-20220826063954-684bcd5f8acc h1:6NdyOAQqNYu0OWy4LQ+JaLIifnXM2HBUKXEo0h0hD1Y=
+github.com/psyark/slackbot v0.0.0-20220826063954-684bcd5f8acc/go.mod h1:H1fkDsKVc4rRmZM6ZTc4FWTMVu6tAyaYRDNFtbwpJWg=
 github.com/rogpeppe/fastuuid v1.2.0/go.mod h1:jVj6XXZzXRy/MSR5jhDC/2q6DgLz+nrA6LYCDYWNEvQ=
 github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
 github.com/sergi/go-diff v1.2.0 h1:XU+rvMAioB0UC3q1MFrIQy4Vo5/4VsRDQQXHsEya6xQ=

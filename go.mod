@@ -18,7 +18,7 @@ require (
 	github.com/mvdan/xurls v1.1.0
 	github.com/psyark/jsonld v0.0.0-20220823063026-e08edf883a0d
 	github.com/psyark/notionapi v0.0.0-20220822092621-3b048662c38b
-	github.com/psyark/slackbot v0.0.0-20220826051828-cfe31a2ac5cc
+	github.com/psyark/slackbot v0.0.0-20220826063954-684bcd5f8acc
 	github.com/slack-go/slack v0.11.2
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
