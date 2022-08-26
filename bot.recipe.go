@@ -1,0 +1,136 @@
+package recipebot
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/psyark/notionapi"
+	"github.com/psyark/recipebot/recipe"
+	"github.com/psyark/recipebot/sites/united"
+)
+
+// レシピページの操作を提供するサービス
+type RecipeService interface {
+	GetRecipeByURL(ctx context.Context, url string) (*notionapi.Page, error)
+	CreateRecipe(ctx context.Context, url string) (*notionapi.Page, error)
+	UpdateRecipe(ctx context.Context, pageID string) error
+	SetRecipeCategory(ctx context.Context, pageID string, category string) error
+}
+
+var _ RecipeService = recipeService{}
+
+type recipeService struct {
+	client *notionapi.Client
+}
+
+func (s recipeService) GetRecipeByURL(ctx context.Context, url string) (*notionapi.Page, error) {
+	opt := &notionapi.QueryDatabaseOptions{Filter: notionapi.PropertyFilter{
+		Property: RECIPE_ORIGINAL,
+		URL:      &notionapi.TextFilterCondition{Equals: url},
+	}}
+
+	pagi, err := s.client.QueryDatabase(ctx, RECIPE_DB_ID, opt)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(pagi.Results) != 0 {
+		return &pagi.Results[0], nil
+	}
+	return nil, nil
+}
+
+func (s recipeService) CreateRecipe(ctx context.Context, url string) (*notionapi.Page, error) {
+	rcp, err := united.Parsers.Parse(ctx, url)
+	if err != nil {
+		return nil, err
+	}
+
+	opt := &notionapi.CreatePageOptions{
+		Parent: &notionapi.Parent{Type: "database_id", DatabaseID: RECIPE_DB_ID},
+		Properties: map[string]notionapi.PropertyValue{
+			"title":         {Type: "title", Title: toRichTextArray(rcp.Title)},
+			RECIPE_ORIGINAL: {Type: "url", URL: url},
+			RECIPE_EVAL:     {Type: "select", Select: notionapi.SelectPropertyValueData{Name: "👀次作る"}},
+		},
+	}
+	if rcp.GetEmoji() != "" {
+		opt.Icon = &notionapi.FileOrEmoji{Type: "emoji", Emoji: rcp.GetEmoji()}
+	}
+	if rcp.Image != "" {
+		opt.Cover = &notionapi.File{Type: "external", External: notionapi.ExternalFileData{URL: rcp.Image}}
+	}
+
+	page, err := s.client.CreatePage(ctx, opt)
+	if err != nil {
+		return nil, err
+	}
+
+	return page, s.updatePageContent(ctx, page.ID, rcp)
+}
+
+func (s recipeService) UpdateRecipe(ctx context.Context, pageID string) error {
+	page, err := s.client.RetrievePage(ctx, pageID)
+	if err != nil {
+		return err
+	}
+
+	piop, err := s.client.RetrievePagePropertyItem(ctx, page.ID, RECIPE_ORIGINAL)
+	if err != nil {
+		return err
+	}
+
+	rcp, err := united.Parsers.Parse(ctx, piop.PropertyItem.URL)
+	if err != nil {
+		return err
+	}
+
+	opt := &notionapi.UpdatePageOptions{}
+	if page.Icon == nil && rcp.GetEmoji() != "" {
+		opt.Icon = &notionapi.FileOrEmoji{Type: "emoji", Emoji: rcp.GetEmoji()}
+	}
+	if page.Cover == nil && rcp.Image != "" {
+		opt.Cover = &notionapi.File{Type: "external", External: notionapi.ExternalFileData{URL: rcp.Image}}
+	}
+
+	if opt.Icon != nil || opt.Cover != nil {
+		if _, err := s.client.UpdatePage(ctx, page.ID, opt); err != nil {
+			return err
+		}
+	}
+
+	return s.updatePageContent(ctx, page.ID, rcp)
+}
+
+func (s recipeService) updatePageContent(ctx context.Context, pageID string, rcp *recipe.Recipe) error {
+	// 以前のブロックを削除
+	pagi, err := s.client.RetrieveBlockChildren(ctx, pageID)
+	if err != nil {
+		return err
+	}
+
+	if pagi.HasMore {
+		return fmt.Errorf("updatePageContent: Not implemented")
+	}
+
+	for _, block := range pagi.Results {
+		_, err := s.client.DeleteBlock(ctx, block.ID)
+		if err != nil {
+			return err
+		}
+	}
+
+	// 新しいブロックを作成
+	opt := &notionapi.AppendBlockChildrenOptions{Children: ToNotionBlocks(rcp)}
+	_, err = s.client.AppendBlockChildren(ctx, pageID, opt)
+	return err
+}
+
+func (s recipeService) SetRecipeCategory(ctx context.Context, pageID string, category string) error {
+	_, err := s.client.UpdatePage(ctx, pageID, &notionapi.UpdatePageOptions{
+		Properties: map[string]notionapi.PropertyValue{
+			RECIPE_CATEGORY: {Type: "select", Select: notionapi.SelectPropertyValueData{Name: category}},
+		},
+	})
+	return err
+}

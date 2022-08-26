@@ -17,8 +17,7 @@ func (b *MyBot) RespondSetCategory(event *slack.InteractionCallback, selectedVal
 		return err
 	}
 
-	_, err := b.updateCategory(ctx, pair[0], pair[1])
-	if err != nil {
+	if err := b.SetRecipeCategory(ctx, pair[0], pair[1]); err != nil {
 		return err
 	}
 

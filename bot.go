@@ -30,6 +30,7 @@ const (
 
 type Bot interface {
 	URLVerifier
+	RecipeService
 }
 
 var _ Bot = &MyBot{}
@@ -37,12 +38,16 @@ var _ Bot = &MyBot{}
 // MyBot はGoogle Cloud Functionsへの応答を行うクラスです
 type MyBot struct {
 	urlVerifier
+	recipeService
 	slack  *slack.Client
 	notion *notionapi.Client
 }
 
 func NewBot(slackClient *slack.Client, notionClient *notionapi.Client) *MyBot {
 	return &MyBot{
+		recipeService: recipeService{
+			client: notionClient,
+		},
 		slack:  slackClient,
 		notion: notionClient,
 	}
