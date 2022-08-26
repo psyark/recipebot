@@ -5,8 +5,45 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/psyark/notionapi"
 	"github.com/slack-go/slack"
 )
+
+// 対話機能を提供するサービス
+type ChatService interface {
+	PostRecipeBlocks(ctx context.Context, channelID string, pageID string) error
+	UpdateRecipeBlocks(ctx context.Context, channelID string, timestamp string, pageID string) error
+}
+
+var _ ChatService = chatService{}
+
+type chatService struct {
+	notion *notionapi.Client
+	slack  *slack.Client
+}
+
+func (s chatService) PostRecipeBlocks(ctx context.Context, channelID string, pageID string) error {
+	rbi, err := s.getRecipeBlocksInfo(ctx, pageID)
+	if err != nil {
+		return &FancyError{err}
+	}
+
+	_, _, err = s.slack.PostMessage(channelID, slack.MsgOptionBlocks(rbi.ToSlackBlocks()...))
+	if err != nil {
+		return &FancyError{err}
+	}
+	return nil
+}
+
+func (s chatService) UpdateRecipeBlocks(ctx context.Context, channelID string, timestamp string, pageID string) error {
+	rbi, err := s.getRecipeBlocksInfo(ctx, pageID)
+	if err != nil {
+		return err
+	}
+
+	_, _, _, err = s.slack.UpdateMessage(channelID, timestamp, slack.MsgOptionBlocks(rbi.ToSlackBlocks()...))
+	return err
+}
 
 type RecipeBlocksInfo struct {
 	PageID     string
@@ -17,10 +54,10 @@ type RecipeBlocksInfo struct {
 	Categories []string
 }
 
-func (b *MyBot) GetRecipeBlocksInfo(ctx context.Context, pageID string) (*RecipeBlocksInfo, error) {
+func (s chatService) getRecipeBlocksInfo(ctx context.Context, pageID string) (*RecipeBlocksInfo, error) {
 	info := &RecipeBlocksInfo{PageID: pageID}
 
-	if db, err := b.notion.RetrieveDatabase(ctx, RECIPE_DB_ID); err != nil {
+	if db, err := s.notion.RetrieveDatabase(ctx, RECIPE_DB_ID); err != nil {
 		return nil, err
 	} else {
 		for _, prop := range db.Properties {
@@ -32,13 +69,13 @@ func (b *MyBot) GetRecipeBlocksInfo(ctx context.Context, pageID string) (*Recipe
 		}
 	}
 
-	if category, err := b.notion.RetrievePagePropertyItem(ctx, pageID, RECIPE_CATEGORY); err != nil {
+	if category, err := s.notion.RetrievePagePropertyItem(ctx, pageID, RECIPE_CATEGORY); err != nil {
 		return nil, err
 	} else {
 		info.Category = category.PropertyItem.Select.Name
 	}
 
-	if title, err := b.notion.RetrievePagePropertyItem(ctx, pageID, "title"); err != nil {
+	if title, err := s.notion.RetrievePagePropertyItem(ctx, pageID, "title"); err != nil {
 		return nil, err
 	} else {
 		for _, item := range title.PropertyItemPagination.Results {
@@ -49,7 +86,7 @@ func (b *MyBot) GetRecipeBlocksInfo(ctx context.Context, pageID string) (*Recipe
 		}
 	}
 
-	if page, err := b.notion.RetrievePage(ctx, pageID); err != nil {
+	if page, err := s.notion.RetrievePage(ctx, pageID); err != nil {
 		return nil, err
 	} else {
 		info.PageURL = page.URL

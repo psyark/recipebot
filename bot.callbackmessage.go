@@ -12,7 +12,7 @@ import (
 )
 
 // SlackのCallbackMessageへの応答
-func (b *MyBot) RespondCallbackMessage(req *http.Request, event *slackevents.MessageEvent) error {
+func (b *Bot) RespondCallbackMessage(req *http.Request, event *slackevents.MessageEvent) error {
 	if req.Header.Get("X-Slack-Retry-Num") != "" {
 		return nil // リトライは無視
 	} else if event.User == botMemberID {
@@ -35,23 +35,14 @@ func (b *MyBot) RespondCallbackMessage(req *http.Request, event *slackevents.Mes
 			return &FancyError{err}
 		}
 
-		rbi, err := b.GetRecipeBlocksInfo(ctx, page.ID)
-		if err != nil {
-			return &FancyError{err}
-		}
-
-		_, _, err = b.slack.PostMessage(event.Channel, slack.MsgOptionBlocks(rbi.ToSlackBlocks()...))
-		if err != nil {
-			return &FancyError{err}
-		}
-
-		return nil
+		return b.PostRecipeBlocks(ctx, event.Channel, page.ID)
 	} else {
 		return b.slack.AddReaction("thinking_face", ref)
 	}
 }
 
-func (b *MyBot) autoUpdateRecipePage(ctx context.Context, recipeURL string) (*notionapi.Page, error) {
+// Deprecated:
+func (b *Bot) autoUpdateRecipePage(ctx context.Context, recipeURL string) (*notionapi.Page, error) {
 	// レシピページを取得
 	page, err := b.GetRecipeByURL(ctx, recipeURL)
 	if err != nil {

@@ -9,7 +9,7 @@ import (
 
 // レシピのカテゴリー変更
 
-func (b *MyBot) RespondSetCategory(event *slack.InteractionCallback, selectedValue string) error {
+func (b *Bot) RespondSetCategory(event *slack.InteractionCallback, selectedValue string) error {
 	ctx := context.Background()
 
 	pair := [2]string{}
@@ -21,15 +21,5 @@ func (b *MyBot) RespondSetCategory(event *slack.InteractionCallback, selectedVal
 		return err
 	}
 
-	rbi, err := b.GetRecipeBlocksInfo(ctx, pair[0])
-	if err != nil {
-		return err
-	}
-
-	_, _, _, err = b.slack.UpdateMessage(
-		event.Channel.ID,
-		event.Message.Timestamp,
-		slack.MsgOptionBlocks(rbi.ToSlackBlocks()...),
-	)
-	return err
+	return b.UpdateRecipeBlocks(ctx, event.Channel.ID, event.Message.Timestamp, pair[0])
 }
