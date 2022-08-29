@@ -25,4 +25,5 @@ require (
 	go.uber.org/zap v1.22.0 // indirect
 	golang.org/x/net v0.0.0-20220812174116-3211cb980234
 	golang.org/x/text v0.3.7
+	golang.org/x/xerrors v0.0.0-20220609144429-65e65417b02f
 )

@@ -7,6 +7,7 @@ import (
 
 	"github.com/psyark/notionapi"
 	"github.com/slack-go/slack"
+	"golang.org/x/xerrors"
 )
 
 // 対話機能を提供するサービス
@@ -25,21 +26,29 @@ type chatService struct {
 func (s chatService) PostRecipeBlocks(ctx context.Context, channelID string, pageID string) error {
 	rbi, err := s.getRecipeBlocksInfo(ctx, pageID)
 	if err != nil {
-		return err
+		return xerrors.Errorf("chatService.getRecipeBlocksInfo: %w", err)
 	}
 
 	_, _, err = s.slack.PostMessage(channelID, slack.MsgOptionBlocks(rbi.ToSlackBlocks()...))
-	return err
+	if err != nil {
+		return xerrors.Errorf("chatService.slack.PostMessage: %w", err)
+	}
+
+	return nil
 }
 
 func (s chatService) UpdateRecipeBlocks(ctx context.Context, channelID string, timestamp string, pageID string) error {
 	rbi, err := s.getRecipeBlocksInfo(ctx, pageID)
 	if err != nil {
-		return err
+		return xerrors.Errorf("chatService.getRecipeBlocksInfo: %w", err)
 	}
 
 	_, _, _, err = s.slack.UpdateMessage(channelID, timestamp, slack.MsgOptionBlocks(rbi.ToSlackBlocks()...))
-	return err
+	if err != nil {
+		return xerrors.Errorf("chatService.slack.UpdateMessage: %w", err)
+	}
+
+	return nil
 }
 
 type RecipeBlocksInfo struct {

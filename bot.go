@@ -3,7 +3,6 @@ package recipebot
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"os"
 	"strings"
@@ -14,6 +13,7 @@ import (
 	"github.com/psyark/slackbot"
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
+	"golang.org/x/xerrors"
 )
 
 /*
@@ -95,17 +95,23 @@ func (b *Bot) onCallbackMessage(req *http.Request, event *slackevents.MessageEve
 		}
 
 		if err := b.slack.AddReaction("thumbsup", ref); err != nil {
-			return err
+			return xerrors.Errorf("Bot.slack.AddReaction: %w", err)
 		}
 
 		page, err := b.autoUpdateRecipePage(ctx, url)
 		if err != nil {
-			return err
+			return xerrors.Errorf("Bot.autoUpdateRecipePage: %w", err)
 		}
 
-		return b.PostRecipeBlocks(ctx, event.Channel, page.ID)
+		if err := b.PostRecipeBlocks(ctx, event.Channel, page.ID); err != nil {
+			return xerrors.Errorf("Bot.PostRecipeBlocks: %w", err)
+		}
+		return nil
 	} else {
-		return b.slack.AddReaction("thinking_face", ref)
+		if err := b.slack.AddReaction("thinking_face", ref); err != nil {
+			return xerrors.Errorf("Bot.slack.AddReaction: %w", err)
+		}
+		return nil
 	}
 }
 
@@ -114,7 +120,7 @@ func (b *Bot) autoUpdateRecipePage(ctx context.Context, recipeURL string) (*noti
 	// レシピページを取得
 	page, err := b.GetRecipeByURL(ctx, recipeURL)
 	if err != nil {
-		return nil, err
+		return nil, xerrors.Errorf("Bot.GetRecipeByURL: %w", err)
 	}
 
 	if page != nil {
@@ -139,10 +145,10 @@ func (b *Bot) onBlockActions(req *http.Request, event *slack.InteractionCallback
 			ctx := context.Background()
 			page, err := b.notion.RetrievePage(ctx, ba.Value)
 			if err != nil {
-				return err
+				return xerrors.Errorf("Bot.notion.RetrievePage: %w", err)
 			}
 			if _, _, err := b.slack.PostMessage(event.Channel.ID, slack.MsgOptionText(page.URL, true)); err != nil {
-				return err
+				return xerrors.Errorf("Bot.slack.PostMessage: %w", err)
 			}
 
 		case actionSetCategory:
@@ -150,11 +156,11 @@ func (b *Bot) onBlockActions(req *http.Request, event *slack.InteractionCallback
 
 			pair := [2]string{}
 			if err := json.Unmarshal([]byte(ba.SelectedOption.Value), &pair); err != nil {
-				return err
+				return xerrors.Errorf("json.Unmarshal: %w", err)
 			}
 
 			if err := b.SetRecipeCategory(ctx, pair[0], pair[1]); err != nil {
-				return err
+				return xerrors.Errorf("Bot.SetRecipeCategory: %w", err)
 			}
 
 			return b.UpdateRecipeBlocks(ctx, event.Channel.ID, event.Message.Timestamp, pair[0])
@@ -163,7 +169,7 @@ func (b *Bot) onBlockActions(req *http.Request, event *slack.InteractionCallback
 			ctx := context.Background()
 			return b.UpdateRecipe(ctx, ba.Value)
 		default:
-			return fmt.Errorf("unsupported action: %v", ba.ActionID)
+			return xerrors.Errorf("unsupported action: %v", ba.ActionID)
 		}
 	}
 	return nil
