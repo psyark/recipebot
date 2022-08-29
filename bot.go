@@ -3,6 +3,7 @@ package recipebot
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"os"
 	"strings"
@@ -76,7 +77,7 @@ func init() {
 // SlackのCallbackMessageへの応答
 func (b *Bot) OnCallbackMessage(req *http.Request, event *slackevents.MessageEvent) {
 	if err := b.onCallbackMessage(req, event); err != nil {
-		b.slack.PostMessage(botChannelID, slack.MsgOptionText(err.Error(), true))
+		b.slack.PostMessage(botChannelID, slack.MsgOptionText(fmt.Sprintf("OnCallbackMessage: %+v", err), true))
 	}
 }
 
@@ -134,7 +135,7 @@ func (b *Bot) autoUpdateRecipePage(ctx context.Context, recipeURL string) (*noti
 // SlackのBlockActionsへの応答
 func (b *Bot) OnBlockActions(req *http.Request, event *slack.InteractionCallback) {
 	if err := b.onBlockActions(req, event); err != nil {
-		b.slack.PostMessage(botChannelID, slack.MsgOptionText(err.Error(), true))
+		b.slack.PostMessage(botChannelID, slack.MsgOptionText(fmt.Sprintf("OnBlockActions: %+v", err), true))
 	}
 }
 
