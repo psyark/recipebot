@@ -24,9 +24,9 @@ func ExampleParser_a() {
 	//       "Name": "",
 	//       "Children": [
 	//         {
-	//           "Name": "豚のスペアリブ（骨付き肉）",
+	//           "Name": "豚のスペアリブ",
 	//           "Amount": "400~500g",
-	//           "Comment": ""
+	//           "Comment": "骨付き肉"
 	//         },
 	//         {
 	//           "Name": "★オレンジマーマレード",
@@ -34,9 +34,9 @@ func ExampleParser_a() {
 	//           "Comment": ""
 	//         },
 	//         {
-	//           "Name": "★しょうゆ（こいくち）",
+	//           "Name": "★しょうゆ",
 	//           "Amount": "40~50cc",
-	//           "Comment": ""
+	//           "Comment": "こいくち"
 	//         },
 	//         {
 	//           "Name": "★砂糖",
@@ -100,19 +100,19 @@ func ExampleParser_b() {
 	//           "Comment": ""
 	//         },
 	//         {
-	//           "Name": "玉ねぎ（みじん切り）",
+	//           "Name": "玉ねぎ",
 	//           "Amount": "1個",
-	//           "Comment": ""
+	//           "Comment": "みじん切り"
 	//         },
 	//         {
-	//           "Name": "人参（みじん切り）",
+	//           "Name": "人参",
 	//           "Amount": "2本",
-	//           "Comment": ""
+	//           "Comment": "みじん切り"
 	//         },
 	//         {
-	//           "Name": "セロリ（みじん切り）",
+	//           "Name": "セロリ",
 	//           "Amount": "1本",
-	//           "Comment": ""
+	//           "Comment": "みじん切り"
 	//         },
 	//         {
 	//           "Name": "赤ワイン",
@@ -130,9 +130,9 @@ func ExampleParser_b() {
 	//           "Comment": ""
 	//         },
 	//         {
-	//           "Name": "小麦粉（薄力粉）",
+	//           "Name": "小麦粉",
 	//           "Amount": "適量",
-	//           "Comment": ""
+	//           "Comment": "薄力粉"
 	//         },
 	//         {
 	//           "Name": "粉チーズ",
@@ -185,6 +185,139 @@ func ExampleParser_b() {
 	//     },
 	//     {
 	//       "Text": "器に移してお好みで粉チーズを振りかけて下さい。",
+	//       "Images": null
+	//     }
+	//   ]
+	// }
+}
+
+func ExampleParser_c() {
+	ctx := context.Background()
+	rcp, err := NewParser().Parse(ctx, "https://cookpad.com/recipe/2032296")
+	if err != nil {
+		panic(err)
+	}
+
+	data, _ := json.MarshalIndent(rcp, "", "  ")
+	fmt.Println(string(data))
+	// output:
+	// {
+	//   "Title": "トロトロ！牛すじカレー",
+	//   "Image": "https://img.cpcdn.com/recipes/2032296/m/27f0f55f9acb7eb68be9ecdadc8efd2a?u=1252112\u0026p=1353214123",
+	//   "IngredientGroups": [
+	//     {
+	//       "Name": "",
+	//       "Children": [
+	//         {
+	//           "Name": "牛すじ肉",
+	//           "Amount": "500g",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "玉ねぎ",
+	//           "Amount": "1個",
+	//           "Comment": "大"
+	//         },
+	//         {
+	//           "Name": "ソフリット",
+	//           "Amount": "適量",
+	//           "Comment": "ビーフシチュー・イタリアンのレシピを参照して下さい"
+	//         },
+	//         {
+	//           "Name": "赤ワイン",
+	//           "Amount": "200cc",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "水",
+	//           "Amount": "1500cc",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "バター",
+	//           "Amount": "大1",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "昆布だし",
+	//           "Amount": "1スティック",
+	//           "Comment": "顆粒"
+	//         },
+	//         {
+	//           "Name": "トマト缶",
+	//           "Amount": "1缶",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "ローリエの葉",
+	//           "Amount": "3枚",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "カレールー",
+	//           "Amount": "6キューブ",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "カレー粉",
+	//           "Amount": "大2",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "ウスターソース",
+	//           "Amount": "大1",
+	//           "Comment": ""
+	//         }
+	//       ]
+	//     }
+	//   ],
+	//   "Steps": [
+	//     {
+	//       "Text": "写真の材料を用意して（ソフリットが無ければ玉ねぎ大2個をスライスにし、人参１本をさいの目切りにして下さい）",
+	//       "Images": null
+	//     },
+	//     {
+	//       "Text": "オリーブオイル（サラダ油でも可）大２をひいて牛すじを入れ軽く塩コショウして焦げ目が付くまでしっかり焼いて下さい。",
+	//       "Images": null
+	//     },
+	//     {
+	//       "Text": "赤ワインを入れてアルコール分を飛ばします。",
+	//       "Images": null
+	//     },
+	//     {
+	//       "Text": "鍋に移してソフリット（無ければ人参）を入れ赤ワインを煮詰めます。",
+	//       "Images": null
+	//     },
+	//     {
+	//       "Text": "煮詰めてる間に、ワインを拭いたフライパンにバター大１を入れ玉ねぎを炒めます。",
+	//       "Images": null
+	//     },
+	//     {
+	//       "Text": "玉ねぎも鍋に入れて良く混ぜて更に煮詰めて乳化させます。",
+	//       "Images": null
+	//     },
+	//     {
+	//       "Text": "水を入れて沸騰したら灰汁を綺麗に取って下さい。",
+	//       "Images": null
+	//     },
+	//     {
+	//       "Text": "昆布ダシとトマト缶とローリエの葉を入れて蓋をせずに、2時間弱火でコトコト煮込みます。",
+	//       "Images": null
+	//     },
+	//     {
+	//       "Text": "一旦火を止めカレールーとカレー粉、ウスターソースを入れて更に１０分煮込みます。",
+	//       "Images": null
+	//     },
+	//     {
+	//       "Text": "味見をして好みの辛さに調整して完成！",
+	//       "Images": null
+	//     },
+	//     {
+	//       "Text": "白ご飯に乗せて牛スジカレーの完成",
+	//       "Images": null
+	//     },
+	//     {
+	//       "Text": "白ご飯の上に半熟卵を乗せて（簡単トロトロ！オムライス参照して下さい）オムカレーの完成！",
 	//       "Images": null
 	//     }
 	//   ]

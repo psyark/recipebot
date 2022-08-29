@@ -2,6 +2,7 @@ package cookpad
 
 import (
 	"context"
+	"regexp"
 	"strings"
 
 	"github.com/psyark/recipebot/recipe"
@@ -28,12 +29,19 @@ func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) 
 		Image: getSrc(doc.Find(`#main-photo img`)),
 	}
 
+	igrRegex := regexp.MustCompile(`^(.*)（(.+)）$`)
+
 	doc.Find(`.ingredient_row`).Each(func(i int, s *goquery.Selection) {
 		igr := recipe.Ingredient{
 			Name:   strings.TrimSpace(width.Widen.String(s.Find(`.ingredient_name`).Text())),
 			Amount: strings.TrimSpace(width.Fold.String(s.Find(`.ingredient_quantity`).Text())),
 		}
 		if igr.Name != "" {
+			if match := igrRegex.FindStringSubmatch(igr.Name); len(match) != 0 {
+				igr.Name = match[1]
+				igr.Comment = match[2]
+			}
+
 			rcp.AddIngredient("", igr)
 		}
 	})

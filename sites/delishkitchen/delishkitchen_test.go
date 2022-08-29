@@ -141,3 +141,66 @@ func ExampleParser() {
 	//   ]
 	// }
 }
+
+func ExampleParser_v2() {
+	ctx := context.Background()
+	rcp, err := NewParser().Parse(ctx, "https://delishkitchen.tv/recipes/236903854006862303")
+	if err != nil {
+		panic(err)
+	}
+
+	data, _ := json.MarshalIndent(rcp, "", "  ")
+	fmt.Println(string(data))
+	// output:
+	// {
+	//   "Title": "牛すじ肉の下処理",
+	//   "Image": "https://image.delishkitchen.tv/recipe/236903854006862303/1.jpg?version=1624426802\u0026w=460",
+	//   "IngredientGroups": [
+	//     {
+	//       "Name": "",
+	//       "Children": [
+	//         {
+	//           "Name": "牛すじ肉",
+	//           "Amount": "300g",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "長ねぎ[青い部分]",
+	//           "Amount": "1本分",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "しょうが(薄切り)",
+	//           "Amount": "3枚",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "酒",
+	//           "Amount": "50cc",
+	//           "Comment": ""
+	//         }
+	//       ]
+	//     }
+	//   ],
+	//   "Steps": [
+	//     {
+	//       "Text": "鍋に牛すじ肉、牛すじ肉が浸かるくらいの水(分量外:適量)を入れてわかし、弱火で10分程煮る。",
+	//       "Images": [
+	//         "https://media.delishkitchen.tv/recipe/236903854006862303/steps/1.jpg?version=1647222138"
+	//       ]
+	//     },
+	//     {
+	//       "Text": "湯を切り、アクと一緒に余分な脂とアクを流水で洗い流し、食べやすい大きさに切る。",
+	//       "Images": [
+	//         "https://media.delishkitchen.tv/recipe/236903854006862303/steps/2.jpg?version=1647222138"
+	//       ]
+	//     },
+	//     {
+	//       "Text": "鍋も一度洗い、牛すじ肉を戻し入れ、牛すじ肉が浸かるくらいの水(分量外:適量)、ねぎ、しょうが、酒を入れてわかし、アクを取り除きながら1時間程弱火で煮る。",
+	//       "Images": [
+	//         "https://media.delishkitchen.tv/recipe/236903854006862303/steps/3.jpg?version=1647222138"
+	//       ]
+	//     }
+	//   ]
+	// }
+}
