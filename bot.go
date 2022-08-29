@@ -110,7 +110,7 @@ func (b *Bot) onCallbackMessage(req *http.Request, event *slackevents.MessageEve
 		return nil
 	} else {
 		if err := b.slack.AddReaction("thinking_face", ref); err != nil {
-			return xerrors.Errorf("Bot.slack.AddReaction: %w", err)
+			return xerrors.Errorf("Bot.slack.AddReaction(channel=%v, ts=%v) = %w", event.Channel, event.TimeStamp, err)
 		}
 		return nil
 	}
