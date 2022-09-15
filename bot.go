@@ -74,7 +74,7 @@ func init() {
 	)
 
 	router.Error = func(w http.ResponseWriter, r *http.Request, err error) {
-		bot.slack.PostMessage(botChannelID, slack.MsgOptionText(fmt.Sprintf("error: %+v", err), true))
+		bot.slack.PostMessage(botChannelID, slack.MsgOptionText(fmt.Sprintf("⚠️ %v", err.Error()), true))
 	}
 	router.Message = bot.onCallbackMessage
 
@@ -86,6 +86,8 @@ func (b *Bot) onCallbackMessage(req *http.Request, event *slackevents.MessageEve
 		return nil // リトライは無視
 	} else if event.User == botMemberID {
 		return nil // 自分のメッセージは無視
+	} else if event.Text == "" {
+		return nil // テキストが空のメッセージ（URLプレビュー削除とかで送られてくるっぽい？）は無視
 	}
 
 	ctx := context.Background()
