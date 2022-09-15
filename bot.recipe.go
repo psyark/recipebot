@@ -2,12 +2,12 @@ package recipebot
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/psyark/notionapi"
 	"github.com/psyark/recipebot/recipe"
 	"github.com/psyark/recipebot/sites/united"
-	"golang.org/x/xerrors"
 )
 
 // レシピページの操作を提供するサービス
@@ -73,17 +73,17 @@ func (s recipeService) CreateRecipe(ctx context.Context, url string) (*notionapi
 func (s recipeService) UpdateRecipe(ctx context.Context, pageID string) error {
 	page, err := s.client.RetrievePage(ctx, pageID)
 	if err != nil {
-		return xerrors.Errorf("recipeService.client.RetrievePage: %w", err)
+		return fmt.Errorf("recipeService.client.RetrievePage: %w", err)
 	}
 
 	piop, err := s.client.RetrievePagePropertyItem(ctx, page.ID, RECIPE_ORIGINAL)
 	if err != nil {
-		return xerrors.Errorf("recipeService.client.RetrievePagePropertyItem: %w", err)
+		return fmt.Errorf("recipeService.client.RetrievePagePropertyItem: %w", err)
 	}
 
 	rcp, err := united.Parsers.Parse(ctx, piop.PropertyItem.URL)
 	if err != nil {
-		return xerrors.Errorf("united.Parsers.Parse: %w", err)
+		return fmt.Errorf("united.Parsers.Parse: %w", err)
 	}
 
 	opt := &notionapi.UpdatePageOptions{}
@@ -96,7 +96,7 @@ func (s recipeService) UpdateRecipe(ctx context.Context, pageID string) error {
 
 	if opt.Icon != nil || opt.Cover != nil {
 		if _, err := s.client.UpdatePage(ctx, page.ID, opt); err != nil {
-			return xerrors.Errorf("recipeService.client.UpdatePage: %w", err)
+			return fmt.Errorf("recipeService.client.UpdatePage: %w", err)
 		}
 	}
 
@@ -107,24 +107,24 @@ func (s recipeService) updatePageContent(ctx context.Context, pageID string, rcp
 	// 以前のブロックを削除
 	pagi, err := s.client.RetrieveBlockChildren(ctx, pageID)
 	if err != nil {
-		return xerrors.Errorf("recipeService.client.RetrieveBlockChildren: %w", err)
+		return fmt.Errorf("recipeService.client.RetrieveBlockChildren: %w", err)
 	}
 
 	if pagi.HasMore {
-		return xerrors.Errorf("updatePageContent: Not implemented")
+		return fmt.Errorf("updatePageContent: Not implemented")
 	}
 
 	for _, block := range pagi.Results {
 		_, err := s.client.DeleteBlock(ctx, block.ID)
 		if err != nil {
-			return xerrors.Errorf("recipeService.client.DeleteBlock: %w", err)
+			return fmt.Errorf("recipeService.client.DeleteBlock: %w", err)
 		}
 	}
 
 	// 新しいブロックを作成
 	opt := &notionapi.AppendBlockChildrenOptions{Children: Recipe(*rcp).NotionBlocks()}
 	if _, err = s.client.AppendBlockChildren(ctx, pageID, opt); err != nil {
-		return xerrors.Errorf("recipeService.client.AppendBlockChildren: %w", err)
+		return fmt.Errorf("recipeService.client.AppendBlockChildren: %w", err)
 	}
 	return nil
 }
@@ -136,7 +136,7 @@ func (s recipeService) SetRecipeCategory(ctx context.Context, pageID string, cat
 		},
 	})
 	if err != nil {
-		return xerrors.Errorf("recipeService.client.UpdatePage: %w", err)
+		return fmt.Errorf("recipeService.client.UpdatePage: %w", err)
 	}
 	return nil
 }
