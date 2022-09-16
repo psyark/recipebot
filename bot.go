@@ -134,80 +134,29 @@ func (b *Bot) autoUpdateRecipePage(ctx context.Context, recipeURL string) (*noti
 	return b.CreateRecipe(ctx, recipeURL)
 }
 
-func (s *Bot) getRecipeBlocksInfo(ctx context.Context, pageID string) (*RecipeBlocksInfo, error) {
-	info := &RecipeBlocksInfo{PageID: pageID}
-
-	if db, err := s.notion.RetrieveDatabase(ctx, RECIPE_DB_ID); err != nil {
-		return nil, err
-	} else {
-		for _, prop := range db.Properties {
-			if prop.ID == RECIPE_CATEGORY {
-				for _, opt := range prop.Select.Options {
-					info.Categories = append(info.Categories, opt.Name)
-				}
-			}
-		}
-	}
-
-	if category, err := s.notion.RetrievePagePropertyItem(ctx, pageID, RECIPE_CATEGORY); err != nil {
-		return nil, err
-	} else {
-		info.Category = category.PropertyItem.Select.Name
-	}
-
-	if title, err := s.notion.RetrievePagePropertyItem(ctx, pageID, "title"); err != nil {
-		return nil, err
-	} else {
-		for _, item := range title.PropertyItemPagination.Results {
-			info.Title += item.Title.Text.Content
-		}
-		if info.Title == "" {
-			info.Title = "無題"
-		}
-	}
-
-	if page, err := s.notion.RetrievePage(ctx, pageID); err != nil {
-		return nil, err
-	} else {
-		info.PageURL = page.URL
-		if page.Icon != nil {
-			info.Title = page.Icon.Emoji + info.Title
-		}
-		if page.Cover != nil {
-			if page.Cover.External.URL != "" {
-				info.ImageURL = page.Cover.External.URL
-			} else if page.Cover.File.URL != "" {
-				info.ImageURL = page.Cover.File.URL
-			}
-		}
-	}
-
-	return info, nil
-}
-
 func (s *Bot) PostRecipeBlocks(ctx context.Context, channelID string, pageID string) error {
-	rbi, err := s.getRecipeBlocksInfo(ctx, pageID)
+	blocks, err := s.getRecipeBlocks(ctx, pageID)
 	if err != nil {
-		return fmt.Errorf("chatService.getRecipeBlocksInfo: %w", err)
+		return fmt.Errorf("getRecipeBlocks: %w", err)
 	}
 
-	_, _, err = s.slack.PostMessage(channelID, slack.MsgOptionBlocks(rbi.ToSlackBlocks(s.actionSetCategory, s.actionCreateMenu, s.actionRebuild)...))
+	_, _, err = s.slack.PostMessage(channelID, slack.MsgOptionBlocks(blocks...))
 	if err != nil {
-		return fmt.Errorf("chatService.slack.PostMessage: %w", err)
+		return fmt.Errorf("postMessage: %w", err)
 	}
 
 	return nil
 }
 
 func (s *Bot) UpdateRecipeBlocks(ctx context.Context, channelID string, timestamp string, pageID string) error {
-	rbi, err := s.getRecipeBlocksInfo(ctx, pageID)
+	blocks, err := s.getRecipeBlocks(ctx, pageID)
 	if err != nil {
-		return fmt.Errorf("chatService.getRecipeBlocksInfo: %w", err)
+		return fmt.Errorf("getRecipeBlocks: %w", err)
 	}
 
-	_, _, _, err = s.slack.UpdateMessage(channelID, timestamp, slack.MsgOptionBlocks(rbi.ToSlackBlocks(s.actionSetCategory, s.actionCreateMenu, s.actionRebuild)...))
+	_, _, _, err = s.slack.UpdateMessage(channelID, timestamp, slack.MsgOptionBlocks(blocks...))
 	if err != nil {
-		return fmt.Errorf("chatService.slack.UpdateMessage: %w", err)
+		return fmt.Errorf("updateMessage: %w", err)
 	}
 
 	return nil
