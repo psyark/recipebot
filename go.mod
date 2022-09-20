@@ -7,7 +7,6 @@ replace github.com/psyark/recipebot => ./
 require (
 	github.com/GoogleCloudPlatform/functions-framework-go v1.6.1
 	github.com/PuerkitoBio/goquery v1.8.0
-	github.com/joho/godotenv v1.4.0
 	github.com/microcosm-cc/bluemonday v1.0.20
 	github.com/mvdan/xurls v1.1.0
 	github.com/psyark/jsonld v0.0.0-20220825042757-0bc9534f3d66

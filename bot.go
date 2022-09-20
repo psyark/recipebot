@@ -1,20 +1,13 @@
 package recipebot
 
 import (
-	"context"
-	"encoding/json"
-	"fmt"
-	"net/http"
 	"os"
-	"strings"
 
 	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
-	"github.com/mvdan/xurls"
 	"github.com/psyark/notionapi"
-	"github.com/psyark/recipebot/service/notion"
+	slackservice "github.com/psyark/recipebot/service/slack"
 	"github.com/psyark/slackbot"
 	"github.com/slack-go/slack"
-	"github.com/slack-go/slack/slackevents"
 )
 
 /*
@@ -28,155 +21,14 @@ recipebot
 https://api.slack.com/apps/A03SNSS0S81
 */
 
-const (
-	botMemberID = "U03SCN7MYEQ"
-	// botChannelID     = "D03SNU2C80H"
-	cookingChannelID = "C03SNSP9HNV" // #料理 チャンネル
-)
-
-// Bot はGoogle Cloud Functionsへの応答を行うクラスです
-// TODO: レシピのスクレイピング、Notion操作、Slack応答でサービスを分割
-type Bot struct {
-	notionService *notion.Service
-	slack         *slack.Client
-
-	actionSetCategory string
-	actionCreateMenu  string
-	actionRebuild     string
-}
-
-func NewBot(slackClient *slack.Client, notionClient *notionapi.Client, hr slackbot.HandlerRegistry) *Bot {
-	bot := &Bot{
-		notionService: notion.New(notionClient),
-		slack:         slackClient,
-	}
-
-	bot.actionCreateMenu = hr.GetActionID("create_menu", bot.onCreateMenu)
-	bot.actionSetCategory = hr.GetActionID("set_category", bot.onSetCategory)
-	bot.actionRebuild = hr.GetActionID("rebuild", bot.onRebuild)
-
-	return bot
-}
-
 func init() {
 	router := slackbot.New()
 
-	bot := NewBot(
+	_ = slackservice.New(
 		slack.New(os.Getenv("SLACK_BOT_USER_OAUTH_TOKEN")),
 		notionapi.NewClient(os.Getenv("NOTION_API_KEY")),
 		router,
 	)
 
-	router.Error = func(w http.ResponseWriter, r *http.Request, err error) {
-		bot.slack.PostMessage(cookingChannelID, slack.MsgOptionText(fmt.Sprintf("⚠️ %v", err.Error()), true))
-	}
-	router.Message = bot.onCallbackMessage
-
 	functions.HTTP("main", router.Route)
-}
-
-func (b *Bot) onCallbackMessage(req *http.Request, event *slackevents.MessageEvent) error {
-	if req.Header.Get("X-Slack-Retry-Num") != "" {
-		return nil // リトライは無視
-	} else if event.User == botMemberID {
-		return nil // 自分のメッセージは無視
-	} else if event.Text == "" {
-		return nil // テキストが空のメッセージ（URLプレビュー削除とかで送られてくるっぽい？）は無視
-	}
-
-	ctx := context.Background()
-	ref := slack.NewRefToMessage(event.Channel, event.TimeStamp)
-	if url := xurls.Strict.FindString(event.Text); url != "" {
-		if strings.Contains(url, "|") {
-			url = strings.Split(url, "|")[0]
-		}
-
-		if err := b.slack.AddReaction("thumbsup", ref); err != nil {
-			return fmt.Errorf("addReaction: %w", err)
-		}
-
-		page, err := b.autoUpdateRecipePage(ctx, url)
-		if err != nil {
-			return fmt.Errorf("autoUpdateRecipePage: %w", err)
-		}
-
-		if err := b.PostRecipeBlocks(ctx, event.Channel, page.ID); err != nil {
-			return fmt.Errorf("postRecipeBlocks: %w", err)
-		}
-		return nil
-	} else {
-		if err := b.slack.AddReaction("thinking_face", ref); err != nil {
-			return fmt.Errorf("addReaction(channel=%v, ts=%v, text=%v) = %w", event.Channel, event.TimeStamp, event.Text, err)
-		}
-		return nil
-	}
-}
-
-// Deprecated:
-func (b *Bot) autoUpdateRecipePage(ctx context.Context, recipeURL string) (*notionapi.Page, error) {
-	// レシピページを取得
-	page, err := b.notionService.GetRecipeByURL(ctx, recipeURL)
-	if err != nil {
-		return nil, fmt.Errorf("Bot.GetRecipeByURL: %w", err)
-	}
-
-	if page != nil {
-		return page, nil
-	}
-
-	// レシピページがなければ作成
-	return b.notionService.CreateRecipe(ctx, recipeURL)
-}
-
-func (s *Bot) PostRecipeBlocks(ctx context.Context, channelID string, pageID string) error {
-	blocks, err := s.getRecipeBlocks(ctx, pageID)
-	if err != nil {
-		return fmt.Errorf("getRecipeBlocks: %w", err)
-	}
-
-	_, _, err = s.slack.PostMessage(channelID, slack.MsgOptionBlocks(blocks...))
-	if err != nil {
-		return fmt.Errorf("postMessage: %w", err)
-	}
-
-	return nil
-}
-
-func (s *Bot) UpdateRecipeBlocks(ctx context.Context, channelID string, timestamp string, pageID string) error {
-	blocks, err := s.getRecipeBlocks(ctx, pageID)
-	if err != nil {
-		return fmt.Errorf("getRecipeBlocks: %w", err)
-	}
-
-	_, _, _, err = s.slack.UpdateMessage(channelID, timestamp, slack.MsgOptionBlocks(blocks...))
-	if err != nil {
-		return fmt.Errorf("updateMessage: %w", err)
-	}
-
-	return nil
-}
-
-func (b *Bot) onCreateMenu(callback *slack.InteractionCallback, action *slack.BlockAction) error {
-	_, _, err := b.slack.PostMessage(callback.Channel.ID, slack.MsgOptionText(fmt.Sprintf("未実装: %v", action.Value), true))
-	return err
-}
-
-func (b *Bot) onSetCategory(callback *slack.InteractionCallback, action *slack.BlockAction) error {
-	ctx := context.Background()
-
-	pair := [2]string{}
-	if err := json.Unmarshal([]byte(action.SelectedOption.Value), &pair); err != nil {
-		return fmt.Errorf("json.Unmarshal: %w", err)
-	}
-
-	if err := b.notionService.SetRecipeCategory(ctx, pair[0], pair[1]); err != nil {
-		return fmt.Errorf("Bot.SetRecipeCategory: %w", err)
-	}
-
-	return b.UpdateRecipeBlocks(ctx, callback.Channel.ID, callback.Message.Timestamp, pair[0])
-}
-
-func (b *Bot) onRebuild(callback *slack.InteractionCallback, action *slack.BlockAction) error {
-	ctx := context.Background()
-	return b.notionService.UpdateRecipe(ctx, action.Value)
 }
