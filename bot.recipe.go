@@ -10,16 +10,6 @@ import (
 	"github.com/psyark/recipebot/sites/united"
 )
 
-// レシピページの操作を提供するサービス
-type RecipeService interface {
-	GetRecipeByURL(ctx context.Context, url string) (*notionapi.Page, error)
-	CreateRecipe(ctx context.Context, url string) (*notionapi.Page, error)
-	UpdateRecipe(ctx context.Context, pageID string) error
-	SetRecipeCategory(ctx context.Context, pageID string, category string) error
-}
-
-var _ RecipeService = recipeService{}
-
 type recipeService struct {
 	client *notionapi.Client
 }
