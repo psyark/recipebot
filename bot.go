@@ -28,8 +28,9 @@ https://api.slack.com/apps/A03SNSS0S81
 */
 
 const (
-	botMemberID      = "U03SCN7MYEQ"
-	botChannelID     = "D03SNU2C80H"
+	botMemberID = "U03SCN7MYEQ"
+	// botChannelID     = "D03SNU2C80H"
+	cookingChannelID = "C03SNSP9HNV" // #料理 チャンネル
 	RECIPE_DB_ID     = "ff24a40498c94ac3ac2fa8894ac0d489"
 	RECIPE_ORIGINAL  = "%5CiX%60"
 	RECIPE_EVAL      = "Ha%3Ba"
@@ -76,7 +77,7 @@ func init() {
 	)
 
 	router.Error = func(w http.ResponseWriter, r *http.Request, err error) {
-		bot.slack.PostMessage(botChannelID, slack.MsgOptionText(fmt.Sprintf("⚠️ %v", err.Error()), true))
+		bot.slack.PostMessage(cookingChannelID, slack.MsgOptionText(fmt.Sprintf("⚠️ %v", err.Error()), true))
 	}
 	router.Message = bot.onCallbackMessage
 
@@ -100,21 +101,21 @@ func (b *Bot) onCallbackMessage(req *http.Request, event *slackevents.MessageEve
 		}
 
 		if err := b.slack.AddReaction("thumbsup", ref); err != nil {
-			return fmt.Errorf("Bot.slack.AddReaction: %w", err)
+			return fmt.Errorf("addReaction: %w", err)
 		}
 
 		page, err := b.autoUpdateRecipePage(ctx, url)
 		if err != nil {
-			return fmt.Errorf("Bot.autoUpdateRecipePage: %w", err)
+			return fmt.Errorf("autoUpdateRecipePage: %w", err)
 		}
 
 		if err := b.PostRecipeBlocks(ctx, event.Channel, page.ID); err != nil {
-			return fmt.Errorf("Bot.PostRecipeBlocks: %w", err)
+			return fmt.Errorf("postRecipeBlocks: %w", err)
 		}
 		return nil
 	} else {
 		if err := b.slack.AddReaction("thinking_face", ref); err != nil {
-			return fmt.Errorf("Bot.slack.AddReaction(channel=%v, ts=%v, text=%v) = %w", event.Channel, event.TimeStamp, event.Text, err)
+			return fmt.Errorf("addReaction(channel=%v, ts=%v, text=%v) = %w", event.Channel, event.TimeStamp, event.Text, err)
 		}
 		return nil
 	}
