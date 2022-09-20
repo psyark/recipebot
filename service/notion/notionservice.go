@@ -14,7 +14,9 @@ const (
 	recipe_original         = "%5CiX%60"
 	recipe_eval             = "Ha%3Ba"
 	recipe_category         = "gmv%3A"
+	recipe_ingredients      = "%5C~%7C%40"
 	recipe_shared_header_id = "60a4999c-b1fa-4e3d-9d6b-48034ad7b675"
+	stock_db_id             = "923bfcb7c9014273b417ddc966fd17b8"
 )
 
 type Service struct {
