@@ -24,28 +24,35 @@ const (
 type Service struct {
 	notionService *notion.Service
 	client        *slack.Client
-
-	actionSetCategory string
-	actionCreateMenu  string
-	actionRebuild     string
+	actionID      actionID
 }
 
-func New(slackClient *slack.Client, notionClient *notionapi.Client, router *slackbot.Router) *Service {
+type actionID struct {
+	setCategory string
+	createMenu  string
+	rebuild     string
+}
+
+func New(slackClient *slack.Client, notionClient *notionapi.Client) *slackbot.Router {
+	router := slackbot.New()
+
 	bot := &Service{
 		notionService: notion.New(notionClient),
 		client:        slackClient,
 	}
 
-	bot.actionCreateMenu = router.GetActionID("create_menu", bot.onCreateMenu)
-	bot.actionSetCategory = router.GetActionID("set_category", bot.onSetCategory)
-	bot.actionRebuild = router.GetActionID("rebuild", bot.onRebuild)
+	bot.actionID = actionID{
+		createMenu:  router.GetActionID("create_menu", bot.onCreateMenu),
+		setCategory: router.GetActionID("set_category", bot.onSetCategory),
+		rebuild:     router.GetActionID("rebuild", bot.onRebuild),
+	}
 
 	router.Error = func(w http.ResponseWriter, r *http.Request, err error) {
 		bot.client.PostMessage(cookingChannelID, slack.MsgOptionText(fmt.Sprintf("⚠️ %v", err.Error()), true))
 	}
 	router.Message = bot.onCallbackMessage
 
-	return bot
+	return router
 }
 
 func (b *Service) onCallbackMessage(req *http.Request, event *slackevents.MessageEvent) error {
@@ -226,7 +233,7 @@ func (b *Service) getRecipeBlocks_CategoryBlock(pageID string, categories []stri
 	selectBlock := slack.NewOptionsSelectBlockElement(
 		slack.OptTypeStatic,
 		slack.NewTextBlockObject(slack.PlainTextType, "分類", true, false),
-		b.actionSetCategory,
+		b.actionID.setCategory,
 		catOptions...,
 	)
 	selectBlock.InitialOption = initialOption
@@ -243,7 +250,7 @@ func (b *Service) getRecipeBlocks_MenuBlock(pageID string) slack.Block {
 		slack.NewTextBlockObject(slack.MarkdownType, "<https://www.notion.so/80cf0a5ec25c4b7489f00594362f6e3b|🍽️献立表>に追加する", false, false),
 		nil,
 		slack.NewAccessory(slack.NewButtonBlockElement(
-			b.actionCreateMenu,
+			b.actionID.createMenu,
 			pageID,
 			slack.NewTextBlockObject(slack.PlainTextType, "献立表に追加", true, false),
 		)),
@@ -255,7 +262,7 @@ func (b *Service) getRecipeBlocks_RebuildBlock(pageID string) slack.Block {
 		slack.NewTextBlockObject(slack.MarkdownType, "再取得して作り直す", false, false),
 		nil,
 		slack.NewAccessory(slack.NewButtonBlockElement(
-			b.actionRebuild,
+			b.actionID.rebuild,
 			pageID,
 			slack.NewTextBlockObject(slack.PlainTextType, "作り直す", true, false),
 		)),
