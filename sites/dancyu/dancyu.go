@@ -64,16 +64,22 @@ func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) 
 
 			ingredients := []string{}
 			hasPrefixA := 0
+			hasPrefixDot := 0
 			for _, ing := range rcp2.RecipeIngredient {
 				if ing, ok := ing.(string); ok {
 					if strings.HasPrefix(ing, "A ") {
 						hasPrefixA++
 					}
+					if strings.HasPrefix(ing, "・") {
+						hasPrefixDot++
+					}
 					ingredients = append(ingredients, ing)
 				}
 			}
 
-			if hasPrefixA > 1 {
+			if hasPrefixA == 1 && hasPrefixDot == 0 {
+				p.parseIngrediens3(ingredients, rcp)
+			} else if hasPrefixA > 1 {
 				p.parseIngrediens2(ingredients, rcp)
 			} else {
 				p.parseIngrediens1(ingredients, rcp)
@@ -170,6 +176,31 @@ func (p *parser) parseIngrediens2(ingredients []string, rcp *recipe.Recipe) {
 		}
 
 		rcp.AddIngredient(group, idg)
+	}
+}
+
+// パターン3
+// https://dancyu.jp/recipe/2020_00003873.html
+// "A" はグループ名に付くが中黒は使わない
+func (p *parser) parseIngrediens3(ingredients []string, rcp *recipe.Recipe) {
+	group := ""
+	for _, item := range ingredients {
+		pair := strings.SplitN(item, "：", 2)
+		th := strings.TrimSpace(pair[0])
+		td := strings.TrimSpace(pair[1])
+
+		if strings.HasPrefix(th, "A ") || strings.HasPrefix(th, "B ") || strings.HasPrefix(th, "C ") {
+			group = th
+		} else {
+			idg := recipe.Ingredient{Name: th, Amount: td}
+
+			if match := commentRegex.FindStringSubmatch(idg.Amount); len(match) == 3 {
+				idg.Amount = match[1]
+				idg.Comment = match[2]
+			}
+
+			rcp.AddIngredient(group, idg)
+		}
 	}
 }
 

@@ -797,12 +797,12 @@ func ExampleParser_g() {
 	//           "Name": "薄力粉",
 	//           "Amount": "適量",
 	//           "Comment": ""
-	//         },
-	//         {
-	//           "Name": "A 生姜醤油ソース",
-	//           "Amount": "",
-	//           "Comment": ""
-	//         },
+	//         }
+	//       ]
+	//     },
+	//     {
+	//       "Name": "A 生姜醤油ソース",
+	//       "Children": [
 	//         {
 	//           "Name": "生姜",
 	//           "Amount": "1かけ",
