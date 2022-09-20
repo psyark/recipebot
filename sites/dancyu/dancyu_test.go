@@ -894,3 +894,92 @@ func ExampleParser_g() {
 	//   ]
 	// }
 }
+
+func ExampleParser_h() {
+	ctx := context.Background()
+	rcp, err := NewParser().Parse(ctx, "https://dancyu.jp/recipe/2022_00006083.html")
+	if err != nil {
+		panic(err)
+	}
+
+	data, _ := json.MarshalIndent(rcp, "", "  ")
+	fmt.Println(string(data))
+
+	// output:
+	// {
+	//   "Title": "ヤンソンの誘惑",
+	//   "Image": "/images/6059b.jpg",
+	//   "IngredientGroups": [
+	//     {
+	//       "Name": "",
+	//       "Children": [
+	//         {
+	//           "Name": "じゃがいも",
+	//           "Amount": "500g",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "玉ねぎ",
+	//           "Amount": "正味150g",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "アンチョビ",
+	//           "Amount": "1缶（50g）",
+	//           "Comment": "細かくちぎる"
+	//         },
+	//         {
+	//           "Name": "乳脂肪分30～35％の生クリーム",
+	//           "Amount": "350～500ml",
+	//           "Comment": "器による"
+	//         },
+	//         {
+	//           "Name": "バター",
+	//           "Amount": "10g",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "パン粉",
+	//           "Amount": "適量",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "粗糖",
+	//           "Amount": "適量",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "シナモンパウダー",
+	//           "Amount": "適量",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "ナツメグパウダー",
+	//           "Amount": "適量",
+	//           "Comment": ""
+	//         }
+	//       ]
+	//     }
+	//   ],
+	//   "Steps": [
+	//     {
+	//       "Text": "野菜をカットする\nじゃがいもは厚さ5mmの拍子木切りにする。玉ねぎはなるべく薄くスライスする。オーブンを190℃に予熱する。",
+	//       "Images": null
+	//     },
+	//     {
+	//       "Text": "玉ねぎ、じゃがいも、アンチョビを容器に重ね入れる\n油（材料外）を薄く塗った耐熱容器に、玉ねぎの半量とじゃがいもの半量、アンチョビの半量を重ねる。その上に粗糖ひとつまみをふり、シナモンとナツメグを全体にうっすらとふる。残りの玉ねぎとじゃがいもを上に重ねる。",
+	//       "Images": null
+	//     },
+	//     {
+	//       "Text": "残りの材料を容器に重ね入れる\n生クリームを器の8分目まで注ぐ（加熱すると噴くので要注意）。残りのアンチョビをのせ、粗糖とシナモン、ナツメグをうっすらとふり、バターをちぎって散らす。パン粉をたっぷりのせる。",
+	//       "Images": null
+	//     },
+	//     {
+	//       "Text": "焼く\nオーブンに入れ、20分したら向きを反転させる。焼き加減を見ながら、さらに10～20分ほど焼く。",
+	//       "Images": [
+	//         "https://dancyu.jp/images/6059b.jpg"
+	//       ]
+	//     }
+	//   ]
+	// }
+}

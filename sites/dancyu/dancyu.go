@@ -34,6 +34,7 @@ func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) 
 
 	doc.Find(`script[type="application/ld+json"]`).EachWithBreak(func(i int, s *goquery.Selection) bool {
 		jsonStr := s.Text()
+		jsonStr = strings.ReplaceAll(jsonStr, "\n", " ") // 改行文字を含んではならない https://dancyu.jp/recipe/2022_00006083.html
 		jsonStr = strings.ReplaceAll(jsonStr, "\t", " ") // タブ文字を含んではならない https://dancyu.jp/recipe/2020_00003873.html
 
 		obj2, err := jsonld.DecodeObject([]byte(jsonStr))
