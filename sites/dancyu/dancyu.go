@@ -2,7 +2,6 @@ package dancyu
 
 import (
 	"context"
-	"fmt"
 	"regexp"
 	"strings"
 
@@ -31,11 +30,16 @@ func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) 
 	}
 
 	rcp := &recipe.Recipe{}
+	var parseError error
 
 	doc.Find(`script[type="application/ld+json"]`).EachWithBreak(func(i int, s *goquery.Selection) bool {
-		obj2, err := jsonld.DecodeObject([]byte(s.Text()))
+		jsonStr := s.Text()
+		jsonStr = strings.ReplaceAll(jsonStr, "\t", " ") // タブ文字を含んではならない https://dancyu.jp/recipe/2020_00003873.html
+
+		obj2, err := jsonld.DecodeObject([]byte(jsonStr))
 		if err != nil {
-			fmt.Println(err)
+			parseError = err
+			return false
 		}
 
 		if rcp2, ok := obj2.(*jsonld.Recipe); ok {
@@ -79,6 +83,10 @@ func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) 
 
 		return true
 	})
+
+	if parseError != nil {
+		return nil, parseError
+	}
 
 	// タイトルの引用符内側
 	if match := titleRegex.FindStringSubmatch(rcp.Title); len(match) == 2 {
