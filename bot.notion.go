@@ -10,11 +10,11 @@ import (
 	"github.com/psyark/recipebot/sites/united"
 )
 
-type recipeService struct {
+type notionService struct {
 	client *notionapi.Client
 }
 
-func (s recipeService) GetRecipeByURL(ctx context.Context, url string) (*notionapi.Page, error) {
+func (s notionService) GetRecipeByURL(ctx context.Context, url string) (*notionapi.Page, error) {
 	opt := &notionapi.QueryDatabaseOptions{Filter: notionapi.PropertyFilter{
 		Property: RECIPE_ORIGINAL,
 		URL:      &notionapi.TextFilterCondition{Equals: url},
@@ -31,7 +31,7 @@ func (s recipeService) GetRecipeByURL(ctx context.Context, url string) (*notiona
 	return nil, nil
 }
 
-func (s recipeService) CreateRecipe(ctx context.Context, url string) (*notionapi.Page, error) {
+func (s notionService) CreateRecipe(ctx context.Context, url string) (*notionapi.Page, error) {
 	rcp, err := united.Parsers.Parse(ctx, url)
 	if err != nil {
 		return nil, err
@@ -60,7 +60,7 @@ func (s recipeService) CreateRecipe(ctx context.Context, url string) (*notionapi
 	return page, s.updatePageContent(ctx, page.ID, rcp)
 }
 
-func (s recipeService) UpdateRecipe(ctx context.Context, pageID string) error {
+func (s notionService) UpdateRecipe(ctx context.Context, pageID string) error {
 	page, err := s.client.RetrievePage(ctx, pageID)
 	if err != nil {
 		return fmt.Errorf("recipeService.client.RetrievePage: %w", err)
@@ -93,7 +93,7 @@ func (s recipeService) UpdateRecipe(ctx context.Context, pageID string) error {
 	return s.updatePageContent(ctx, page.ID, rcp)
 }
 
-func (s recipeService) updatePageContent(ctx context.Context, pageID string, rcp *recipe.Recipe) error {
+func (s notionService) updatePageContent(ctx context.Context, pageID string, rcp *recipe.Recipe) error {
 	// 以前のブロックを削除
 	pagi, err := s.client.RetrieveBlockChildren(ctx, pageID)
 	if err != nil {
@@ -119,7 +119,7 @@ func (s recipeService) updatePageContent(ctx context.Context, pageID string, rcp
 	return nil
 }
 
-func (s recipeService) SetRecipeCategory(ctx context.Context, pageID string, category string) error {
+func (s notionService) SetRecipeCategory(ctx context.Context, pageID string, category string) error {
 	_, err := s.client.UpdatePage(ctx, pageID, &notionapi.UpdatePageOptions{
 		Properties: map[string]notionapi.PropertyValue{
 			RECIPE_CATEGORY: {Type: "select", Select: notionapi.SelectPropertyValueData{Name: category}},

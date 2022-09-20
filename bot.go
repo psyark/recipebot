@@ -41,7 +41,7 @@ const (
 // Bot はGoogle Cloud Functionsへの応答を行うクラスです
 // TODO: レシピのスクレイピング、Notion操作、Slack応答でサービスを分割
 type Bot struct {
-	recipeService
+	notionService
 	slack  *slack.Client
 	notion *notionapi.Client
 
@@ -52,11 +52,8 @@ type Bot struct {
 
 func NewBot(slackClient *slack.Client, notionClient *notionapi.Client, hr slackbot.HandlerRegistry) *Bot {
 	bot := &Bot{
-		recipeService: recipeService{
-			client: notionClient,
-		},
-		slack:  slackClient,
-		notion: notionClient,
+		notionService: notionService{client: notionClient},
+		slack:         slackClient,
 	}
 
 	bot.actionCreateMenu = hr.GetActionID("create_menu", bot.onCreateMenu)
@@ -165,12 +162,7 @@ func (s *Bot) UpdateRecipeBlocks(ctx context.Context, channelID string, timestam
 }
 
 func (b *Bot) onCreateMenu(callback *slack.InteractionCallback, action *slack.BlockAction) error {
-	ctx := context.Background()
-	page, err := b.notion.RetrievePage(ctx, action.Value)
-	if err != nil {
-		return fmt.Errorf("Bot.notion.RetrievePage: %w", err)
-	}
-	_, _, err = b.slack.PostMessage(callback.Channel.ID, slack.MsgOptionText(page.URL, true))
+	_, _, err := b.slack.PostMessage(callback.Channel.ID, slack.MsgOptionText(fmt.Sprintf("未実装: %v", action.Value), true))
 	return err
 }
 
