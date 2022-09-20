@@ -9,46 +9,32 @@ import (
 )
 
 func (b *Bot) getRecipeBlocks(ctx context.Context, pageID string) ([]slack.Block, error) {
-	var pageTitle string
 	var pageURL string
 	var thumbnail *slack.Accessory
-	var category string
-	var categories []string
 
 	// カテゴリーの選択肢の取得
-	if db, err := b.notion.RetrieveDatabase(ctx, RECIPE_DB_ID); err != nil {
+	categories, err := b.notionService.GetRecipeCategories(ctx)
+	if err != nil {
 		return nil, err
-	} else {
-		for _, prop := range db.Properties {
-			if prop.ID == RECIPE_CATEGORY {
-				for _, opt := range prop.Select.Options {
-					categories = append(categories, opt.Name)
-				}
-			}
-		}
 	}
 
 	// 現在のカテゴリーの取得
-	if c, err := b.notion.RetrievePagePropertyItem(ctx, pageID, RECIPE_CATEGORY); err != nil {
+	category, err := b.notionService.GetRecipeCategory(ctx, pageID)
+	if err != nil {
 		return nil, err
-	} else {
-		category = c.PropertyItem.Select.Name
 	}
 
 	// タイトルの取得
-	if t, err := b.notion.RetrievePagePropertyItem(ctx, pageID, "title"); err != nil {
+	pageTitle, err := b.notionService.GetRecipeTitle(ctx, pageID)
+	if err != nil {
 		return nil, err
-	} else {
-		for _, item := range t.PropertyItemPagination.Results {
-			pageTitle += item.Title.Text.Content
-		}
-		if pageTitle == "" {
-			pageTitle = "無題"
-		}
+	}
+	if pageTitle == "" {
+		pageTitle = "無題"
 	}
 
 	// ページの取得
-	if page, err := b.notion.RetrievePage(ctx, pageID); err != nil {
+	if page, err := b.notionService.RetrievePage(ctx, pageID); err != nil {
 		return nil, err
 	} else {
 		pageURL = page.URL

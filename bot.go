@@ -11,6 +11,7 @@ import (
 	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 	"github.com/mvdan/xurls"
 	"github.com/psyark/notionapi"
+	"github.com/psyark/recipebot/service/notion"
 	"github.com/psyark/slackbot"
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
@@ -31,19 +32,13 @@ const (
 	botMemberID = "U03SCN7MYEQ"
 	// botChannelID     = "D03SNU2C80H"
 	cookingChannelID = "C03SNSP9HNV" // #料理 チャンネル
-	RECIPE_DB_ID     = "ff24a40498c94ac3ac2fa8894ac0d489"
-	RECIPE_ORIGINAL  = "%5CiX%60"
-	RECIPE_EVAL      = "Ha%3Ba"
-	RECIPE_CATEGORY  = "gmv%3A"
-	RECIPE_HEADER_ID = "60a4999c-b1fa-4e3d-9d6b-48034ad7b675"
 )
 
 // Bot はGoogle Cloud Functionsへの応答を行うクラスです
 // TODO: レシピのスクレイピング、Notion操作、Slack応答でサービスを分割
 type Bot struct {
-	notionService
-	slack  *slack.Client
-	notion *notionapi.Client
+	notionService *notion.Service
+	slack         *slack.Client
 
 	actionSetCategory string
 	actionCreateMenu  string
@@ -52,7 +47,7 @@ type Bot struct {
 
 func NewBot(slackClient *slack.Client, notionClient *notionapi.Client, hr slackbot.HandlerRegistry) *Bot {
 	bot := &Bot{
-		notionService: notionService{client: notionClient},
+		notionService: notion.New(notionClient),
 		slack:         slackClient,
 	}
 
@@ -120,7 +115,7 @@ func (b *Bot) onCallbackMessage(req *http.Request, event *slackevents.MessageEve
 // Deprecated:
 func (b *Bot) autoUpdateRecipePage(ctx context.Context, recipeURL string) (*notionapi.Page, error) {
 	// レシピページを取得
-	page, err := b.GetRecipeByURL(ctx, recipeURL)
+	page, err := b.notionService.GetRecipeByURL(ctx, recipeURL)
 	if err != nil {
 		return nil, fmt.Errorf("Bot.GetRecipeByURL: %w", err)
 	}
@@ -130,7 +125,7 @@ func (b *Bot) autoUpdateRecipePage(ctx context.Context, recipeURL string) (*noti
 	}
 
 	// レシピページがなければ作成
-	return b.CreateRecipe(ctx, recipeURL)
+	return b.notionService.CreateRecipe(ctx, recipeURL)
 }
 
 func (s *Bot) PostRecipeBlocks(ctx context.Context, channelID string, pageID string) error {
@@ -174,7 +169,7 @@ func (b *Bot) onSetCategory(callback *slack.InteractionCallback, action *slack.B
 		return fmt.Errorf("json.Unmarshal: %w", err)
 	}
 
-	if err := b.SetRecipeCategory(ctx, pair[0], pair[1]); err != nil {
+	if err := b.notionService.SetRecipeCategory(ctx, pair[0], pair[1]); err != nil {
 		return fmt.Errorf("Bot.SetRecipeCategory: %w", err)
 	}
 
@@ -183,5 +178,5 @@ func (b *Bot) onSetCategory(callback *slack.InteractionCallback, action *slack.B
 
 func (b *Bot) onRebuild(callback *slack.InteractionCallback, action *slack.BlockAction) error {
 	ctx := context.Background()
-	return b.UpdateRecipe(ctx, action.Value)
+	return b.notionService.UpdateRecipe(ctx, action.Value)
 }
