@@ -38,6 +38,8 @@ const (
 )
 
 // Bot はGoogle Cloud Functionsへの応答を行うクラスです
+// TODO: レシピのスクレイピング、Notion操作、Slack応答でサービスを分割
+// TODO: #料理 チャンネルに対応
 type Bot struct {
 	recipeService
 	slack  *slack.Client
