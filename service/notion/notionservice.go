@@ -19,6 +19,7 @@ const (
 	recipe_ingredients      = "%5C~%7C%40"
 	recipe_shared_header_id = "60a4999c-b1fa-4e3d-9d6b-48034ad7b675"
 	stock_db_id             = "923bfcb7c9014273b417ddc966fd17b8"
+	stock_alias             = "pK%3Ag"
 )
 
 type Service struct {
@@ -63,7 +64,7 @@ func (s *Service) GetRecipeTitle(ctx context.Context, pageID string) (string, er
 		return "", err
 	} else {
 		title := ""
-		for _, item := range piop.PropertyItemPagination.Results {
+		for _, item := range piop.Pagination.Results {
 			title += item.Title.Text.Content
 		}
 		return title, nil
@@ -78,7 +79,7 @@ func (s *Service) RetrievePage(ctx context.Context, pageID string) (*notionapi.P
 func (s *Service) GetRecipeByURL(ctx context.Context, url string) (*notionapi.Page, error) {
 	opt := &notionapi.QueryDatabaseOptions{Filter: notionapi.PropertyFilter{
 		Property: recipe_original,
-		URL:      &notionapi.TextFilterCondition{Equals: url},
+		URL:      &notionapi.TextFilterCondition{Equals: &url},
 	}}
 
 	pagi, err := s.client.QueryDatabase(ctx, recipe_db_id, opt)
@@ -102,15 +103,15 @@ func (s *Service) CreateRecipe(ctx context.Context, url string) (*notionapi.Page
 		Parent: &notionapi.Parent{Type: "database_id", DatabaseID: recipe_db_id},
 		Properties: map[string]notionapi.PropertyValue{
 			"title":         {Type: "title", Title: toRichTextArray(rcp.Title)},
-			recipe_original: {Type: "url", URL: url},
-			recipe_eval:     {Type: "select", Select: notionapi.SelectPropertyValueData{Name: "👀次作る"}},
+			recipe_original: {Type: "url", URL: &url},
+			recipe_eval:     {Type: "select", Select: &notionapi.SelectOption{Name: "👀次作る"}},
 		},
 	}
 	if rcp.GetEmoji() != "" {
-		opt.Icon = &notionapi.FileOrEmoji{Type: "emoji", Emoji: rcp.GetEmoji()}
+		opt.Icon = &notionapi.Emoji{Type: "emoji", Emoji: rcp.GetEmoji()}
 	}
 	if rcp.Image != "" {
-		opt.Cover = &notionapi.File{Type: "external", External: notionapi.ExternalFileData{URL: rcp.Image}}
+		opt.Cover = &notionapi.File{Type: "external", External: &notionapi.ExternalFileData{URL: rcp.Image}}
 	}
 
 	page, err := s.client.CreatePage(ctx, opt)
@@ -150,10 +151,10 @@ func (s *Service) UpdateRecipe(ctx context.Context, pageID string) error {
 		opt.Properties["title"] = notionapi.PropertyValue{Type: "title", Title: toRichTextArray(rcp.Title)}
 	}
 	if page.Icon == nil && rcp.GetEmoji() != "" {
-		opt.Icon = &notionapi.FileOrEmoji{Type: "emoji", Emoji: rcp.GetEmoji()}
+		opt.Icon = &notionapi.Emoji{Type: "emoji", Emoji: rcp.GetEmoji()}
 	}
 	if page.Cover == nil && rcp.Image != "" {
-		opt.Cover = &notionapi.File{Type: "external", External: notionapi.ExternalFileData{URL: rcp.Image}}
+		opt.Cover = &notionapi.File{Type: "external", External: &notionapi.ExternalFileData{URL: rcp.Image}}
 	}
 
 	if opt.Icon != nil || opt.Cover != nil || len(opt.Properties) != 0 {
@@ -194,7 +195,7 @@ func (s *Service) updatePageContent(ctx context.Context, pageID string, rcp *rec
 func (s *Service) SetRecipeCategory(ctx context.Context, pageID string, category string) error {
 	_, err := s.client.UpdatePage(ctx, pageID, &notionapi.UpdatePageOptions{
 		Properties: map[string]notionapi.PropertyValue{
-			recipe_category: {Type: "select", Select: notionapi.SelectPropertyValueData{Name: category}},
+			recipe_category: {Type: "select", Select: &notionapi.SelectOption{Name: category}},
 		},
 	})
 	if err != nil {
@@ -227,12 +228,26 @@ func (s *Service) GetStockMap(ctx context.Context) (map[string]string, error) {
 			}
 
 			title := ""
-			for _, pi := range piop.Results {
+			for _, pi := range piop.Pagination.Results {
 				title += pi.Title.Text.Content
 			}
 			mu.Lock()
 			defer mu.Unlock()
 			stockMap[title] = result.ID
+			return nil
+		})
+
+		eg.Go(func() error {
+			piop, err := s.client.RetrievePagePropertyItem(ctx, result.ID, stock_alias)
+			if err != nil {
+				return err
+			}
+
+			mu.Lock()
+			defer mu.Unlock()
+			for _, pi := range piop.PropertyItem.MultiSelect {
+				stockMap[pi.Name] = result.ID
+			}
 			return nil
 		})
 	}

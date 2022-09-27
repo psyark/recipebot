@@ -192,7 +192,9 @@ func (b *Service) getRecipeBlocks(ctx context.Context, pageID string) ([]slack.B
 	} else {
 		pageURL = page.URL
 		if page.Icon != nil {
-			pageTitle = page.Icon.Emoji + pageTitle
+			if emoji, ok := page.Icon.(*notionapi.Emoji); ok {
+				pageTitle = emoji.Emoji + pageTitle
+			}
 		}
 		if page.Cover != nil {
 			if page.Cover.External.URL != "" {

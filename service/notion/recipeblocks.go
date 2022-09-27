@@ -77,7 +77,7 @@ func toCallout(str string, emoji string, images []string) notionapi.Block {
 		Type:   "callout",
 		Callout: notionapi.CalloutBlockData{
 			RichText: toRichTextArray(str),
-			Icon:     &notionapi.FileOrEmoji{Type: "emoji", Emoji: emoji},
+			Icon:     &notionapi.Emoji{Type: "emoji", Emoji: emoji},
 			Color:    "gray_background",
 		},
 	}
@@ -91,10 +91,10 @@ func toImage(url string) notionapi.Block {
 	return notionapi.Block{
 		Object: "block",
 		Type:   "image",
-		Image:  notionapi.File{Type: "external", External: notionapi.ExternalFileData{URL: url}},
+		Image:  &notionapi.ImageFile{File: notionapi.File{Type: "external", External: &notionapi.ExternalFileData{URL: url}}},
 	}
 }
 
 func toRichTextArray(text string) []notionapi.RichText {
-	return []notionapi.RichText{{Type: "text", Text: notionapi.Text{Content: text}}}
+	return []notionapi.RichText{{Type: "text", Text: &notionapi.Text{Content: text}}}
 }
