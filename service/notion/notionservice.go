@@ -53,7 +53,7 @@ func (s *Service) GetRecipeCategory(ctx context.Context, pageID string) (string,
 	if piop, err := s.client.RetrievePagePropertyItem(ctx, pageID, recipe_category); err != nil {
 		return "", err
 	} else {
-		return piop.PropertyItem.Select.Name, nil
+		return piop.(*notionapi.PropertyItem).Select.Name, nil
 	}
 }
 
@@ -64,7 +64,7 @@ func (s *Service) GetRecipeTitle(ctx context.Context, pageID string) (string, er
 		return "", err
 	} else {
 		title := ""
-		for _, item := range piop.Pagination.Results {
+		for _, item := range piop.(*notionapi.PropertyItemPagination).Results {
 			title += item.Title.Text.Content
 		}
 		return title, nil
@@ -138,7 +138,7 @@ func (s *Service) UpdateRecipe(ctx context.Context, pageID string) error {
 		return fmt.Errorf("recipeService.client.RetrievePagePropertyItem: %w", err)
 	}
 
-	rcp, err := united.Parsers.Parse(ctx, piop.PropertyItem.URL)
+	rcp, err := united.Parsers.Parse(ctx, piop.(*notionapi.PropertyItem).URL)
 	if err != nil {
 		return fmt.Errorf("united.Parsers.Parse: %w", err)
 	}
@@ -228,7 +228,7 @@ func (s *Service) GetStockMap(ctx context.Context) (map[string]string, error) {
 			}
 
 			title := ""
-			for _, pi := range piop.Pagination.Results {
+			for _, pi := range piop.(*notionapi.PropertyItemPagination).Results {
 				title += pi.Title.Text.Content
 			}
 			mu.Lock()
@@ -245,7 +245,7 @@ func (s *Service) GetStockMap(ctx context.Context) (map[string]string, error) {
 
 			mu.Lock()
 			defer mu.Unlock()
-			for _, pi := range piop.PropertyItem.MultiSelect {
+			for _, pi := range piop.(*notionapi.PropertyItem).MultiSelect {
 				stockMap[pi.Name] = result.ID
 			}
 			return nil

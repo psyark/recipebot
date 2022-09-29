@@ -202,8 +202,8 @@ github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZN
 github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4/go.mod h1:xMI15A0UPsDsEKsMN9yxemIoYk6Tm2C1GtYGdfGttqA=
 github.com/psyark/jsonld v0.0.0-20220825042757-0bc9534f3d66 h1:aj3UzL74gCM1Hqq0wCTEO8fx6tlA8KOFz+FDJVkPzvI=
 github.com/psyark/jsonld v0.0.0-20220825042757-0bc9534f3d66/go.mod h1:uootRS/s5cPfUC8IYEpgtZnwjkvQxJ9eWFMdvB/hCgw=
-github.com/psyark/notionapi v0.0.0-20220927054835-47e2ac37872e h1:pA5Ef7DXmhvAcusvQMFVH20A0LoRY9L6llaTJxy1SvU=
-github.com/psyark/notionapi v0.0.0-20220927054835-47e2ac37872e/go.mod h1:gtp29ZJahnm4d9pi+me5zZcMfahnG4OTBLag4BqbZtY=
+github.com/psyark/notionapi v0.0.0-20220929014552-15c7817d3b86 h1:PmMMk4rGixr2n7B8TwGczZxc7BtUVgLYOHlWHJW5GKE=
+github.com/psyark/notionapi v0.0.0-20220929014552-15c7817d3b86/go.mod h1:gtp29ZJahnm4d9pi+me5zZcMfahnG4OTBLag4BqbZtY=
 github.com/psyark/slackbot v0.0.0-20220919132108-aa6f92ad32db h1:bCrYFRB8tnUdUfD/FDl6if3BZkNzSjPjEdnnlSGNhVw=
 github.com/psyark/slackbot v0.0.0-20220919132108-aa6f92ad32db/go.mod h1:p6dAnd3Diu5m9YQERzw7x8QQQiEOOngOCCPP4ZBEuEY=
 github.com/rogpeppe/fastuuid v1.2.0/go.mod h1:jVj6XXZzXRy/MSR5jhDC/2q6DgLz+nrA6LYCDYWNEvQ=
@@ -320,8 +320,8 @@ golang.org/x/net v0.0.0-20210503060351-7fd8e65b6420/go.mod h1:9nx3DQGgdP8bBQD5qx
 golang.org/x/net v0.0.0-20210916014120-12bc252f5db8/go.mod h1:9nx3DQGgdP8bBQD5qxJ1jj9UTztislL4KSBs9R2vV5Y=
 golang.org/x/net v0.0.0-20211015210444-4f30a5c0130f/go.mod h1:9nx3DQGgdP8bBQD5qxJ1jj9UTztislL4KSBs9R2vV5Y=
 golang.org/x/net v0.0.0-20220826154423-83b083e8dc8b/go.mod h1:YDH+HFinaLZZlnHAfSS6ZXJJ9M9t4Dl22yv3iI2vPwk=
-golang.org/x/net v0.0.0-20220926192436-02166a98028e h1:I51lVG9ykW5AQeTE50sJ0+gJCAF0J78Hf1+1VUCGxDI=
-golang.org/x/net v0.0.0-20220926192436-02166a98028e/go.mod h1:YDH+HFinaLZZlnHAfSS6ZXJJ9M9t4Dl22yv3iI2vPwk=
+golang.org/x/net v0.0.0-20220927171203-f486391704dc h1:FxpXZdoBqT8RjqTy6i1E8nXHhW21wK7ptQ/EPIGxzPQ=
+golang.org/x/net v0.0.0-20220927171203-f486391704dc/go.mod h1:YDH+HFinaLZZlnHAfSS6ZXJJ9M9t4Dl22yv3iI2vPwk=
 golang.org/x/oauth2 v0.0.0-20180821212333-d2e6202438be/go.mod h1:N/0e6XlmueqKjAGxoOufVs8QHGRruUQn6yWY3a++T0U=
 golang.org/x/oauth2 v0.0.0-20190226205417-e64efc72b421/go.mod h1:gOpvHmFTYa4IltrdGE7lF6nIHvwfUNPOp7c8zoXwtLw=
 golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45/go.mod h1:gOpvHmFTYa4IltrdGE7lF6nIHvwfUNPOp7c8zoXwtLw=

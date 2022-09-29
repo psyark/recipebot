@@ -68,12 +68,14 @@ func TestService(t *testing.T) {
 				return err
 			}
 
-			rcp, err := united.Parsers.Parse(ctx, piop.PropertyItem.URL)
+			pi := piop.(*notionapi.PropertyItem)
+
+			rcp, err := united.Parsers.Parse(ctx, pi.URL)
 			if errors.Is(err, sites.ErrUnsupportedURL) {
-				fmt.Printf("%2d, unsupported: %v\n", i, piop.PropertyItem.URL)
+				fmt.Printf("%2d, unsupported: %v\n", i, pi.URL)
 				return nil
 			} else if err != nil {
-				return fmt.Errorf("%v: %w", piop.PropertyItem.URL, err)
+				return fmt.Errorf("%v: %w", pi.URL, err)
 			}
 
 			title, err := service.GetRecipeTitle(ctx, recipePage.ID)
