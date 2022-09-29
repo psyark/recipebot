@@ -338,3 +338,46 @@ func ExampleParser_r85520() {
 	//   ]
 	// }
 }
+func ExampleParser_r35774() {
+	ctx := context.Background()
+	rcp, err := NewParser().Parse(ctx, "https://macaro-ni.jp/35774")
+	if err != nil {
+		panic(err)
+	}
+
+	data, _ := json.MarshalIndent(rcp, "", "  ")
+	fmt.Println(string(data))
+	// output:
+	// {
+	//   "Title": "必見！コツをおさえた『基本の鮭フライ＆タルタルソース』の作り方",
+	//   "Image": "https://cdn.macaro-ni.jp/image/summary/35/35774/2a8f6aae712a66cdf5c8485a93a3f044.jpg?p=medium",
+	//   "IngredientGroups": null,
+	//   "Steps": [
+	//     {
+	//       "Text": "\n①鮭は食べやすいよう、1切れを2〜3切れに切る。\n②塩胡椒(分量外)を全体にまんべんなく振り、5分ほど置く。水分が出るのでキッチンペーパー等で軽く拭きとる。\n塩胡椒を振って水分を出すことで生臭みを取るので、必ずこの行程は行いましょう。\nまた、塩を振ることで旨味も増します。\n③袋に鮭と薄力粉を入れ、薄力粉を全体にまぶす。\n空気を含んだ状態で口を閉じ、全体を揺するようにすると薄力粉がきれいに付きます。\n④袋から鮭を取り出し、一つずつ軽く叩いて余分な薄力粉を落とす。\n薄力粉・卵・パン粉の3つとも、余分に付いていると揚げた時にムラができます。\nきれいな仕上がりにするために、軽く叩きましょう。\n⑤鮭を卵にくぐらせる。\n薄力粉と同じく、卵はくぐらせた後によく水気を切りましょう。\n⑥粉チーズを混ぜたパン粉に鮭をのせ、パン粉を全体によくまぶす。\nパン粉を付けたら、鮭は軽く振って余分なパン粉を落とし、別の容器に置きましょう。\n⑦170℃に熱した油で、きつね色になるまでじっくり揚げる。\n火加減の目安は中火です。油が十分に温まり、なおかつ高温すぎないのがポイント。\n⑧ふちがきつね色になったらひっくり返し、反対側も同じように揚げる。\nふちがきつね色になってからひっくり返すと、火加減が均等で色も良く仕上がります。\nひっくり返す時に、衣が硬くサクッとしていればOK。\n衣が柔らかい場合は火が弱いので、火加減を調整しましょう。\n⑨バットに上げて、余分な油を落とす。\n油切れが悪いと、ベタついたり胃もたれの原因になります。\n必ず油を落としましょう。\n次にタルタルソースを作ります。\n⑩玉ねぎはみじん切りにして、水にさらす。\n玉ねぎの辛味を抜きます。時間がない場合は、みじん切りして塩をまぶし、軽く握りつぶしてから水にさらすと繊維が潰れて辛味が早く抜けます。\n⑪茹で卵をフォーク等で潰す。\n⑫茹で卵、水気を切った玉ねぎにBの材料を加え、よく混ぜ合わせる。",
+	//       "Images": [
+	//         "https://cdn.macaro-ni.jp/image/summary/35/35774/567f5cb41b2286ae60d4d50922f023b9.jpg?p=medium",
+	//         "https://cdn.macaro-ni.jp/image/summary/35/35774/c7e74110c599d13774d13970fdad4d06.jpg?p=medium",
+	//         "https://cdn.macaro-ni.jp/image/summary/35/35774/6a9cde73befc66ba24908e8d83b39c63.jpg?p=medium",
+	//         "https://cdn.macaro-ni.jp/image/summary/35/35774/00bfda22dee251416d728d9c2c7cdded.jpg?p=medium",
+	//         "https://cdn.macaro-ni.jp/image/summary/35/35774/28d95776755897528b210f32c65f6e34.jpg?p=medium",
+	//         "https://cdn.macaro-ni.jp/image/summary/35/35774/a12119be3895d3041acf3bf1898244cf.jpg?p=medium",
+	//         "https://cdn.macaro-ni.jp/image/summary/35/35774/8095dd34daaa3e9e013297131193770c.jpg?p=medium",
+	//         "https://cdn.macaro-ni.jp/image/summary/35/35774/d7358658a5b263523fdb003fb0a4ee04.jpg?p=medium",
+	//         "https://cdn.macaro-ni.jp/image/summary/35/35774/40a21368c402b5b0d98c0f35a0723550.jpg?p=medium",
+	//         "https://cdn.macaro-ni.jp/image/summary/35/35774/854e7a24b157f83b5bb4789e137cfa9c.jpg?p=medium",
+	//         "https://cdn.macaro-ni.jp/image/summary/35/35774/b820fa7fcd527d067253ca6a4a0160af.jpg?p=medium",
+	//         "https://cdn.macaro-ni.jp/image/summary/35/35774/8b82745ef832ea1a7c2dc8194821695f.jpg?p=medium",
+	//         "https://cdn.macaro-ni.jp/image/summary/35/35774/489ae3463574a9953ff59d25120f4c70.jpg?p=medium"
+	//       ]
+	//     },
+	//     {
+	//       "Text": "ぜひ揚げたての食感を楽しんで！\n揚げたてのサクサクをお召し上がりください。\nお好みでレモンを絞ると、より爽やかに頂けます。\nタルタルソースはたっぷりかけるのが美味しさの秘訣！\nタルタルソースのみでも、レモンをプラスしても、さらにソースをかけても美味しいです。\n\nビールと一緒に食べると最高！揚げた後に油をしっかり落とせば、油やけの心配もありません。\n\nタルタルソースはお好みでキュウリのみじん切りやピクルス等を入れて、食感の変化をお楽しみください。",
+	//       "Images": [
+	//         "https://cdn.macaro-ni.jp/image/summary/35/35774/58a32da160ee9b7f1b5d66241874a551.jpg?p=medium",
+	//         "https://cdn.macaro-ni.jp/image/summary/35/35774/9590d4298b5153378bebb6584810ea9c.jpg?p=medium"
+	//       ]
+	//     }
+	//   ]
+	// }
+}

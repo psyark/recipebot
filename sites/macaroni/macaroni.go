@@ -70,6 +70,10 @@ func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) 
 			rcp.Steps = append(rcp.Steps, recipe.Step{Text: strings.TrimSpace(s.Text())})
 			curStep = &rcp.Steps[len(rcp.Steps)-1]
 		case "articleShow__contentsText":
+			if curStep == nil {
+				rcp.Steps = append(rcp.Steps, recipe.Step{})
+				curStep = &rcp.Steps[len(rcp.Steps)-1]
+			}
 			for _, line := range parseCTB(s.Find(`.articleShow__contentsTextBody`).Get(0)) {
 				curStep.Text += "\n" + line
 			}
