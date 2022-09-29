@@ -53,7 +53,11 @@ func (s *Service) GetRecipeCategory(ctx context.Context, pageID string) (string,
 	if piop, err := s.client.RetrievePagePropertyItem(ctx, pageID, recipe_category); err != nil {
 		return "", err
 	} else {
-		return piop.(*notionapi.PropertyItem).Select.Name, nil
+		if option := piop.(*notionapi.PropertyItem).Select; option != nil {
+			return option.Name, nil
+		} else {
+			return "", nil
+		}
 	}
 }
 
