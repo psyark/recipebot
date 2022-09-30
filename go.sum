@@ -202,8 +202,8 @@ github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZN
 github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4/go.mod h1:xMI15A0UPsDsEKsMN9yxemIoYk6Tm2C1GtYGdfGttqA=
 github.com/psyark/jsonld v0.0.0-20220825042757-0bc9534f3d66 h1:aj3UzL74gCM1Hqq0wCTEO8fx6tlA8KOFz+FDJVkPzvI=
 github.com/psyark/jsonld v0.0.0-20220825042757-0bc9534f3d66/go.mod h1:uootRS/s5cPfUC8IYEpgtZnwjkvQxJ9eWFMdvB/hCgw=
-github.com/psyark/notionapi v0.0.0-20220929075520-b84c12003bf3 h1:HmjLe3C4xa5Z31MEnpawVQgcI/Na8xpfJJ0Q7H3FM0E=
-github.com/psyark/notionapi v0.0.0-20220929075520-b84c12003bf3/go.mod h1:gtp29ZJahnm4d9pi+me5zZcMfahnG4OTBLag4BqbZtY=
+github.com/psyark/notionapi v0.0.0-20220930020806-e182426f0bba h1:vxyAgKU23ipoS6n+6CapSveGTLCYFHPx+cvZ+orU7oo=
+github.com/psyark/notionapi v0.0.0-20220930020806-e182426f0bba/go.mod h1:gtp29ZJahnm4d9pi+me5zZcMfahnG4OTBLag4BqbZtY=
 github.com/psyark/slackbot v0.0.0-20220919132108-aa6f92ad32db h1:bCrYFRB8tnUdUfD/FDl6if3BZkNzSjPjEdnnlSGNhVw=
 github.com/psyark/slackbot v0.0.0-20220919132108-aa6f92ad32db/go.mod h1:p6dAnd3Diu5m9YQERzw7x8QQQiEOOngOCCPP4ZBEuEY=
 github.com/rogpeppe/fastuuid v1.2.0/go.mod h1:jVj6XXZzXRy/MSR5jhDC/2q6DgLz+nrA6LYCDYWNEvQ=
@@ -348,8 +348,8 @@ golang.org/x/sync v0.0.0-20200625203802-6e8e738ad208/go.mod h1:RxMgew5VJxzue5/jJ
 golang.org/x/sync v0.0.0-20201020160332-67f06af15bc9/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
 golang.org/x/sync v0.0.0-20201207232520-09787c993a3a/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
 golang.org/x/sync v0.0.0-20210220032951-036812b2e83c/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
-golang.org/x/sync v0.0.0-20220923202941-7f9b1623fab7 h1:ZrnxWX62AgTKOSagEqxvb3ffipvEDX2pl7E1TdqLqIc=
-golang.org/x/sync v0.0.0-20220923202941-7f9b1623fab7/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
+golang.org/x/sync v0.0.0-20220929204114-8fcdb60fdcc0 h1:cu5kTvlzcw1Q5S9f5ip1/cpiB4nXvw1XYzFPGgzLUOY=
+golang.org/x/sync v0.0.0-20220929204114-8fcdb60fdcc0/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
 golang.org/x/sys v0.0.0-20180830151530-49385e6e1522/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
 golang.org/x/sys v0.0.0-20190215142949-d0b11bdaac8a/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
 golang.org/x/sys v0.0.0-20190312061237-fead79001313/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=

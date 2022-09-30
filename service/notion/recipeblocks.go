@@ -91,7 +91,7 @@ func toImage(url string) notionapi.Block {
 	return notionapi.Block{
 		Object: "block",
 		Type:   "image",
-		Image:  &notionapi.ImageFile{File: notionapi.File{Type: "external", External: &notionapi.ExternalFileData{URL: url}}},
+		Image:  &notionapi.File{Type: "external", External: &notionapi.ExternalFileData{URL: url}},
 	}
 }
 
