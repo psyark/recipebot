@@ -121,3 +121,96 @@ func ExampleParser() {
 	//   ]
 	// }
 }
+
+func ExampleParser_canonURL() {
+	ctx := context.Background()
+	rcp, err := NewParser().Parse(ctx, "https://www.sirogohan.com/sp/recipe/butabaradaikon/amp/")
+	if err != nil {
+		panic(err)
+	}
+
+	data, _ := json.MarshalIndent(rcp, "", "  ")
+	fmt.Println(string(data))
+	// output:
+	// {
+	//   "Title": "豚バラ大根",
+	//   "Image": "https://www.sirogohan.com/_files/recipe/images/butabaradaikon/abutabaradaikon76112.JPG",
+	//   "IngredientGroups": [
+	//     {
+	//       "Name": "",
+	//       "Children": [
+	//         {
+	//           "Name": "大根",
+	//           "Amount": "600ｇ（約1/2本）",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "豚バラ肉薄切り",
+	//           "Amount": "150ｇ",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "生姜",
+	//           "Amount": "20ｇほど",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "粗びき黒胡椒（仕上げ用）",
+	//           "Amount": "好みで少々",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "ごま油",
+	//           "Amount": "小さじ1",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "だし汁",
+	//           "Amount": "400ml",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "砂糖",
+	//           "Amount": "大さじ1と1/2",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "醤油",
+	//           "Amount": "大さじ2",
+	//           "Comment": ""
+	//         }
+	//       ]
+	//     }
+	//   ],
+	//   "Steps": [
+	//     {
+	//       "Text": "豚バラ大根の下ごしらえ\n\n用意するものは大根、豚バラ肉（薄切り）、生姜で、大根600ｇに対して豚バラ肉は150ｇほどでOKです。\n煮物にする大根は皮近くにある筋をむき取った方が口当たりがよいので、大根は包丁やピーラーで皮を厚めにむき取ります。\n\n\t\n\t\t\n\t\t\n\t\n\n皮をむいた大根は2㎝幅ほどの半月切りにします（先端側は火が通りやすいので3㎝幅ほどにしています）。\n豚バラ肉は3～4㎝幅に、生姜は皮をむいてせん切りにします。",
+	//       "Images": [
+	//         "https://www.sirogohan.com/_files/recipe/images/butabaradaikon/butabaradaikon1.JPG",
+	//         "https://www.sirogohan.com/_files/recipe/images/butabaradaikon/butabaradaikon2.JPG",
+	//         "https://www.sirogohan.com/_files/recipe/images/butabaradaikon/butabaradaikon3.JPG",
+	//         "https://www.sirogohan.com/_files/recipe/images/butabaradaikon/butabaradaikon4.JPG"
+	//       ]
+	//     },
+	//     {
+	//       "Text": "豚バラ大根のレシピ/作り方\n\n大きめのフライパンか鍋を用意し、ごま油小さじ1と生姜を入れて中火にかけ、香りが立ってくれば豚バラ肉を入れてほぐしながら炒めます。\n\n\t\n\t\t\n\t\t\n\t\n\n豚バラ肉の色が変わってほぼ火が通れば塩ひとつまみとこしょう少々（各分量外）を加えて下味をつけます。\n続けて大根を加え、中火のまま1分ほど大根と豚バラ肉を炒め合わせます。\n\n\t\n\t\t\n\t\t\n\t\n\nだし汁400mlをそそぎ入れ、沸いてきたら軽くアクをすくい取ります。\n\n\t\n\t\t\n\t\t\n\t\n\n※豚肉などの具材からだしが出るのでだし汁は薄めでもOKです。レシピ下の補足に各種だし汁に関してのリンクを貼っています。\n\nここからは落し蓋をして中で煮汁を対流させながら15分煮ます。\n※落とし蓋の下では下の写真のように煮汁がグツグツと煮立つ状態にすることが大切です。弱火ではなく弱めの中火くらいの火加減で煮ます。\n\n\t\n\t\t\n\t\t\n\t\n\n15分経てば砂糖大さじ1と1/2を加え、煮汁をかけるなどして溶かし混ぜます。\n砂糖を入れたら5分煮るのですが、竹串を大きめの大根に刺してみてすっと刺されば落とし蓋を外して5分煮ていきます。\n\n\t\n\t\t\n\t\t\n\t\n\n※大根にしっかり火が通っていないようなら5分の間は落とし蓋をしたままで煮て、次の醬油を加える時に蓋を外してください。\n\n続けて醤油大さじ2を加え、同じく煮汁をまわしかけるなどして溶かし混ぜます。\nこの段階で煮汁が半分以下になっているのですが、ここから煮汁がさらに少なくなるまで5～7分ほど煮詰めます。\n\n\t\n\t\t\n\t\t\n\t\n\n煮汁が少ないので途中3～4度くらいフライパンをふるか箸で大根の上下を返すなどして、煮汁のしみ込みを均一にするとよいです。\n煮汁がフライパンの底に少し残って、大根や豚肉にしっかり煮汁がからむくらいになれば完成です。器に盛って好みで粗びき黒胡椒などを散らしていただきましょう！",
+	//       "Images": [
+	//         "https://www.sirogohan.com/_files/recipe/images/butabaradaikon/butabaradaikon5.JPG",
+	//         "https://www.sirogohan.com/_files/recipe/images/butabaradaikon/butabaradaikon6.JPG",
+	//         "https://www.sirogohan.com/_files/recipe/images/butabaradaikon/butabaradaikon7.JPG",
+	//         "https://www.sirogohan.com/_files/recipe/images/butabaradaikon/butabaradaikon8.JPG",
+	//         "https://www.sirogohan.com/_files/recipe/images/butabaradaikon/butabaradaikon9.JPG",
+	//         "https://www.sirogohan.com/_files/recipe/images/butabaradaikon/butabaradaikon10.JPG",
+	//         "https://www.sirogohan.com/_files/recipe/images/butabaradaikon/butabaradaikon11.JPG",
+	//         "https://www.sirogohan.com/_files/recipe/images/butabaradaikon/butabaradaikon12.JPG",
+	//         "https://www.sirogohan.com/_files/recipe/images/butabaradaikon/butabaradaikon13.JPG",
+	//         "https://www.sirogohan.com/_files/recipe/images/butabaradaikon/butabaradaikon14.JPG",
+	//         "https://www.sirogohan.com/_files/recipe/images/butabaradaikon/butabaradaikon15.JPG",
+	//         "https://www.sirogohan.com/_files/recipe/images/butabaradaikon/butabaradaikon16.JPG",
+	//         "https://www.sirogohan.com/_files/recipe/images/butabaradaikon/butabaradaikon17.JPG",
+	//         "https://www.sirogohan.com/_files/recipe/images/butabaradaikon/butabaradaikon18.JPG"
+	//       ]
+	//     }
+	//   ]
+	// }
+}

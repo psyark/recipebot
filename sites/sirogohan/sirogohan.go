@@ -13,6 +13,8 @@ import (
 type parser struct{}
 
 func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) {
+	url = p.normalizeURL(url)
+
 	if !strings.HasPrefix(url, "https://www.sirogohan.com/recipe/") {
 		return nil, sites.ErrUnsupportedURL
 	}
@@ -57,6 +59,16 @@ func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) 
 	})
 
 	return rcp, nil
+}
+
+func (p *parser) normalizeURL(url string) string {
+	if strings.HasPrefix(url, "https://www.sirogohan.com/sp/") {
+		url = "https://www.sirogohan.com/" + strings.TrimPrefix(url, "https://www.sirogohan.com/sp/")
+	}
+	if strings.HasSuffix(url, "/amp/") {
+		url = strings.TrimSuffix(url, "/amp/") + "/"
+	}
+	return url
 }
 
 func NewParser() sites.Parser {
