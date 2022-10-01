@@ -31,20 +31,12 @@ type Service struct {
 func New(slackClient *slack.Client, notionClient *notionapi.Client, registry *slackbot.Registry) *Service {
 	var svc *Service
 	svc = &Service{
-		notionService: notion.New(notionClient),
-		client:        slackClient,
-
-		actionCreateMenu: registry.GetActionID("create_menu", func(args *slackbot.BlockActionHandlerArgs) error {
-			return svc.onCreateMenu(args.InteractionCallback, args.BlockAction)
-		}),
-		actionSetCategory: registry.GetActionID("set_category", func(args *slackbot.BlockActionHandlerArgs) error {
-			return svc.onSetCategory(args.InteractionCallback, args.BlockAction)
-		}),
-		actionRebuild: registry.GetActionID("rebuild", func(args *slackbot.BlockActionHandlerArgs) error {
-			return svc.onRebuild(args.InteractionCallback, args.BlockAction)
-		}),
+		notionService:     notion.New(notionClient),
+		client:            slackClient,
+		actionCreateMenu:  registry.GetActionID("create_menu", func(args *slackbot.BlockActionHandlerArgs) error { return svc.onCreateMenu(args) }),
+		actionSetCategory: registry.GetActionID("set_category", func(args *slackbot.BlockActionHandlerArgs) error { return svc.onSetCategory(args) }),
+		actionRebuild:     registry.GetActionID("rebuild", func(args *slackbot.BlockActionHandlerArgs) error { return svc.onRebuild(args) }),
 	}
-
 	return svc
 }
 
@@ -135,13 +127,16 @@ func (s *Service) UpdateRecipeBlocks(ctx context.Context, channelID string, time
 	return nil
 }
 
-func (b *Service) onCreateMenu(callback *slack.InteractionCallback, action *slack.BlockAction) error {
-	_, _, err := b.client.PostMessage(callback.Channel.ID, slack.MsgOptionText(fmt.Sprintf("未実装: %v", action.Value), true))
+func (b *Service) onCreateMenu(args *slackbot.BlockActionHandlerArgs) error {
+	opt := slack.MsgOptionText(fmt.Sprintf("未実装: %v", args.BlockAction.Value), true)
+	_, _, err := b.client.PostMessage(args.InteractionCallback.Channel.ID, opt)
 	return err
 }
 
-func (b *Service) onSetCategory(callback *slack.InteractionCallback, action *slack.BlockAction) error {
+func (b *Service) onSetCategory(args *slackbot.BlockActionHandlerArgs) error {
 	ctx := context.Background()
+	callback := args.InteractionCallback
+	action := args.BlockAction
 
 	pair := [2]string{}
 	if err := json.Unmarshal([]byte(action.SelectedOption.Value), &pair); err != nil {
@@ -155,9 +150,9 @@ func (b *Service) onSetCategory(callback *slack.InteractionCallback, action *sla
 	return b.UpdateRecipeBlocks(ctx, callback.Channel.ID, callback.Message.Timestamp, pair[0])
 }
 
-func (b *Service) onRebuild(callback *slack.InteractionCallback, action *slack.BlockAction) error {
+func (b *Service) onRebuild(args *slackbot.BlockActionHandlerArgs) error {
 	ctx := context.Background()
-	return b.notionService.UpdateRecipe(ctx, action.Value)
+	return b.notionService.UpdateRecipe(ctx, args.BlockAction.Value)
 }
 
 func (b *Service) getRecipeBlocks(ctx context.Context, pageID string) ([]slack.Block, error) {
