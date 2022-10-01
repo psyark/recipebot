@@ -6,6 +6,7 @@ import (
 	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 	"github.com/psyark/notionapi"
 	slackservice "github.com/psyark/recipebot/service/slack"
+	"github.com/psyark/slackbot"
 	"github.com/slack-go/slack"
 )
 
@@ -21,10 +22,18 @@ https://api.slack.com/apps/A03SNSS0S81
 */
 
 func init() {
-	router := slackservice.New(
+	registry := slackbot.NewRegistry()
+
+	slacksvc := slackservice.New(
 		slack.New(os.Getenv("SLACK_BOT_USER_OAUTH_TOKEN")),
 		notionapi.NewClient(os.Getenv("NOTION_API_KEY")),
+		registry,
 	)
 
-	functions.HTTP("main", router.Route)
+	opt := &slackbot.GetHandlerOption{
+		Registry: registry,
+		Message:  slacksvc.OnCallbackMessage,
+		Error:    slacksvc.OnError,
+	}
+	functions.HTTP("main", slackbot.GetHandler(opt))
 }

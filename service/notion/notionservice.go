@@ -81,7 +81,7 @@ func (s *Service) RetrievePage(ctx context.Context, pageID string) (*notionapi.P
 }
 
 func (s *Service) GetRecipeByURL(ctx context.Context, url string) (*notionapi.Page, error) {
-	opt := &notionapi.QueryDatabaseOptions{Filter: notionapi.PropertyFilter{
+	opt := &notionapi.QueryDatabaseOptions{Filter: &notionapi.PropertyFilter{
 		Property: recipe_original,
 		URL:      &notionapi.TextFilterCondition{Equals: &url},
 	}}

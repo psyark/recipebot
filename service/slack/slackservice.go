@@ -24,38 +24,37 @@ const (
 type Service struct {
 	notionService *notion.Service
 	client        *slack.Client
-	actionID      actionID
+
+	actionSetCategory string
+	actionCreateMenu  string
+	actionRebuild     string
 }
 
-type actionID struct {
-	setCategory string
-	createMenu  string
-	rebuild     string
-}
-
-func New(slackClient *slack.Client, notionClient *notionapi.Client) *slackbot.Router {
-	router := slackbot.New()
-
-	bot := &Service{
+func New(slackClient *slack.Client, notionClient *notionapi.Client, registry *slackbot.HandlerRegistry) *Service {
+	var svc *Service
+	svc = &Service{
 		notionService: notion.New(notionClient),
 		client:        slackClient,
+
+		actionCreateMenu: registry.GetActionID("create_menu", func(callback *slack.InteractionCallback, action *slack.BlockAction) error {
+			return svc.onCreateMenu(callback, action)
+		}),
+		actionSetCategory: registry.GetActionID("set_category", func(callback *slack.InteractionCallback, action *slack.BlockAction) error {
+			return svc.onSetCategory(callback, action)
+		}),
+		actionRebuild: registry.GetActionID("rebuild", func(callback *slack.InteractionCallback, action *slack.BlockAction) error {
+			return svc.onRebuild(callback, action)
+		}),
 	}
 
-	bot.actionID = actionID{
-		createMenu:  router.GetActionID("create_menu", bot.onCreateMenu),
-		setCategory: router.GetActionID("set_category", bot.onSetCategory),
-		rebuild:     router.GetActionID("rebuild", bot.onRebuild),
-	}
-
-	router.Error = func(w http.ResponseWriter, r *http.Request, err error) {
-		bot.client.PostMessage(cookingChannelID, slack.MsgOptionText(fmt.Sprintf("⚠️ %v", err.Error()), true))
-	}
-	router.Message = bot.onCallbackMessage
-
-	return router
+	return svc
 }
 
-func (b *Service) onCallbackMessage(req *http.Request, event *slackevents.MessageEvent) error {
+func (b *Service) OnError(w http.ResponseWriter, r *http.Request, err error) {
+	b.client.PostMessage(cookingChannelID, slack.MsgOptionText(fmt.Sprintf("⚠️ %v", err.Error()), true))
+}
+
+func (b *Service) OnCallbackMessage(req *http.Request, event *slackevents.MessageEvent) error {
 	if req.Header.Get("X-Slack-Retry-Num") != "" {
 		return nil // リトライは無視
 	} else if event.User == botMemberID {
@@ -235,7 +234,7 @@ func (b *Service) getRecipeBlocks_CategoryBlock(pageID string, categories []stri
 	selectBlock := slack.NewOptionsSelectBlockElement(
 		slack.OptTypeStatic,
 		slack.NewTextBlockObject(slack.PlainTextType, "分類", true, false),
-		b.actionID.setCategory,
+		b.actionSetCategory,
 		catOptions...,
 	)
 	selectBlock.InitialOption = initialOption
@@ -252,7 +251,7 @@ func (b *Service) getRecipeBlocks_MenuBlock(pageID string) slack.Block {
 		slack.NewTextBlockObject(slack.MarkdownType, "<https://www.notion.so/80cf0a5ec25c4b7489f00594362f6e3b|🍽️献立表>に追加する", false, false),
 		nil,
 		slack.NewAccessory(slack.NewButtonBlockElement(
-			b.actionID.createMenu,
+			b.actionCreateMenu,
 			pageID,
 			slack.NewTextBlockObject(slack.PlainTextType, "献立表に追加", true, false),
 		)),
@@ -264,7 +263,7 @@ func (b *Service) getRecipeBlocks_RebuildBlock(pageID string) slack.Block {
 		slack.NewTextBlockObject(slack.MarkdownType, "再取得して作り直す", false, false),
 		nil,
 		slack.NewAccessory(slack.NewButtonBlockElement(
-			b.actionID.rebuild,
+			b.actionRebuild,
 			pageID,
 			slack.NewTextBlockObject(slack.PlainTextType, "作り直す", true, false),
 		)),
