@@ -3,7 +3,7 @@ package recipebot
 import (
 	"os"
 
-	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
+	_ "github.com/GoogleCloudPlatform/functions-framework-go/functions"
 	"github.com/psyark/notionapi"
 	slackservice "github.com/psyark/recipebot/service/slack"
 	"github.com/psyark/slackbot"
@@ -30,10 +30,9 @@ func init() {
 		registry,
 	)
 
-	opt := &slackbot.GetHandlerOption{
+	slackbot.RegisterHandler_WillNotWork("main", &slackbot.GetHandlerOption{
 		Registry: registry,
 		Message:  slacksvc.OnCallbackMessage,
 		Error:    slacksvc.OnError,
-	}
-	functions.HTTP("main", slackbot.GetHandler(opt))
+	})
 }

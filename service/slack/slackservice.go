@@ -45,6 +45,7 @@ func (b *Service) OnError(args *slackbot.ErrorHandlerArgs) {
 }
 
 func (b *Service) OnCallbackMessage(args *slackbot.MessageHandlerArgs) error {
+	ctx := context.Background()
 	event := args.MessageEvent
 
 	if args.Request.Header.Get("X-Slack-Retry-Num") != "" {
@@ -55,15 +56,14 @@ func (b *Service) OnCallbackMessage(args *slackbot.MessageHandlerArgs) error {
 		return nil // テキストが空のメッセージ（URLプレビュー削除とかで送られてくるっぽい？）は無視
 	}
 
-	ctx := context.Background()
-	ref := slack.NewRefToMessage(event.Channel, event.TimeStamp)
 	if url := xurls.Strict.FindString(event.Text); url != "" {
 		if strings.Contains(url, "|") {
 			url = strings.Split(url, "|")[0]
 		}
 
-		if err := b.client.AddReaction("thumbsup", ref); err != nil {
-			return fmt.Errorf("addReaction: %w", err)
+		_, timestamp, err := b.client.PostMessage(event.Channel, slack.MsgOptionText(":hourglass_flowing_sand:", false))
+		if err != nil {
+			return err
 		}
 
 		page, err := b.autoUpdateRecipePage(ctx, url)
@@ -71,16 +71,12 @@ func (b *Service) OnCallbackMessage(args *slackbot.MessageHandlerArgs) error {
 			return fmt.Errorf("autoUpdateRecipePage: %w", err)
 		}
 
-		if err := b.PostRecipeBlocks(ctx, event.Channel, page.ID); err != nil {
+		if err := b.UpdateRecipeBlocks(ctx, event.Channel, timestamp, page.ID); err != nil {
 			return fmt.Errorf("postRecipeBlocks: %w", err)
 		}
-		return nil
-	} else {
-		if err := b.client.AddReaction("thinking_face", ref); err != nil {
-			return fmt.Errorf("addReaction(channel=%v, ts=%v, text=%v) = %w", event.Channel, event.TimeStamp, event.Text, err)
-		}
-		return nil
 	}
+
+	return nil
 }
 
 // Deprecated:
@@ -99,19 +95,19 @@ func (b *Service) autoUpdateRecipePage(ctx context.Context, recipeURL string) (*
 	return b.notionService.CreateRecipe(ctx, recipeURL)
 }
 
-func (s *Service) PostRecipeBlocks(ctx context.Context, channelID string, pageID string) error {
-	blocks, err := s.getRecipeBlocks(ctx, pageID)
-	if err != nil {
-		return fmt.Errorf("getRecipeBlocks: %w", err)
-	}
+// func (s *Service) PostRecipeBlocks(ctx context.Context, channelID string, pageID string) error {
+// 	blocks, err := s.getRecipeBlocks(ctx, pageID)
+// 	if err != nil {
+// 		return fmt.Errorf("getRecipeBlocks: %w", err)
+// 	}
 
-	_, _, err = s.client.PostMessage(channelID, slack.MsgOptionBlocks(blocks...))
-	if err != nil {
-		return fmt.Errorf("postMessage: %w", err)
-	}
+// 	_, _, err = s.client.PostMessage(channelID, slack.MsgOptionBlocks(blocks...))
+// 	if err != nil {
+// 		return fmt.Errorf("postMessage: %w", err)
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
 func (s *Service) UpdateRecipeBlocks(ctx context.Context, channelID string, timestamp string, pageID string) error {
 	blocks, err := s.getRecipeBlocks(ctx, pageID)
