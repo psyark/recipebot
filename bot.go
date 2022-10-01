@@ -30,7 +30,7 @@ func init() {
 		registry,
 	)
 
-	slackbot.RegisterHandler_WillNotWork("main", &slackbot.GetHandlerOption{
+	slackbot.RegisterHandler("main", &slackbot.GetHandlerOption{
 		Registry: registry,
 		Message:  slacksvc.OnCallbackMessage,
 		Error:    slacksvc.OnError,
