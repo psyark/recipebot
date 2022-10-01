@@ -8,6 +8,7 @@ import (
 	"github.com/psyark/recipebot/sites/dancyu"
 	"github.com/psyark/recipebot/sites/delishkitchen"
 	"github.com/psyark/recipebot/sites/foodie"
+	"github.com/psyark/recipebot/sites/jsonld"
 	"github.com/psyark/recipebot/sites/kikkoman"
 	"github.com/psyark/recipebot/sites/kurashiru"
 	"github.com/psyark/recipebot/sites/lettuceclub"
@@ -31,4 +32,5 @@ var Parsers = sites.Parsers{
 	nadia.NewParser(),
 	sbfoods.NewParser(),
 	sirogohan.NewParser(),
+	jsonld.NewParser(),
 }
