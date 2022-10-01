@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"strings"
 
 	"github.com/mvdan/xurls"
@@ -12,7 +11,6 @@ import (
 	"github.com/psyark/recipebot/service/notion"
 	"github.com/psyark/slackbot"
 	"github.com/slack-go/slack"
-	"github.com/slack-go/slack/slackevents"
 )
 
 const (
@@ -30,32 +28,34 @@ type Service struct {
 	actionRebuild     string
 }
 
-func New(slackClient *slack.Client, notionClient *notionapi.Client, registry *slackbot.HandlerRegistry) *Service {
+func New(slackClient *slack.Client, notionClient *notionapi.Client, registry *slackbot.Registry) *Service {
 	var svc *Service
 	svc = &Service{
 		notionService: notion.New(notionClient),
 		client:        slackClient,
 
-		actionCreateMenu: registry.GetActionID("create_menu", func(callback *slack.InteractionCallback, action *slack.BlockAction) error {
-			return svc.onCreateMenu(callback, action)
+		actionCreateMenu: registry.GetActionID("create_menu", func(args *slackbot.BlockActionHandlerArgs) error {
+			return svc.onCreateMenu(args.InteractionCallback, args.BlockAction)
 		}),
-		actionSetCategory: registry.GetActionID("set_category", func(callback *slack.InteractionCallback, action *slack.BlockAction) error {
-			return svc.onSetCategory(callback, action)
+		actionSetCategory: registry.GetActionID("set_category", func(args *slackbot.BlockActionHandlerArgs) error {
+			return svc.onSetCategory(args.InteractionCallback, args.BlockAction)
 		}),
-		actionRebuild: registry.GetActionID("rebuild", func(callback *slack.InteractionCallback, action *slack.BlockAction) error {
-			return svc.onRebuild(callback, action)
+		actionRebuild: registry.GetActionID("rebuild", func(args *slackbot.BlockActionHandlerArgs) error {
+			return svc.onRebuild(args.InteractionCallback, args.BlockAction)
 		}),
 	}
 
 	return svc
 }
 
-func (b *Service) OnError(w http.ResponseWriter, r *http.Request, err error) {
-	b.client.PostMessage(cookingChannelID, slack.MsgOptionText(fmt.Sprintf("⚠️ %v", err.Error()), true))
+func (b *Service) OnError(args *slackbot.ErrorHandlerArgs) {
+	b.client.PostMessage(cookingChannelID, slack.MsgOptionText(fmt.Sprintf("⚠️ %v", args.Err.Error()), true))
 }
 
-func (b *Service) OnCallbackMessage(req *http.Request, event *slackevents.MessageEvent) error {
-	if req.Header.Get("X-Slack-Retry-Num") != "" {
+func (b *Service) OnCallbackMessage(args *slackbot.MessageHandlerArgs) error {
+	event := args.MessageEvent
+
+	if args.Request.Header.Get("X-Slack-Retry-Num") != "" {
 		return nil // リトライは無視
 	} else if event.User == botMemberID {
 		return nil // 自分のメッセージは無視
