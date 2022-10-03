@@ -243,12 +243,14 @@ func (b *Service) getRecipeBlocks(ctx context.Context, pageID string) ([]slack.B
 			nil,
 			thumbnail,
 		),
-		slack.NewDividerBlock(),
-		slack.NewSectionBlock(slack.NewTextBlockObject(slack.MarkdownType, "*このレシピの操作*", false, false), nil, nil),
 		// b.getRecipeBlocks_CategoryBlock(pageID, categories, category),
 		// b.getRecipeBlocks_MenuBlock(pageID),
-		b.getRecipeBlocks_RebuildBlock(pageID),
-		b.getRecipeBlocks_UpdateIngredientBlock(pageID),
+
+		slack.NewActionBlock(
+			"", // ブロックID未設定
+			slack.NewButtonBlockElement(b.actionRebuild, pageID, slack.NewTextBlockObject(slack.PlainTextType, "レシピを再取得", false, false)),
+			slack.NewButtonBlockElement(b.actionUpdateIngredients, pageID, slack.NewTextBlockObject(slack.PlainTextType, "主な材料を更新", false, false)),
+		),
 	}, nil
 }
 
@@ -288,23 +290,3 @@ func (b *Service) getRecipeBlocks(ctx context.Context, pageID string) ([]slack.B
 // 		pageID,
 // 	)
 // }
-
-func (b *Service) getRecipeBlocks_RebuildBlock(pageID string) slack.Block {
-	return b.getRecipeBlocks_ButtonBlock("再取得して作り直す", "作り直す", b.actionRebuild, pageID)
-}
-
-func (b *Service) getRecipeBlocks_UpdateIngredientBlock(pageID string) slack.Block {
-	return b.getRecipeBlocks_ButtonBlock("主な材料を自動更新", "材料を更新", b.actionUpdateIngredients, pageID)
-}
-
-func (b *Service) getRecipeBlocks_ButtonBlock(sectionText string, buttonLabel string, actionId string, buttonValue string) slack.Block {
-	return slack.NewSectionBlock(
-		slack.NewTextBlockObject(slack.MarkdownType, sectionText, false, false),
-		nil,
-		slack.NewAccessory(slack.NewButtonBlockElement(
-			actionId,
-			buttonValue,
-			slack.NewTextBlockObject(slack.PlainTextType, buttonLabel, true, false),
-		)),
-	)
-}
