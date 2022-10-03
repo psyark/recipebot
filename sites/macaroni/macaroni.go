@@ -40,11 +40,14 @@ func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) 
 			rcp.Image = tmp.Image[0]
 			for _, idg := range tmp.RecipeIngredient {
 				parts := strings.Split(idg, " ")
+
+				group := ""
 				if len(parts) == 3 {
-					rcp.AddIngredient(parts[0], recipe.Ingredient{Name: parts[1], Amount: parts[2]})
-				} else {
-					rcp.AddIngredient("", recipe.Ingredient{Name: parts[0], Amount: parts[1]})
+					group = parts[0]
+					parts = parts[1:]
 				}
+
+				rcp.AddIngredient(group, recipe.GetIngredient(parts[0], parts[1]))
 			}
 			for _, ins := range tmp.RecipeInstructions {
 				step := recipe.Step{Text: ins.Text}

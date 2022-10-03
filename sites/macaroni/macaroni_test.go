@@ -177,9 +177,9 @@ func ExampleParser_a() {
 	//           "Comment": ""
 	//         },
 	//         {
-	//           "Name": "豚バラ肉（薄切り）",
+	//           "Name": "豚バラ肉",
 	//           "Amount": "200g",
-	//           "Comment": ""
+	//           "Comment": "薄切り"
 	//         },
 	//         {
 	//           "Name": "大葉",
@@ -377,6 +377,100 @@ func ExampleParser_r35774() {
 	//         "https://cdn.macaro-ni.jp/image/summary/35/35774/58a32da160ee9b7f1b5d66241874a551.jpg?p=medium",
 	//         "https://cdn.macaro-ni.jp/image/summary/35/35774/9590d4298b5153378bebb6584810ea9c.jpg?p=medium"
 	//       ]
+	//     }
+	//   ]
+	// }
+}
+
+func ExampleParser_r45500() {
+	ctx := context.Background()
+	rcp, err := NewParser().Parse(ctx, "https://macaro-ni.jp/45500")
+	if err != nil {
+		panic(err)
+	}
+	data, _ := json.MarshalIndent(rcp, "", "  ")
+	fmt.Println(string(data))
+	// output:
+	// {
+	//   "Title": "ごはん無限レベル！豚肉とれんこんの甘辛炒め【作り置き】",
+	//   "Image": "https://cdn.macaro-ni.jp/image/summary/45/45500/7d761cc229abdcb5088e77942c7bc1ed.jpg?p=1x1",
+	//   "IngredientGroups": [
+	//     {
+	//       "Name": "",
+	//       "Children": [
+	//         {
+	//           "Name": "豚こま切れ肉",
+	//           "Amount": "300g",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "れんこん",
+	//           "Amount": "200g",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "片栗粉",
+	//           "Amount": "大さじ2杯",
+	//           "Comment": "豚肉用"
+	//         },
+	//         {
+	//           "Name": "片栗粉",
+	//           "Amount": "大さじ2杯",
+	//           "Comment": "れんこん用"
+	//         },
+	//         {
+	//           "Name": "塩こしょう",
+	//           "Amount": "少々",
+	//           "Comment": "豚肉下味用"
+	//         },
+	//         {
+	//           "Name": "サラダ油",
+	//           "Amount": "適量",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "☆砂糖",
+	//           "Amount": "大さじ3杯",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "☆しょうゆ",
+	//           "Amount": "大さじ3杯",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "☆酢",
+	//           "Amount": "大さじ3杯",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "白ごま",
+	//           "Amount": "適量",
+	//           "Comment": ""
+	//         }
+	//       ]
+	//     }
+	//   ],
+	//   "Steps": [
+	//     {
+	//       "Text": "豚こま切れ肉とれんこんに片栗粉を大さじ2杯ずつまぶします。",
+	//       "Images": null
+	//     },
+	//     {
+	//       "Text": "フライパンにサラダ油を深さ3cm入れて170℃に熱し、れんこんを揚げ焼きにします。まぶした片栗粉がカリっとしてきたら油から上げます。",
+	//       "Images": null
+	//     },
+	//     {
+	//       "Text": "次に豚こま切れ肉を入れて揚げ焼きにし、カリカリになったら油を切って上げます。",
+	//       "Images": null
+	//     },
+	//     {
+	//       "Text": "フライパンの油をふき取り☆の調味料を入れてひと煮立ちさせます。とろみがついたら②のれんこんと③の豚こま切れ肉を加えて絡めます。",
+	//       "Images": null
+	//     },
+	//     {
+	//       "Text": "保存容器に入れ、お好みで白ごまを振って完成です！保存期間は冷蔵5日間です♪",
+	//       "Images": null
 	//     }
 	//   ]
 	// }
