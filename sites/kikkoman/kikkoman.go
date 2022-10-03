@@ -13,8 +13,10 @@ import (
 type parser struct{}
 
 var debrandMap = map[string]string{
-	"キッコーマン特選丸大豆しょうゆ": "醤油",
-	"マンジョウ濃厚熟成本みりん":   "みりん",
+	"キッコーマン特選丸大豆しょうゆ":        "醤油",
+	"キッコーマンいつでも新鮮しぼりたて生しょうゆ": "醤油",
+	"マンジョウ濃厚熟成本みりん":          "みりん",
+	"マンジョウ国産米こだわり仕込み料理の清酒":   "料理酒",
 }
 
 func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) {
