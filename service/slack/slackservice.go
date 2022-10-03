@@ -2,6 +2,7 @@ package slack
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"sort"
 	"strings"
@@ -13,10 +14,15 @@ import (
 	"github.com/slack-go/slack"
 )
 
+type ofType string
+
 const (
 	// botChannelID     = "D03SNU2C80H"
 	botMemberID      = "U03SCN7MYEQ"
 	cookingChannelID = "C03SNSP9HNV" // #料理 チャンネル
+
+	ofTypeRebuildRecipe     = ofType("rebuildRecipe")
+	ofTypeUpdateIngredients = ofType("updateIngredients")
 )
 
 type Service struct {
@@ -25,8 +31,9 @@ type Service struct {
 
 	// actionSetCategory       string
 	// actionCreateMenu        string
-	actionRebuild           string
-	actionUpdateIngredients string
+	// actionRebuild           string
+	// actionUpdateIngredients string
+	actionOverflow string
 }
 
 func New(slackClient *slack.Client, notionClient *notionapi.Client, registry *slackbot.Registry) *Service {
@@ -36,8 +43,9 @@ func New(slackClient *slack.Client, notionClient *notionapi.Client, registry *sl
 		client: slackClient,
 		// actionSetCategory:       registry.GetActionID("set_category", func(args *slackbot.BlockActionHandlerArgs) error { return svc.onSetCategory(args) }),
 		// actionCreateMenu:        registry.GetActionID("create_menu", func(args *slackbot.BlockActionHandlerArgs) error { return svc.onCreateMenu(args) }),
-		actionRebuild:           registry.GetActionID("rebuild", func(args *slackbot.BlockActionHandlerArgs) error { return svc.onRebuild(args) }),
-		actionUpdateIngredients: registry.GetActionID("update_ingredients", func(args *slackbot.BlockActionHandlerArgs) error { return svc.onUpdateIngredients(args) }),
+		// actionRebuild:           registry.GetActionID("rebuild", func(args *slackbot.BlockActionHandlerArgs) error { return svc.onRebuild(args) }),
+		// actionUpdateIngredients: registry.GetActionID("update_ingredients", func(args *slackbot.BlockActionHandlerArgs) error { return svc.onUpdateIngredients(args) }),
+		actionOverflow: registry.GetActionID("overflow", func(args *slackbot.BlockActionHandlerArgs) error { return svc.onOverflow(args) }),
 	}
 	return svc
 }
@@ -148,49 +156,57 @@ func (s *Service) UpdateRecipeBlocks(ctx context.Context, channelID string, time
 // 	return b.UpdateRecipeBlocks(ctx, callback.Channel.ID, callback.Message.Timestamp, pair[0])
 // }
 
-func (b *Service) onRebuild(args *slackbot.BlockActionHandlerArgs) error {
+func (s *Service) onOverflow(args *slackbot.BlockActionHandlerArgs) error {
 	ctx := context.Background()
-	return b.notion.UpdateRecipe(ctx, args.BlockAction.Value)
-}
 
-func (b *Service) onUpdateIngredients(args *slackbot.BlockActionHandlerArgs) error {
-	ctx := context.Background()
-	stockMap, err := b.notion.GetStockMap(ctx)
-	if err != nil {
+	ofArgs := OverflowArgs{}
+	if err := json.Unmarshal([]byte(args.BlockAction.SelectedOption.Value), &ofArgs); err != nil {
 		return err
 	}
 
-	result, err := b.notion.UpdateRecipeIngredients(ctx, args.BlockAction.Value, stockMap)
-	if err != nil {
-		return err
-	}
+	switch ofArgs.Type {
+	case ofTypeRebuildRecipe:
+		return s.notion.UpdateRecipe(ctx, ofArgs.PageID)
 
-	foundItems := []string{}
-	notFoundItems := []string{}
-	for name, found := range result {
-		if found {
-			foundItems = append(foundItems, name)
-		} else {
-			notFoundItems = append(notFoundItems, name)
-		}
-	}
-
-	if len(foundItems) != 0 {
-		sort.Strings(foundItems)
-		_, _, err := b.client.PostMessage(args.InteractionCallback.Channel.ID, slack.MsgOptionText(fmt.Sprintf("材料を設定しました: %v", foundItems), true))
+	case ofTypeUpdateIngredients:
+		stockMap, err := s.notion.GetStockMap(ctx)
 		if err != nil {
 			return err
 		}
-	}
-	if len(notFoundItems) != 0 {
-		sort.Strings(notFoundItems)
-		_, _, err := b.client.PostMessage(args.InteractionCallback.Channel.ID, slack.MsgOptionText(fmt.Sprintf("材料が見つかりませんでした: %v", notFoundItems), true))
+
+		result, err := s.notion.UpdateRecipeIngredients(ctx, ofArgs.PageID, stockMap)
 		if err != nil {
 			return err
 		}
-	}
 
-	return nil
+		foundItems := []string{}
+		notFoundItems := []string{}
+		for name, found := range result {
+			if found {
+				foundItems = append(foundItems, name)
+			} else {
+				notFoundItems = append(notFoundItems, name)
+			}
+		}
+
+		if len(foundItems) != 0 {
+			sort.Strings(foundItems)
+			_, _, err := s.client.PostMessage(args.InteractionCallback.Channel.ID, slack.MsgOptionText(fmt.Sprintf("材料を設定しました: %v", foundItems), true))
+			if err != nil {
+				return err
+			}
+		}
+		if len(notFoundItems) != 0 {
+			sort.Strings(notFoundItems)
+			_, _, err := s.client.PostMessage(args.InteractionCallback.Channel.ID, slack.MsgOptionText(fmt.Sprintf("材料が見つかりませんでした: %v", notFoundItems), true))
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	default:
+		return fmt.Errorf("unknown ofType: %v", ofArgs.Type)
+	}
 }
 
 func (b *Service) getRecipeBlocks(ctx context.Context, pageID string) ([]slack.Block, error) {
@@ -243,50 +259,29 @@ func (b *Service) getRecipeBlocks(ctx context.Context, pageID string) ([]slack.B
 			nil,
 			thumbnail,
 		),
-		// b.getRecipeBlocks_CategoryBlock(pageID, categories, category),
-		// b.getRecipeBlocks_MenuBlock(pageID),
-
-		slack.NewActionBlock(
-			"", // ブロックID未設定
-			slack.NewButtonBlockElement(b.actionRebuild, pageID, slack.NewTextBlockObject(slack.PlainTextType, "レシピを再取得", false, false)),
-			slack.NewButtonBlockElement(b.actionUpdateIngredients, pageID, slack.NewTextBlockObject(slack.PlainTextType, "主な材料を更新", false, false)),
+		slack.NewSectionBlock(
+			slack.NewTextBlockObject(slack.MarkdownType, "*このレシピの操作*", false, false),
+			nil,
+			slack.NewAccessory(slack.NewOverflowBlockElement(
+				b.actionOverflow,
+				slack.NewOptionBlockObject(OverflowArgs{ofTypeRebuildRecipe, pageID}.String(), slack.NewTextBlockObject(slack.PlainTextType, "レシピを再取得", false, false), nil),
+				slack.NewOptionBlockObject(OverflowArgs{ofTypeUpdateIngredients, pageID}.String(), slack.NewTextBlockObject(slack.PlainTextType, "主な材料を更新", false, false), nil),
+			)),
 		),
+		// slack.NewActionBlock(
+		// 	"", // ブロックID未設定
+		// 	slack.NewButtonBlockElement(b.actionRebuild, pageID, slack.NewTextBlockObject(slack.PlainTextType, "レシピを再取得", false, false)),
+		// 	slack.NewButtonBlockElement(b.actionUpdateIngredients, pageID, slack.NewTextBlockObject(slack.PlainTextType, "主な材料を更新", false, false)),
+		// ),
 	}, nil
 }
 
-// func (b *Service) getRecipeBlocks_CategoryBlock(pageID string, categories []string, category string) slack.Block {
-// 	var catOptions []*slack.OptionBlockObject
-// 	var initialOption *slack.OptionBlockObject
+type OverflowArgs struct {
+	Type   ofType `json:"type"`
+	PageID string `json:"page_id"`
+}
 
-// 	for _, c := range categories {
-// 		val, _ := json.Marshal([]string{pageID, c})
-// 		opt := slack.NewOptionBlockObject(string(val), slack.NewTextBlockObject(slack.PlainTextType, c, true, false), nil)
-// 		catOptions = append(catOptions, opt)
-// 		if c == category {
-// 			initialOption = opt
-// 		}
-// 	}
-
-// 	selectBlock := slack.NewOptionsSelectBlockElement(
-// 		slack.OptTypeStatic,
-// 		slack.NewTextBlockObject(slack.PlainTextType, "分類", true, false),
-// 		b.actionSetCategory,
-// 		catOptions...,
-// 	)
-// 	selectBlock.InitialOption = initialOption
-
-// 	return slack.NewSectionBlock(
-// 		slack.NewTextBlockObject(slack.MarkdownType, "分類を設定する", false, false),
-// 		nil,
-// 		slack.NewAccessory(selectBlock),
-// 	)
-// }
-
-// func (b *Service) getRecipeBlocks_MenuBlock(pageID string) slack.Block {
-// 	return b.getRecipeBlocks_ButtonBlock(
-// 		"<https://www.notion.so/80cf0a5ec25c4b7489f00594362f6e3b|🍽️献立表>に追加する",
-// 		"献立表に追加",
-// 		b.actionCreateMenu,
-// 		pageID,
-// 	)
-// }
+func (a OverflowArgs) String() string {
+	data, _ := json.Marshal(a)
+	return string(data)
+}
