@@ -38,13 +38,13 @@ func init() {
 // 	fmt.Printf("%v件のストック\n", len(stockMap))
 
 // 	opt := &notionapi.QueryDatabaseOptions{
-// 		Filter: notionapi.CompoundFilter{
+// 		Filter: &notionapi.CompoundFilter{
 // 			And: []notionapi.Filter{
-// 				notionapi.PropertyFilter{
+// 				&notionapi.PropertyFilter{
 // 					Property: recipe_ingredients,
 // 					Relation: &notionapi.RelationFilterCondition{IsEmpty: true},
 // 				},
-// 				notionapi.PropertyFilter{
+// 				&notionapi.PropertyFilter{
 // 					Property: recipe_original,
 // 					URL:      &notionapi.TextFilterCondition{IsNotEmpty: true},
 // 				},
@@ -74,7 +74,7 @@ func init() {
 
 // 			rcp, err := united.Parsers.Parse(ctx, pi.URL)
 // 			if errors.Is(err, sites.ErrUnsupportedURL) {
-// 				fmt.Printf("%2d, unsupported: %v\n", i, pi.URL)
+// 				// fmt.Printf("%2d, unsupported: %v\n", i, pi.URL)
 // 				return nil
 // 			} else if err != nil {
 // 				return fmt.Errorf("%v: %w", pi.URL, err)
@@ -101,20 +101,20 @@ func init() {
 // 			}
 
 // 			if len(stockRelation) != 0 {
-// 				opt := &notionapi.UpdatePageOptions{
-// 					Properties: map[string]notionapi.PropertyValue{
-// 						recipe_ingredients: {Type: "relation", Relation: stockRelation},
-// 					},
-// 				}
-// 				if _, err := client.UpdatePage(ctx, recipePage.ID, opt); err != nil {
-// 					return err
-// 				}
+// 				// opt := &notionapi.UpdatePageOptions{
+// 				// 	Properties: map[string]notionapi.PropertyValue{
+// 				// 		recipe_ingredients: {Type: "relation", Relation: stockRelation},
+// 				// 	},
+// 				// }
+// 				// if _, err := client.UpdatePage(ctx, recipePage.ID, opt); err != nil {
+// 				// 	return err
+// 				// }
 
 // 				fmt.Printf("%2d %v %v の材料 %v を設定しました (%v は見つかりませんでした）\n", i, recipePage.URL, title, stockFound, stockNotFound)
 // 			} else if len(stockNotFound) != 0 {
-// 				fmt.Printf("%2d %v %v の材料は一つも見つかりませんでした (%v）\n", i, recipePage.URL, title, stockNotFound)
+// 				// fmt.Printf("%2d %v %v の材料は一つも見つかりませんでした (%v）\n", i, recipePage.URL, title, stockNotFound)
 // 			} else {
-// 				fmt.Printf("%2d %v %v の材料は設定されていません\n", i, recipePage.URL, title)
+// 				// fmt.Printf("%2d %v %v の材料は設定されていません\n", i, recipePage.URL, title)
 // 			}
 
 // 			return nil

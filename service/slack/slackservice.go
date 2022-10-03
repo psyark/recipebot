@@ -2,8 +2,8 @@ package slack
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/mvdan/xurls"
@@ -20,22 +20,24 @@ const (
 )
 
 type Service struct {
-	notionService *notion.Service
-	client        *slack.Client
+	notion *notion.Service
+	client *slack.Client
 
-	actionSetCategory string
-	actionCreateMenu  string
-	actionRebuild     string
+	// actionSetCategory       string
+	// actionCreateMenu        string
+	actionRebuild           string
+	actionUpdateIngredients string
 }
 
 func New(slackClient *slack.Client, notionClient *notionapi.Client, registry *slackbot.Registry) *Service {
 	var svc *Service
 	svc = &Service{
-		notionService:     notion.New(notionClient),
-		client:            slackClient,
-		actionCreateMenu:  registry.GetActionID("create_menu", func(args *slackbot.BlockActionHandlerArgs) error { return svc.onCreateMenu(args) }),
-		actionSetCategory: registry.GetActionID("set_category", func(args *slackbot.BlockActionHandlerArgs) error { return svc.onSetCategory(args) }),
-		actionRebuild:     registry.GetActionID("rebuild", func(args *slackbot.BlockActionHandlerArgs) error { return svc.onRebuild(args) }),
+		notion: notion.New(notionClient),
+		client: slackClient,
+		// actionSetCategory:       registry.GetActionID("set_category", func(args *slackbot.BlockActionHandlerArgs) error { return svc.onSetCategory(args) }),
+		// actionCreateMenu:        registry.GetActionID("create_menu", func(args *slackbot.BlockActionHandlerArgs) error { return svc.onCreateMenu(args) }),
+		actionRebuild:           registry.GetActionID("rebuild", func(args *slackbot.BlockActionHandlerArgs) error { return svc.onRebuild(args) }),
+		actionUpdateIngredients: registry.GetActionID("update_ingredients", func(args *slackbot.BlockActionHandlerArgs) error { return svc.onUpdateIngredients(args) }),
 	}
 	return svc
 }
@@ -82,7 +84,7 @@ func (b *Service) OnCallbackMessage(args *slackbot.MessageHandlerArgs) error {
 // Deprecated:
 func (b *Service) autoUpdateRecipePage(ctx context.Context, recipeURL string) (*notionapi.Page, error) {
 	// レシピページを取得
-	page, err := b.notionService.GetRecipeByURL(ctx, recipeURL)
+	page, err := b.notion.GetRecipeByURL(ctx, recipeURL)
 	if err != nil {
 		return nil, fmt.Errorf("Bot.GetRecipeByURL: %w", err)
 	}
@@ -92,7 +94,7 @@ func (b *Service) autoUpdateRecipePage(ctx context.Context, recipeURL string) (*
 	}
 
 	// レシピページがなければ作成
-	return b.notionService.CreateRecipe(ctx, recipeURL)
+	return b.notion.CreateRecipe(ctx, recipeURL)
 }
 
 // func (s *Service) PostRecipeBlocks(ctx context.Context, channelID string, pageID string) error {
@@ -123,32 +125,72 @@ func (s *Service) UpdateRecipeBlocks(ctx context.Context, channelID string, time
 	return nil
 }
 
-func (b *Service) onCreateMenu(args *slackbot.BlockActionHandlerArgs) error {
-	opt := slack.MsgOptionText(fmt.Sprintf("未実装: %v", args.BlockAction.Value), true)
-	_, _, err := b.client.PostMessage(args.InteractionCallback.Channel.ID, opt)
-	return err
-}
+// func (b *Service) onCreateMenu(args *slackbot.BlockActionHandlerArgs) error {
+// 	opt := slack.MsgOptionText(fmt.Sprintf("未実装: %v", args.BlockAction.Value), true)
+// 	_, _, err := b.client.PostMessage(args.InteractionCallback.Channel.ID, opt)
+// 	return err
+// }
 
-func (b *Service) onSetCategory(args *slackbot.BlockActionHandlerArgs) error {
-	ctx := context.Background()
-	callback := args.InteractionCallback
-	action := args.BlockAction
+// func (b *Service) onSetCategory(args *slackbot.BlockActionHandlerArgs) error {
+// 	ctx := context.Background()
+// 	callback := args.InteractionCallback
+// 	action := args.BlockAction
 
-	pair := [2]string{}
-	if err := json.Unmarshal([]byte(action.SelectedOption.Value), &pair); err != nil {
-		return fmt.Errorf("json.Unmarshal: %w", err)
-	}
+// 	pair := [2]string{}
+// 	if err := json.Unmarshal([]byte(action.SelectedOption.Value), &pair); err != nil {
+// 		return fmt.Errorf("json.Unmarshal: %w", err)
+// 	}
 
-	if err := b.notionService.SetRecipeCategory(ctx, pair[0], pair[1]); err != nil {
-		return fmt.Errorf("Bot.SetRecipeCategory: %w", err)
-	}
+// 	if err := b.notionService.SetRecipeCategory(ctx, pair[0], pair[1]); err != nil {
+// 		return fmt.Errorf("Bot.SetRecipeCategory: %w", err)
+// 	}
 
-	return b.UpdateRecipeBlocks(ctx, callback.Channel.ID, callback.Message.Timestamp, pair[0])
-}
+// 	return b.UpdateRecipeBlocks(ctx, callback.Channel.ID, callback.Message.Timestamp, pair[0])
+// }
 
 func (b *Service) onRebuild(args *slackbot.BlockActionHandlerArgs) error {
 	ctx := context.Background()
-	return b.notionService.UpdateRecipe(ctx, args.BlockAction.Value)
+	return b.notion.UpdateRecipe(ctx, args.BlockAction.Value)
+}
+
+func (b *Service) onUpdateIngredients(args *slackbot.BlockActionHandlerArgs) error {
+	ctx := context.Background()
+	stockMap, err := b.notion.GetStockMap(ctx)
+	if err != nil {
+		return err
+	}
+
+	result, err := b.notion.UpdateRecipeIngredients(ctx, args.BlockAction.Value, stockMap)
+	if err != nil {
+		return err
+	}
+
+	foundItems := []string{}
+	notFoundItems := []string{}
+	for name, found := range result {
+		if found {
+			foundItems = append(foundItems, name)
+		} else {
+			notFoundItems = append(notFoundItems, name)
+		}
+	}
+
+	if len(foundItems) != 0 {
+		sort.Strings(foundItems)
+		_, _, err := b.client.PostMessage(args.InteractionCallback.Channel.ID, slack.MsgOptionText(fmt.Sprintf("材料を設定しました: %v", foundItems), true))
+		if err != nil {
+			return err
+		}
+	}
+	if len(notFoundItems) != 0 {
+		sort.Strings(notFoundItems)
+		_, _, err := b.client.PostMessage(args.InteractionCallback.Channel.ID, slack.MsgOptionText(fmt.Sprintf("材料が見つかりませんでした: %v", notFoundItems), true))
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (b *Service) getRecipeBlocks(ctx context.Context, pageID string) ([]slack.Block, error) {
@@ -156,19 +198,19 @@ func (b *Service) getRecipeBlocks(ctx context.Context, pageID string) ([]slack.B
 	var thumbnail *slack.Accessory
 
 	// カテゴリーの選択肢の取得
-	categories, err := b.notionService.GetRecipeCategories(ctx)
-	if err != nil {
-		return nil, err
-	}
+	// categories, err := b.notionService.GetRecipeCategories(ctx)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	// 現在のカテゴリーの取得
-	category, err := b.notionService.GetRecipeCategory(ctx, pageID)
-	if err != nil {
-		return nil, err
-	}
+	// category, err := b.notionService.GetRecipeCategory(ctx, pageID)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	// タイトルの取得
-	pageTitle, err := b.notionService.GetRecipeTitle(ctx, pageID)
+	pageTitle, err := b.notion.GetRecipeTitle(ctx, pageID)
 	if err != nil {
 		return nil, err
 	}
@@ -177,7 +219,7 @@ func (b *Service) getRecipeBlocks(ctx context.Context, pageID string) ([]slack.B
 	}
 
 	// ページの取得
-	if page, err := b.notionService.RetrievePage(ctx, pageID); err != nil {
+	if page, err := b.notion.RetrievePage(ctx, pageID); err != nil {
 		return nil, err
 	} else {
 		pageURL = page.URL
@@ -203,60 +245,66 @@ func (b *Service) getRecipeBlocks(ctx context.Context, pageID string) ([]slack.B
 		),
 		slack.NewDividerBlock(),
 		slack.NewSectionBlock(slack.NewTextBlockObject(slack.MarkdownType, "*このレシピの操作*", false, false), nil, nil),
-		b.getRecipeBlocks_CategoryBlock(pageID, categories, category),
-		b.getRecipeBlocks_MenuBlock(pageID),
+		// b.getRecipeBlocks_CategoryBlock(pageID, categories, category),
+		// b.getRecipeBlocks_MenuBlock(pageID),
 		b.getRecipeBlocks_RebuildBlock(pageID),
+		b.getRecipeBlocks_UpdateIngredientBlock(pageID),
 	}, nil
 }
 
-func (b *Service) getRecipeBlocks_CategoryBlock(pageID string, categories []string, category string) slack.Block {
-	var catOptions []*slack.OptionBlockObject
-	var initialOption *slack.OptionBlockObject
+// func (b *Service) getRecipeBlocks_CategoryBlock(pageID string, categories []string, category string) slack.Block {
+// 	var catOptions []*slack.OptionBlockObject
+// 	var initialOption *slack.OptionBlockObject
 
-	for _, c := range categories {
-		val, _ := json.Marshal([]string{pageID, c})
-		opt := slack.NewOptionBlockObject(string(val), slack.NewTextBlockObject(slack.PlainTextType, c, true, false), nil)
-		catOptions = append(catOptions, opt)
-		if c == category {
-			initialOption = opt
-		}
-	}
+// 	for _, c := range categories {
+// 		val, _ := json.Marshal([]string{pageID, c})
+// 		opt := slack.NewOptionBlockObject(string(val), slack.NewTextBlockObject(slack.PlainTextType, c, true, false), nil)
+// 		catOptions = append(catOptions, opt)
+// 		if c == category {
+// 			initialOption = opt
+// 		}
+// 	}
 
-	selectBlock := slack.NewOptionsSelectBlockElement(
-		slack.OptTypeStatic,
-		slack.NewTextBlockObject(slack.PlainTextType, "分類", true, false),
-		b.actionSetCategory,
-		catOptions...,
-	)
-	selectBlock.InitialOption = initialOption
+// 	selectBlock := slack.NewOptionsSelectBlockElement(
+// 		slack.OptTypeStatic,
+// 		slack.NewTextBlockObject(slack.PlainTextType, "分類", true, false),
+// 		b.actionSetCategory,
+// 		catOptions...,
+// 	)
+// 	selectBlock.InitialOption = initialOption
 
-	return slack.NewSectionBlock(
-		slack.NewTextBlockObject(slack.MarkdownType, "分類を設定する", false, false),
-		nil,
-		slack.NewAccessory(selectBlock),
-	)
-}
+// 	return slack.NewSectionBlock(
+// 		slack.NewTextBlockObject(slack.MarkdownType, "分類を設定する", false, false),
+// 		nil,
+// 		slack.NewAccessory(selectBlock),
+// 	)
+// }
 
-func (b *Service) getRecipeBlocks_MenuBlock(pageID string) slack.Block {
-	return slack.NewSectionBlock(
-		slack.NewTextBlockObject(slack.MarkdownType, "<https://www.notion.so/80cf0a5ec25c4b7489f00594362f6e3b|🍽️献立表>に追加する", false, false),
-		nil,
-		slack.NewAccessory(slack.NewButtonBlockElement(
-			b.actionCreateMenu,
-			pageID,
-			slack.NewTextBlockObject(slack.PlainTextType, "献立表に追加", true, false),
-		)),
-	)
-}
+// func (b *Service) getRecipeBlocks_MenuBlock(pageID string) slack.Block {
+// 	return b.getRecipeBlocks_ButtonBlock(
+// 		"<https://www.notion.so/80cf0a5ec25c4b7489f00594362f6e3b|🍽️献立表>に追加する",
+// 		"献立表に追加",
+// 		b.actionCreateMenu,
+// 		pageID,
+// 	)
+// }
 
 func (b *Service) getRecipeBlocks_RebuildBlock(pageID string) slack.Block {
+	return b.getRecipeBlocks_ButtonBlock("再取得して作り直す", "作り直す", b.actionRebuild, pageID)
+}
+
+func (b *Service) getRecipeBlocks_UpdateIngredientBlock(pageID string) slack.Block {
+	return b.getRecipeBlocks_ButtonBlock("主な材料を自動更新", "材料を更新", b.actionUpdateIngredients, pageID)
+}
+
+func (b *Service) getRecipeBlocks_ButtonBlock(sectionText string, buttonLabel string, actionId string, buttonValue string) slack.Block {
 	return slack.NewSectionBlock(
-		slack.NewTextBlockObject(slack.MarkdownType, "再取得して作り直す", false, false),
+		slack.NewTextBlockObject(slack.MarkdownType, sectionText, false, false),
 		nil,
 		slack.NewAccessory(slack.NewButtonBlockElement(
-			b.actionRebuild,
-			pageID,
-			slack.NewTextBlockObject(slack.PlainTextType, "作り直す", true, false),
+			actionId,
+			buttonValue,
+			slack.NewTextBlockObject(slack.PlainTextType, buttonLabel, true, false),
 		)),
 	)
 }

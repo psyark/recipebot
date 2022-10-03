@@ -170,6 +170,42 @@ func (s *Service) UpdateRecipe(ctx context.Context, pageID string) error {
 	return s.updatePageContent(ctx, page.ID, rcp)
 }
 
+func (s *Service) UpdateRecipeIngredients(ctx context.Context, pageID string, stockMap map[string]string) (map[string]bool, error) {
+	piop, err := s.client.RetrievePagePropertyItem(ctx, pageID, recipe_original)
+	if err != nil {
+		return nil, err
+	}
+
+	rcp, err := united.Parsers.Parse(ctx, piop.(*notionapi.PropertyItem).URL)
+	if err != nil {
+		return nil, err
+	}
+
+	stockRelation := []notionapi.PageReference{}
+	found := map[string]bool{}
+	for _, g := range rcp.IngredientGroups {
+		for _, idg := range g.Children {
+			if id, ok := stockMap[idg.Name]; ok {
+				stockRelation = append(stockRelation, notionapi.PageReference{ID: id})
+				found[idg.Name] = true
+			} else {
+				found[idg.Name] = false
+			}
+		}
+	}
+
+	if len(stockRelation) != 0 {
+		opt := &notionapi.UpdatePageOptions{
+			Properties: map[string]notionapi.PropertyValue{recipe_ingredients: {Type: "relation", Relation: stockRelation}},
+		}
+		if _, err := s.client.UpdatePage(ctx, pageID, opt); err != nil {
+			return nil, err
+		}
+	}
+
+	return found, nil
+}
+
 func (s *Service) updatePageContent(ctx context.Context, pageID string, rcp *recipe.Recipe) error {
 	// 以前のブロックを削除
 	pagi, err := s.client.RetrieveBlockChildren(ctx, pageID)
