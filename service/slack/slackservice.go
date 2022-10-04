@@ -12,6 +12,7 @@ import (
 	"github.com/psyark/recipebot/service/notion"
 	"github.com/psyark/slackbot"
 	"github.com/slack-go/slack"
+	"github.com/slack-go/slack/slackevents"
 )
 
 type ofType string
@@ -46,7 +47,6 @@ func (b *Service) OnError(args *slackbot.ErrorHandlerArgs) {
 }
 
 func (b *Service) OnCallbackMessage(args *slackbot.MessageHandlerArgs) error {
-	ctx := context.Background()
 	event := args.MessageEvent
 
 	if args.Request.Header.Get("X-Slack-Retry-Num") != "" {
@@ -62,52 +62,44 @@ func (b *Service) OnCallbackMessage(args *slackbot.MessageHandlerArgs) error {
 			url = strings.Split(url, "|")[0]
 		}
 
-		_, timestamp, err := b.client.PostMessage(event.Channel, slack.MsgOptionText(":hourglass_flowing_sand:", false))
-		if err != nil {
-			return err
-		}
-
-		page, err := b.autoUpdateRecipePage(ctx, url)
-		if err != nil {
-			return fmt.Errorf("autoUpdateRecipePage: %w", err)
-		}
-
-		if err := b.UpdateRecipeBlocks(ctx, event.Channel, timestamp, page.ID); err != nil {
-			return fmt.Errorf("postRecipeBlocks: %w", err)
-		}
+		return b.ReactMessageWithURL(event, url)
 	}
 
 	return nil
 }
 
-// Deprecated:
-func (b *Service) autoUpdateRecipePage(ctx context.Context, recipeURL string) (*notionapi.Page, error) {
-	// レシピページを取得
-	page, err := b.notion.GetRecipeByURL(ctx, recipeURL)
+// ReactMessageWithURL はURL付きのメッセージに反応します
+func (s *Service) ReactMessageWithURL(event *slackevents.MessageEvent, url string) error {
+	ctx := context.Background()
+
+	// 砂時計のプレースホルダを出しておく
+	_, msgTs, err := s.client.PostMessage(event.Channel, slack.MsgOptionText(":hourglass_flowing_sand:", false))
 	if err != nil {
-		return nil, fmt.Errorf("Bot.GetRecipeByURL: %w", err)
+		return err
 	}
 
-	if page != nil {
-		return page, nil
+	// URLに対応するレシピページを探す
+	page, err := s.notion.GetRecipeByURL(ctx, url)
+	if err != nil {
+		return err
 	}
 
 	// レシピページがなければ作成
-	return b.notion.CreateRecipe(ctx, recipeURL)
-}
-
-func (s *Service) UpdateRecipeBlocks(ctx context.Context, channelID string, timestamp string, pageID string) error {
-	blocks, err := s.getRecipeBlocks(ctx, pageID)
-	if err != nil {
-		return fmt.Errorf("getRecipeBlocks: %w", err)
+	if page == nil {
+		page, err = s.notion.CreateRecipe(ctx, url)
+		if err != nil {
+			return err
+		}
 	}
 
-	_, _, _, err = s.client.UpdateMessage(channelID, timestamp, slack.MsgOptionBlocks(blocks...))
+	// プレースホルダを更新
+	blocks, err := s.getRecipeBlocks(ctx, page)
 	if err != nil {
-		return fmt.Errorf("updateMessage: %w", err)
+		return err
 	}
 
-	return nil
+	_, _, _, err = s.client.UpdateMessage(event.Channel, msgTs, slack.MsgOptionBlocks(blocks...))
+	return err
 }
 
 func (s *Service) onOverflow(args *slackbot.BlockActionHandlerArgs) error {
@@ -163,12 +155,12 @@ func (s *Service) onOverflow(args *slackbot.BlockActionHandlerArgs) error {
 	}
 }
 
-func (b *Service) getRecipeBlocks(ctx context.Context, pageID string) ([]slack.Block, error) {
+func (b *Service) getRecipeBlocks(ctx context.Context, page *notionapi.Page) ([]slack.Block, error) {
 	var pageURL string
 	var thumbnail *slack.Accessory
 
 	// タイトルの取得
-	pageTitle, err := b.notion.GetRecipeTitle(ctx, pageID)
+	pageTitle, err := b.notion.GetRecipeTitle(ctx, page.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -176,22 +168,17 @@ func (b *Service) getRecipeBlocks(ctx context.Context, pageID string) ([]slack.B
 		pageTitle = "無題"
 	}
 
-	// ページの取得
-	if page, err := b.notion.RetrievePage(ctx, pageID); err != nil {
-		return nil, err
-	} else {
-		pageURL = page.URL
-		if page.Icon != nil {
-			if emoji, ok := page.Icon.(*notionapi.Emoji); ok {
-				pageTitle = emoji.Emoji + pageTitle
-			}
+	pageURL = page.URL
+	if page.Icon != nil {
+		if emoji, ok := page.Icon.(*notionapi.Emoji); ok {
+			pageTitle = emoji.Emoji + pageTitle
 		}
-		if page.Cover != nil {
-			if page.Cover.External != nil {
-				thumbnail = slack.NewAccessory(slack.NewImageBlockElement(page.Cover.External.URL, "レシピの写真"))
-			} else if page.Cover.File != nil {
-				thumbnail = slack.NewAccessory(slack.NewImageBlockElement(page.Cover.File.URL, "レシピの写真"))
-			}
+	}
+	if page.Cover != nil {
+		if page.Cover.External != nil {
+			thumbnail = slack.NewAccessory(slack.NewImageBlockElement(page.Cover.External.URL, "レシピの写真"))
+		} else if page.Cover.File != nil {
+			thumbnail = slack.NewAccessory(slack.NewImageBlockElement(page.Cover.File.URL, "レシピの写真"))
 		}
 	}
 
@@ -206,8 +193,8 @@ func (b *Service) getRecipeBlocks(ctx context.Context, pageID string) ([]slack.B
 			nil,
 			slack.NewAccessory(slack.NewOverflowBlockElement(
 				b.actionOverflow,
-				slack.NewOptionBlockObject(OverflowArgs{ofTypeRebuildRecipe, pageID}.String(), slack.NewTextBlockObject(slack.PlainTextType, "レシピを再取得", false, false), nil),
-				slack.NewOptionBlockObject(OverflowArgs{ofTypeUpdateIngredients, pageID}.String(), slack.NewTextBlockObject(slack.PlainTextType, "主な材料を更新", false, false), nil),
+				slack.NewOptionBlockObject(OverflowArgs{ofTypeRebuildRecipe, page.ID}.String(), slack.NewTextBlockObject(slack.PlainTextType, "レシピを再取得", false, false), nil),
+				slack.NewOptionBlockObject(OverflowArgs{ofTypeUpdateIngredients, page.ID}.String(), slack.NewTextBlockObject(slack.PlainTextType, "主な材料を更新", false, false), nil),
 			)),
 		),
 	}, nil
