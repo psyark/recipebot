@@ -187,9 +187,9 @@ func (b *Service) getRecipeBlocks(ctx context.Context, pageID string) ([]slack.B
 			}
 		}
 		if page.Cover != nil {
-			if page.Cover.External.URL != "" {
+			if page.Cover.External != nil {
 				thumbnail = slack.NewAccessory(slack.NewImageBlockElement(page.Cover.External.URL, "レシピの写真"))
-			} else if page.Cover.File.URL != "" {
+			} else if page.Cover.File != nil {
 				thumbnail = slack.NewAccessory(slack.NewImageBlockElement(page.Cover.File.URL, "レシピの写真"))
 			}
 		}
