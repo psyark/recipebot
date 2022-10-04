@@ -127,24 +127,30 @@ func (s *Service) CreateRecipe(ctx context.Context, url string) (*notionapi.Page
 }
 
 func (s *Service) UpdateRecipe(ctx context.Context, pageID string) error {
-	title, err := s.GetRecipeTitle(ctx, pageID)
-	if err != nil {
-		return fmt.Errorf("getRecipeTitle: %w", err)
-	}
-
 	page, err := s.client.RetrievePage(ctx, pageID)
 	if err != nil {
 		return fmt.Errorf("recipeService.client.RetrievePage: %w", err)
 	}
 
-	piop, err := s.client.RetrievePagePropertyItem(ctx, page.ID, recipe_original)
-	if err != nil {
-		return fmt.Errorf("recipeService.client.RetrievePagePropertyItem: %w", err)
+	title := ""
+	url := ""
+	for _, pv := range page.Properties {
+		switch pv.ID {
+		case "title":
+			for _, t := range pv.Title {
+				title += t.PlainText
+			}
+		case recipe_original:
+			if pv.URL == nil {
+				return fmt.Errorf("url unset")
+			}
+			url = *pv.URL
+		}
 	}
 
-	rcp, err := united.Parsers.Parse(ctx, piop.(*notionapi.PropertyItem).URL)
+	rcp, err := united.Parsers.Parse(ctx, url)
 	if err != nil {
-		return fmt.Errorf("united.Parsers.Parse: %w", err)
+		return err
 	}
 
 	opt := &notionapi.UpdatePageOptions{}
@@ -163,7 +169,7 @@ func (s *Service) UpdateRecipe(ctx context.Context, pageID string) error {
 
 	if opt.Icon != nil || opt.Cover != nil || len(opt.Properties) != 0 {
 		if _, err := s.client.UpdatePage(ctx, page.ID, opt); err != nil {
-			return fmt.Errorf("recipeService.client.UpdatePage: %w", err)
+			return err
 		}
 	}
 
