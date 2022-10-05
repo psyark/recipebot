@@ -11,7 +11,7 @@ require (
 	github.com/microcosm-cc/bluemonday v1.0.21
 	github.com/mvdan/xurls v1.1.0
 	github.com/psyark/jsonld v0.0.0-20220825042757-0bc9534f3d66
-	github.com/psyark/notionapi v0.0.0-20221004085326-30a515443734
+	github.com/psyark/notionapi v0.0.0-20221005024044-6d36d5bffc5a
 	github.com/psyark/slackbot v0.0.0-20221001084604-53e16179df81
 	github.com/slack-go/slack v0.11.3
 	golang.org/x/net v0.0.0-20221004154528-8021a29435af

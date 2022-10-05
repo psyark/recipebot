@@ -187,8 +187,10 @@ func (s *Service) UpdateRecipeIngredients(ctx context.Context, pageID string, st
 	for _, g := range rcp.IngredientGroups {
 		for _, idg := range g.Children {
 			if id, ok := stockMap[idg.Name]; ok {
-				stockRelation = append(stockRelation, notionapi.PageReference{ID: id})
-				found[idg.Name] = true
+				if id != "" { // リンクしない
+					stockRelation = append(stockRelation, notionapi.PageReference{ID: id})
+					found[idg.Name] = true
+				}
 			} else {
 				found[idg.Name] = false
 			}
@@ -283,17 +285,19 @@ func (s *Service) GetStockMap(ctx context.Context) (map[string]string, error) {
 				return err
 			}
 
+			value := page.ID
+
 			// リンクしない
-			if cb := page.Properties.Get(stock_nolink).Checkbox; cb != nil && *cb {
-				return nil
+			if page.Properties.Get(stock_nolink).Checkbox {
+				value = ""
 			}
 
 			mu.Lock()
 			defer mu.Unlock()
 
-			stockMap[page.Properties.Get("title").Title.PlainText()] = page.ID
+			stockMap[page.Properties.Get("title").Title.PlainText()] = value
 			for _, opt := range page.Properties.Get(stock_alias).MultiSelect {
-				stockMap[opt.Name] = page.ID
+				stockMap[opt.Name] = value
 			}
 
 			return nil
