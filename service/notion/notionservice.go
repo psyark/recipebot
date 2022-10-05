@@ -20,6 +20,7 @@ const (
 	recipe_shared_header_id = "60a4999c-b1fa-4e3d-9d6b-48034ad7b675"
 	stock_db_id             = "923bfcb7c9014273b417ddc966fd17b8"
 	stock_alias             = "pK%3Ag"
+	stock_nolink            = "xy_~"
 )
 
 type Service struct {
@@ -261,21 +262,6 @@ func (s *Service) GetStockMap(ctx context.Context) (map[string]string, error) {
 
 	for _, result := range pagi.Results {
 		result := result
-		eg.Go(func() error {
-			piop, err := s.client.RetrievePagePropertyItem(ctx, result.ID, "title")
-			if err != nil {
-				return err
-			}
-
-			title := ""
-			for _, pi := range piop.(*notionapi.PropertyItemPagination).Results {
-				title += pi.Title.Text.Content
-			}
-			mu.Lock()
-			defer mu.Unlock()
-			stockMap[title] = result.ID
-			return nil
-		})
 
 		eg.Go(func() error {
 			piop, err := s.client.RetrievePagePropertyItem(ctx, result.ID, stock_alias)
@@ -288,6 +274,28 @@ func (s *Service) GetStockMap(ctx context.Context) (map[string]string, error) {
 			for _, pi := range piop.(*notionapi.PropertyItem).MultiSelect {
 				stockMap[pi.Name] = result.ID
 			}
+			return nil
+		})
+
+		eg.Go(func() error {
+			page, err := s.client.RetrievePage(ctx, result.ID)
+			if err != nil {
+				return err
+			}
+
+			// リンクしない
+			if cb := page.Properties.Get(stock_nolink).Checkbox; cb != nil && *cb {
+				return nil
+			}
+
+			mu.Lock()
+			defer mu.Unlock()
+
+			stockMap[page.Properties.Get("title").Title.PlainText()] = page.ID
+			for _, opt := range page.Properties.Get(stock_alias).MultiSelect {
+				stockMap[opt.Name] = page.ID
+			}
+
 			return nil
 		})
 	}
