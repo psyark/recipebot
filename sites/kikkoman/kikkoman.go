@@ -31,7 +31,7 @@ func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) 
 
 	rcp := &recipe.Recipe{
 		Title: strings.TrimSpace(doc.Find(`.elem-heading-lv1`).Text()),
-		Image: sites.ResolvePath(url, doc.Find(`.main-movBox img`).AttrOr("src", "")),
+		Image: sites.ResolvePath(url, doc.Find(`img.photo`).AttrOr("src", "")),
 	}
 
 	groupName := ""

@@ -100,7 +100,7 @@ func ExampleParser_enoki() {
 	// output:
 	// {
 	//   "Title": "クセになるおいしさ！えのきのカリカリ焼き",
-	//   "Image": "",
+	//   "Image": "https://www.kikkoman.co.jp/homecook/search/recipe/img/00052848.jpg",
 	//   "IngredientGroups": [
 	//     {
 	//       "Name": "",
