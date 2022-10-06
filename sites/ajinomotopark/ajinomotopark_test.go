@@ -493,3 +493,121 @@ func ExampleParser_natto() {
 	//   ]
 	// }
 }
+
+func ExampleParser_omrice() {
+	ctx := context.Background()
+	rcp, err := NewParser().Parse(ctx, "https://park.ajinomoto.co.jp/recipe/card/706078/")
+	if err != nil {
+		panic(err)
+	}
+
+	data, _ := json.MarshalIndent(rcp, "", "  ")
+	fmt.Println(string(data))
+	// output:
+	// {
+	//   "Title": "ふんわり卵で絶品  \n                オムライス",
+	//   "Image": "https://park.ajinomoto.co.jp/wp-content/uploads/2018/03/706078.jpeg",
+	//   "IngredientGroups": [
+	//     {
+	//       "Name": "",
+	//       "Children": [
+	//         {
+	//           "Name": "鶏むね肉",
+	//           "Amount": "100g",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "玉ねぎ",
+	//           "Amount": "1/2個",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "温かいご飯",
+	//           "Amount": "300g",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "コンソメ（顆粒）",
+	//           "Amount": "小さじ1",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "トマトケチャップ",
+	//           "Amount": "適量",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "卵",
+	//           "Amount": "4個",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "塩",
+	//           "Amount": "適量",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "こしょう",
+	//           "Amount": "適量",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "サラダ油",
+	//           "Amount": "適量",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "バター",
+	//           "Amount": "大さじ2",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "パセリ",
+	//           "Amount": "適量",
+	//           "Comment": ""
+	//         }
+	//       ]
+	//     }
+	//   ],
+	//   "Steps": [
+	//     {
+	//       "Text": "1鶏肉は１．５ｃｍ角に切り、塩・こしょう少々をふる。玉ねぎはみじん切りにする。",
+	//       "Images": [
+	//         "https://park.ajinomoto.co.jp/wp-content/uploads/2021/08/706078_direction_0_0.jpeg"
+	//       ]
+	//     },
+	//     {
+	//       "Text": "2フライパンに油小さじ１を熱し、（１）の鶏肉を炒める。焼き色がついたら、バター大さじ１、（１）の玉ねぎを加えてよく炒める。",
+	//       "Images": [
+	//         "https://park.ajinomoto.co.jp/wp-content/uploads/2021/08/706078_direction_1_0.jpeg"
+	//       ]
+	//     },
+	//     {
+	//       "Text": "3ご飯を加えて「コンソメ」をふり、混ぜながら炒める。トマトケチャップ大さじ２、塩・こしょう少々で味を調え、チキンライスを作る。",
+	//       "Images": [
+	//         "https://park.ajinomoto.co.jp/wp-content/uploads/2021/08/706078_direction_2_0.jpeg"
+	//       ]
+	//     },
+	//     {
+	//       "Text": "4小さめのボウルに卵２個を溶きほぐし、塩・こしょう少々を混ぜる。",
+	//       "Images": null
+	//     },
+	//     {
+	//       "Text": "5フライパンに油、バター各大さじ１／２を熱し、（４）の溶き卵を一気に流し入れて全体をサッと混ぜる。半熟状になったら（３）のチキンライスの半量を中央にのせ、両端からヘラで折り曲げる。",
+	//       "Images": [
+	//         "https://park.ajinomoto.co.jp/wp-content/uploads/2021/08/706078_direction_4_0.jpeg"
+	//       ]
+	//     },
+	//     {
+	//       "Text": "6フライパンの片側に寄せ、皿に返して盛りつける。トマトケチャップ少々をかけ、パセリを飾る。もう一つも同様に作る。",
+	//       "Images": [
+	//         "https://park.ajinomoto.co.jp/wp-content/uploads/2021/08/706078_direction_5_0.jpeg"
+	//       ]
+	//     },
+	//     {
+	//       "Text": "＊フライパンのフチを利用すると形よく整えられます。",
+	//       "Images": null
+	//     }
+	//   ]
+	// }
+}
