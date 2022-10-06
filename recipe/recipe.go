@@ -29,8 +29,8 @@ type Ingredient struct {
 
 func GetIngredient(nameAndComment string, amount string) Ingredient {
 	idg := Ingredient{
-		Name:   width.Widen.String(nameAndComment),
-		Amount: width.Fold.String(amount),
+		Name:   width.Widen.String(strings.TrimSpace(nameAndComment)),
+		Amount: width.Fold.String(strings.TrimSpace(amount)),
 	}
 	if match := commentRegex.FindStringSubmatch(idg.Name); len(match) != 0 {
 		idg.Name = strings.TrimSuffix(idg.Name, match[0])

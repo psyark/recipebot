@@ -45,7 +45,7 @@ func ExampleParser_ebi() {
 	//         },
 	//         {
 	//           "Name": "豆板醤",
-	//           "Amount": "小さじ1（5g）",
+	//           "Amount": "小さじ1(5g)",
 	//           "Comment": ""
 	//         },
 	//         {
@@ -290,7 +290,7 @@ func ExampleParser_amazu() {
 	//       "Children": [
 	//         {
 	//           "Name": "玉ねぎのみじん切り",
-	//           "Amount": "1/4個分（50g）",
+	//           "Amount": "1/4個分(50g)",
 	//           "Comment": ""
 	//         },
 	//         {
@@ -527,9 +527,9 @@ func ExampleParser_omrice() {
 	//           "Comment": ""
 	//         },
 	//         {
-	//           "Name": "コンソメ（顆粒）",
+	//           "Name": "コンソメ",
 	//           "Amount": "小さじ1",
-	//           "Comment": ""
+	//           "Comment": "顆粒"
 	//         },
 	//         {
 	//           "Name": "トマトケチャップ",

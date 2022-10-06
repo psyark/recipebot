@@ -48,10 +48,9 @@ func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) 
 		if strings.HasPrefix(className, "ico") {
 			groupName = strings.TrimPrefix(className, "ico")
 		}
-		rcp.AddIngredient(groupName, recipe.Ingredient{
-			Name:   debrand(strings.TrimSpace(s.Text())),
-			Amount: strings.TrimSpace(s.Next().Text()),
-		})
+
+		idg := recipe.GetIngredient(debrand(strings.TrimSpace(s.Text())), s.Next().Text())
+		rcp.AddIngredient(groupName, idg)
 	})
 
 	doc.Find(`#makeList ol li`).Each(func(i int, s *goquery.Selection) {
