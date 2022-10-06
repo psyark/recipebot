@@ -49,7 +49,7 @@ func ExampleParser() {
 	//       "Name": "ソース",
 	//       "Children": [
 	//         {
-	//           "Name": "100%オレンジジュース",
+	//           "Name": "１００％オレンジジュース",
 	//           "Amount": "30ml",
 	//           "Comment": ""
 	//         },
@@ -110,6 +110,120 @@ func ExampleParser() {
 	//     },
 	//     {
 	//       "Text": "ベビーリーフと共にお皿に盛り付けてできあがりです。",
+	//       "Images": null
+	//     }
+	//   ]
+	// }
+}
+
+func ExampleParser_nikumaki() {
+	ctx := context.Background()
+	rcp, err := NewParser().Parse(ctx, "https://www.kurashiru.com/recipes/e6c3ef62-8e77-4fed-9ab4-705a1ec78fd3")
+	if err != nil {
+		panic(err)
+	}
+
+	data, _ := json.MarshalIndent(rcp, "", "  ")
+	fmt.Println(string(data))
+	// output:
+	// {
+	//   "Title": "とろーりおいしい！肉巻き半熟卵",
+	//   "Image": "https://video.kurashiru.com/production/videos/e6c3ef62-8e77-4fed-9ab4-705a1ec78fd3/compressed_thumbnail_square_large.jpg?1649747039",
+	//   "IngredientGroups": [
+	//     {
+	//       "Name": "",
+	//       "Children": [
+	//         {
+	//           "Name": "豚バラ肉",
+	//           "Amount": "200g",
+	//           "Comment": "スライス"
+	//         },
+	//         {
+	//           "Name": "塩こしょう",
+	//           "Amount": "小さじ1/4",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "卵",
+	//           "Amount": "4個",
+	//           "Comment": "Ｍサイズ"
+	//         },
+	//         {
+	//           "Name": "お湯",
+	//           "Amount": "1000ml",
+	//           "Comment": "卵をゆでる用"
+	//         },
+	//         {
+	//           "Name": "薄力粉",
+	//           "Amount": "大さじ1",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "サラダ油",
+	//           "Amount": "小さじ2",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "レタス",
+	//           "Amount": "20g",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "ミニトマト",
+	//           "Amount": "2個",
+	//           "Comment": ""
+	//         }
+	//       ]
+	//     },
+	//     {
+	//       "Name": "（Ａ）",
+	//       "Children": [
+	//         {
+	//           "Name": "酒",
+	//           "Amount": "大さじ1",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "砂糖",
+	//           "Amount": "小さじ2",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "みりん",
+	//           "Amount": "小さじ2",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "しょうゆ",
+	//           "Amount": "大さじ1.5",
+	//           "Comment": ""
+	//         }
+	//       ]
+	//     }
+	//   ],
+	//   "Steps": [
+	//     {
+	//       "Text": "卵は常温に戻しておきます。",
+	//       "Images": null
+	//     },
+	//     {
+	//       "Text": "お湯を沸騰させ、卵を7分ゆでて流水で冷やし、殻を剥きます。",
+	//       "Images": null
+	//     },
+	//     {
+	//       "Text": "豚バラ肉に塩こしょうをふり、1を巻いて、全体に薄力粉をまぶします。",
+	//       "Images": null
+	//     },
+	//     {
+	//       "Text": "中火に熱したフライパンにサラダ油をひき、2を焼きます。",
+	//       "Images": null
+	//     },
+	//     {
+	//       "Text": "全体に焼き色がつき豚バラ肉に火が通ったら、(A)を入れて、中火で全体を煮詰めて火から下ろします。",
+	//       "Images": null
+	//     },
+	//     {
+	//       "Text": "お皿に盛り付け、レタス、ミニトマトを添えて完成です。",
 	//       "Images": null
 	//     }
 	//   ]

@@ -7,7 +7,7 @@ import (
 	"golang.org/x/text/width"
 )
 
-var commentRegex = regexp.MustCompile(`（(.+?)）$`)
+var commentRegex = regexp.MustCompile(`　*（(.+?)）$`)
 
 type Recipe struct {
 	Title            string

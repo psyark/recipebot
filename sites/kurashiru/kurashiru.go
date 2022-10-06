@@ -36,10 +36,18 @@ func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) 
 			groupName = ""
 			fallthrough
 		case "ingredient-list-item group-item":
-			rcp.AddIngredient(groupName, recipe.Ingredient{
-				Name:   strings.TrimSpace(s.Find(`.ingredient-name`).Text()),
-				Amount: strings.TrimSpace(s.Find(`.ingredient-quantity-amount`).Text()),
-			})
+			idg := recipe.GetIngredient(s.Find(`.ingredient-name`).Text(), s.Find(`.ingredient-quantity-amount`).Text())
+			groupName2 := groupName
+
+			for _, prefix := range []string{"（Ａ）", "（Ｂ）", "（Ｃ）"} {
+				if strings.HasPrefix(idg.Name, prefix) {
+					idg.Name = strings.TrimPrefix(idg.Name, prefix)
+					groupName2 = prefix
+					break
+				}
+			}
+
+			rcp.AddIngredient(groupName2, idg)
 		}
 	})
 
