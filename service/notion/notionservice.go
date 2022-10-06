@@ -20,6 +20,7 @@ const (
 	recipe_shared_header_id = "60a4999c-b1fa-4e3d-9d6b-48034ad7b675"
 	stock_db_id             = "923bfcb7c9014273b417ddc966fd17b8"
 	stock_alias             = "pK%3Ag"
+	stock_nolink            = "xy_~"
 )
 
 type Service struct {
@@ -192,8 +193,10 @@ func (s *Service) UpdateRecipeIngredients(ctx context.Context, pageID string, st
 	for _, g := range rcp.IngredientGroups {
 		for _, idg := range g.Children {
 			if id, ok := stockMap[idg.Name]; ok {
-				stockRelation = append(stockRelation, notionapi.PageReference{ID: id})
-				found[idg.Name] = true
+				if id != "" { // リンクしない
+					stockRelation = append(stockRelation, notionapi.PageReference{ID: id})
+					found[idg.Name] = true
+				}
 			} else {
 				found[idg.Name] = false
 			}
@@ -267,21 +270,6 @@ func (s *Service) GetStockMap(ctx context.Context) (map[string]string, error) {
 
 	for _, result := range pagi.Results {
 		result := result
-		eg.Go(func() error {
-			piop, err := s.client.RetrievePagePropertyItem(ctx, result.ID, "title")
-			if err != nil {
-				return err
-			}
-
-			title := ""
-			for _, pi := range piop.(*notionapi.PropertyItemPagination).Results {
-				title += pi.Title.Text.Content
-			}
-			mu.Lock()
-			defer mu.Unlock()
-			stockMap[title] = result.ID
-			return nil
-		})
 
 		eg.Go(func() error {
 			piop, err := s.client.RetrievePagePropertyItem(ctx, result.ID, stock_alias)
@@ -294,6 +282,30 @@ func (s *Service) GetStockMap(ctx context.Context) (map[string]string, error) {
 			for _, pi := range piop.(*notionapi.PropertyItem).MultiSelect {
 				stockMap[pi.Name] = result.ID
 			}
+			return nil
+		})
+
+		eg.Go(func() error {
+			page, err := s.client.RetrievePage(ctx, result.ID)
+			if err != nil {
+				return err
+			}
+
+			value := page.ID
+
+			// リンクしない
+			if page.Properties.Get(stock_nolink).Checkbox {
+				value = ""
+			}
+
+			mu.Lock()
+			defer mu.Unlock()
+
+			stockMap[page.Properties.Get("title").Title.PlainText()] = value
+			for _, opt := range page.Properties.Get(stock_alias).MultiSelect {
+				stockMap[opt.Name] = value
+			}
+
 			return nil
 		})
 	}

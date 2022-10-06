@@ -17,6 +17,18 @@ func init() {
 	client = notionapi.NewClient(os.Getenv("NOTION_API_KEY"))
 }
 
+// func TestGetStockMap(t *testing.T) {
+// 	ctx := context.Background()
+// 	service := New(client)
+// 	stockMap, err := service.GetStockMap(ctx)
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+
+// 	fmt.Println(len(stockMap))
+// 	fmt.Println(stockMap)
+// }
+
 // func TestUpdateRecipe(t *testing.T) {
 // 	ctx := context.Background()
 // 	service := New(client)
