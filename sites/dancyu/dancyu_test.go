@@ -983,3 +983,176 @@ func ExampleParser_h() {
 	//   ]
 	// }
 }
+
+func ExampleParser_i() {
+	ctx := context.Background()
+	rcp, err := NewParser().Parse(ctx, "https://dancyu.jp/recipe/2022_00006402.html")
+	if err != nil {
+		panic(err)
+	}
+
+	data, _ := json.MarshalIndent(rcp, "", "  ")
+	fmt.Println(string(data))
+
+	// output:
+	// {
+	//   "Title": "高野豆腐と椎茸の含め煮",
+	//   "Image": "https://dancyu.jp/images/m6402.jpg",
+	//   "IngredientGroups": [
+	//     {
+	//       "Name": "★ ［高野豆腐の含め煮］",
+	//       "Children": [
+	//         {
+	//           "Name": "高野豆腐",
+	//           "Amount": "4枚",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "だし汁",
+	//           "Amount": "3カップ",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "調味料",
+	//           "Amount": "",
+	//           "Comment": ""
+	//         }
+	//       ]
+	//     },
+	//     {
+	//       "Name": "",
+	//       "Children": [
+	//         {
+	//           "Name": "├ 味醂",
+	//           "Amount": "大さじ3",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "├ 砂糖",
+	//           "Amount": "大さじ3",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "├ 醤油",
+	//           "Amount": "小さじ1",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "└ 塩",
+	//           "Amount": "小さじ1／2",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "小松菜",
+	//           "Amount": "150g",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "小松菜をゆでる塩",
+	//           "Amount": "少々",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "├ 酒",
+	//           "Amount": "大さじ4",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "├ 味醂",
+	//           "Amount": "大さじ2",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "└ 醤油",
+	//           "Amount": "大さじ2",
+	//           "Comment": ""
+	//         }
+	//       ]
+	//     },
+	//     {
+	//       "Name": "★ ［椎茸の含め煮］",
+	//       "Children": [
+	//         {
+	//           "Name": "干し椎茸",
+	//           "Amount": "中12個（もどして250g）",
+	//           "Comment": "冬どん菇こ"
+	//         },
+	//         {
+	//           "Name": "もどし汁とだし汁",
+	//           "Amount": "計2カップ",
+	//           "Comment": ""
+	//         },
+	//         {
+	//           "Name": "調味料",
+	//           "Amount": "",
+	//           "Comment": ""
+	//         }
+	//       ]
+	//     }
+	//   ],
+	//   "Steps": [
+	//     {
+	//       "Text": "高野豆腐をもどす\n高野豆腐は大きめのバットに入れて60℃ぐらいの湯を注ぎ、浮かないように、小さい軽いまな板や木の蓋、または皿をのせて湯が冷めるまでおいてもどす。",
+	//       "Images": [
+	//         "https://dancyu.jp/images/6402a.jpg",
+	//         "https://dancyu.jp/images/6402b.jpg"
+	//       ]
+	//     },
+	//     {
+	//       "Text": "洗う\nボウルにをたっぷりの水を入れて手ではさみながら洗う。",
+	//       "Images": [
+	//         "https://dancyu.jp/images/6402c.jpg"
+	//       ]
+	//     },
+	//     {
+	//       "Text": "切る\n両手ではさんで水気を絞り、4等分に切る。",
+	//       "Images": [
+	//         "https://dancyu.jp/images/6402d.jpg"
+	//       ]
+	//     },
+	//     {
+	//       "Text": "干し椎茸をもどす\n干し椎茸はボウルに入れて水を注ぎ、軽く重しをして冷蔵庫に一晩おいてもどす。",
+	//       "Images": [
+	//         "https://dancyu.jp/images/6402e.jpg"
+	//       ]
+	//     },
+	//     {
+	//       "Text": "切る\n軽く水気を絞って軸を切り落とす。",
+	//       "Images": [
+	//         "https://dancyu.jp/images/6402f.jpg"
+	//       ]
+	//     },
+	//     {
+	//       "Text": "切り目を入れる\nかさの表面に浅く切り目を入れる。",
+	//       "Images": [
+	//         "https://dancyu.jp/images/6402g.jpg"
+	//       ]
+	//     },
+	//     {
+	//       "Text": "高野豆腐を煮る\n大きな鍋にだし汁を煮立て、調味料で調味し、高野豆腐を入れて落とし蓋をし、さらに蓋をして弱火で15～20分煮含める。",
+	//       "Images": [
+	//         "https://dancyu.jp/images/6402h.jpg"
+	//       ]
+	//     },
+	//     {
+	//       "Text": "さらに煮る\n小松菜は洗って塩を入れた熱湯に入れてゆで、冷水にとって冷まして水気を絞り、長さ3～4cmに切る。高野豆腐を端に寄せ、小松菜を入れてひと煮する。",
+	//       "Images": [
+	//         "https://dancyu.jp/images/6402i.jpg"
+	//       ]
+	//     },
+	//     {
+	//       "Text": "干し椎茸を煮る\n鍋に椎茸、もどし汁、だし汁を入れて中火にかけ、煮立ってきたら醤油以外の調味料を加える。再び煮立ってきたら、落とし蓋をしてさらに蓋をして弱火で10～15分煮る。",
+	//       "Images": [
+	//         "https://dancyu.jp/images/6402j.jpg"
+	//       ]
+	//     },
+	//     {
+	//       "Text": "煮含める\n醤油を加えて混ぜ、煮立ってきたら落とし蓋をしてさらに蓋をして弱火で10～15分煮含める。",
+	//       "Images": [
+	//         "https://dancyu.jp/images/6402k.jpg",
+	//         "https://dancyu.jp/images/m6402l.jpg"
+	//       ]
+	//     }
+	//   ]
+	// }
+}

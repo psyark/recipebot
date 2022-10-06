@@ -68,6 +68,7 @@ func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) 
 			hasPrefixDot := 0
 			for _, ing := range rcp2.RecipeIngredient {
 				if ing, ok := ing.(string); ok {
+					ing := strings.ReplaceAll(ing, "&emsp;", " ")
 					if strings.HasPrefix(ing, "A ") {
 						hasPrefixA++
 					}
