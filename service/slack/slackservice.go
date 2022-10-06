@@ -193,7 +193,7 @@ func (b *Service) getRecipeBlocks(ctx context.Context, page *notionapi.Page) ([]
 			nil,
 			slack.NewAccessory(slack.NewOverflowBlockElement(
 				b.actionOverflow,
-				slack.NewOptionBlockObject(OverflowArgs{ofTypeRebuildRecipe, page.ID}.String(), slack.NewTextBlockObject(slack.PlainTextType, "レシピを再取得", false, false), nil),
+				slack.NewOptionBlockObject(OverflowArgs{ofTypeRebuildRecipe, page.ID}.String(), slack.NewTextBlockObject(slack.PlainTextType, "レシピを再構築", false, false), nil),
 				slack.NewOptionBlockObject(OverflowArgs{ofTypeUpdateIngredients, page.ID}.String(), slack.NewTextBlockObject(slack.PlainTextType, "主な材料を更新", false, false), nil),
 			)),
 		),
