@@ -7,7 +7,6 @@ import (
 	"github.com/psyark/recipebot/sites/cookpad"
 	"github.com/psyark/recipebot/sites/dancyu"
 	"github.com/psyark/recipebot/sites/delishkitchen"
-	"github.com/psyark/recipebot/sites/foodie"
 	"github.com/psyark/recipebot/sites/jsonld"
 	"github.com/psyark/recipebot/sites/kikkoman"
 	"github.com/psyark/recipebot/sites/kurashiru"
@@ -24,7 +23,6 @@ var Parsers = sites.Parsers{
 	cookpad.NewParser(),
 	dancyu.NewParser(),
 	delishkitchen.NewParser(),
-	foodie.NewParser(),
 	kikkoman.NewParser(),
 	kurashiru.NewParser(),
 	lettuceclub.NewParser(),
