@@ -58,29 +58,10 @@ func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) 
 		// 	stp.Images = append(stp.Images, src)
 		// })
 
-		if strings.Contains(stp.Text, "クックパッドニュース") {
-			return
-		}
-		if strings.Contains(stp.Text, "感謝") {
-			return
-		}
-		if strings.Contains(stp.Text, "発売") {
-			return
-		}
-		if strings.Contains(stp.Text, "掲載") {
-			return
-		}
-		if strings.Contains(stp.Text, "検索") {
-			return
-		}
-		if strings.Contains(stp.Text, "話題") {
-			return
-		}
-		if strings.Contains(stp.Text, "ありがとう") {
-			return
-		}
-		if strings.Contains(stp.Text, "年") {
-			return
+		for _, ngword := range []string{"クックパッドニュース", "感謝", "発売", "掲載", "検索", "話題", "ありがとう", "年"} {
+			if strings.Contains(stp.Text, ngword) {
+				return
+			}
 		}
 		if len([]rune(stp.Text)) < 3 {
 			return
