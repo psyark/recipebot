@@ -33,40 +33,11 @@ var debrandMap = map[string]string{
 }
 
 func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) {
-	if !strings.HasPrefix(url, "https://park.ajinomoto.co.jp/") {
-		return nil, sites.ErrUnsupportedURL
-	}
-
-	doc, err := sites.NewDocumentFromURL(ctx, url)
+	rex, err := p.Parse2(ctx, url)
 	if err != nil {
 		return nil, err
 	}
-
-	rcp := &recipe.Recipe{
-		Title: strings.TrimSpace(doc.Find(`h1.recipeTitle`).Text()),
-		Image: doc.Find(`.recipeImageArea img`).AttrOr("src", ""),
-	}
-
-	doc.Find(`.recipeMaterialList dl dt`).Each(func(i int, s *goquery.Selection) {
-		groupName := ""
-		className := s.AttrOr("class", "")
-		if strings.HasPrefix(className, "ico") {
-			groupName = strings.TrimPrefix(className, "ico")
-		}
-
-		idg := recipe.GetIngredient(debrand(strings.TrimSpace(s.Text())), s.Next().Text())
-		rcp.AddIngredient(groupName, idg)
-	})
-
-	doc.Find(`#makeList ol li`).Each(func(i int, s *goquery.Selection) {
-		stp := recipe.Step{Text: strings.TrimSpace(s.Text())}
-		s.Find("img").Each(func(i int, s *goquery.Selection) {
-			stp.Images = append(stp.Images, s.AttrOr("src", ""))
-		})
-		rcp.Steps = append(rcp.Steps, stp)
-	})
-
-	return rcp, nil
+	return rex.BackCompat(), nil
 }
 
 func (p *parser) Parse2(ctx context.Context, url string) (*rexch.Recipe, error) {
