@@ -11,6 +11,7 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/psyark/recipebot/recipe"
+	"github.com/psyark/recipebot/rexch"
 	"github.com/sergi/go-diff/diffmatchpatch"
 )
 
@@ -21,6 +22,11 @@ var (
 
 type Parser interface {
 	Parse(ctx context.Context, url string) (*recipe.Recipe, error)
+}
+
+type Parser2 interface {
+	Parser
+	Parse2(ctx context.Context, url string) (*rexch.Recipe, error)
 }
 
 func NewDocumentFromURL(ctx context.Context, url string) (*goquery.Document, error) {
@@ -64,8 +70,32 @@ func RecipeMustBe(rcp recipe.Recipe, want string) error {
 	return nil
 }
 
+func RecipeMustBe2(rex *rexch.Recipe, want string) error {
+	got, _ := json.Marshal(rex)
+	if want == "" {
+		fmt.Println(string(got))
+		return nil
+	}
+
+	if want != string(got) {
+		dmp := diffmatchpatch.New()
+		diffs := dmp.DiffMain(indent2(want), indent2(string(got)), false)
+		diffs = dmp.DiffCleanupSemantic(diffs)
+
+		return fmt.Errorf("%w: %v", errUnmatch, dmp.DiffPrettyText(diffs))
+	}
+	return nil
+}
+
 func indent(src string) string {
 	var x recipe.Recipe
+	json.Unmarshal([]byte(src), &x)
+	dst, _ := json.MarshalIndent(x, "", "  ")
+	return string(dst)
+}
+
+func indent2(src string) string {
+	var x rexch.Recipe
 	json.Unmarshal([]byte(src), &x)
 	dst, _ := json.MarshalIndent(x, "", "  ")
 	return string(dst)

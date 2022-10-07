@@ -2,13 +2,18 @@ package ajinomotopark
 
 import (
 	"context"
+	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/psyark/recipebot/recipe"
+	"github.com/psyark/recipebot/rexch"
 	"github.com/psyark/recipebot/sites"
 
 	"github.com/PuerkitoBio/goquery"
 )
+
+var servingsRegex = regexp.MustCompile(`（(\d+)人分）`)
 
 type parser struct{}
 
@@ -64,6 +69,51 @@ func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) 
 	return rcp, nil
 }
 
+func (p *parser) Parse2(ctx context.Context, url string) (*rexch.Recipe, error) {
+	if !strings.HasPrefix(url, "https://park.ajinomoto.co.jp/") {
+		return nil, sites.ErrUnsupportedURL
+	}
+
+	doc, err := sites.NewDocumentFromURL(ctx, url)
+	if err != nil {
+		return nil, err
+	}
+
+	rex := &rexch.Recipe{
+		Title: strings.TrimSpace(doc.Find(`h1.recipeTitle`).Text()),
+		Image: doc.Find(`.recipeImageArea img`).AttrOr("src", ""),
+	}
+
+	if match := servingsRegex.FindStringSubmatch(doc.Find(`.bigTitle_quantity`).Text()); len(match) != 0 {
+		i, _ := strconv.Atoi(match[1])
+		rex.Servings = i
+	}
+
+	doc.Find(`.recipeMaterialList dl dt`).Each(func(i int, s *goquery.Selection) {
+		idg := rexch.NewIngredient(debrand(strings.TrimSpace(s.Text())), s.Next().Text())
+
+		if className := s.AttrOr("class", ""); strings.HasPrefix(className, "ico") {
+			idg.Group = strings.TrimPrefix(className, "ico")
+		}
+
+		rex.Ingredients = append(rex.Ingredients, *idg)
+	})
+
+	doc.Find(`#makeList ol li`).Each(func(i int, s *goquery.Selection) {
+		ist := rexch.Instruction{
+			Elements: []rexch.InstructionElement{
+				&rexch.TextInstructionElement{Text: strings.TrimSpace(s.Text())},
+			},
+		}
+		s.Find("img").Each(func(i int, s *goquery.Selection) {
+			ist.Elements = append(ist.Elements, &rexch.ImageInstructionElement{URL: s.AttrOr("src", "")})
+		})
+		rex.Instructions = append(rex.Instructions, ist)
+	})
+
+	return rex, nil
+}
+
 func debrand(name string) string {
 	if debranded, ok := debrandMap[name]; ok {
 		return debranded
@@ -71,6 +121,6 @@ func debrand(name string) string {
 	return name
 }
 
-func NewParser() sites.Parser {
+func NewParser() sites.Parser2 {
 	return &parser{}
 }

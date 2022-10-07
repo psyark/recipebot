@@ -1,6 +1,15 @@
 // Package rexch はレシピの交換用のデータ構造を提供します
 package rexch
 
+import (
+	"regexp"
+	"strings"
+
+	"golang.org/x/text/width"
+)
+
+var commentRegex = regexp.MustCompile(`　*（(.+?)）$`)
+
 type Recipe struct {
 	Title        string        `json:"title"`
 	Image        string        `json:"image"`
@@ -14,6 +23,18 @@ type Ingredient struct {
 	Name    string `json:"name"`
 	Amount  string `json:"amount,omitempty"`
 	Comment string `json:"comment,omitempty"`
+}
+
+func NewIngredient(nameAndComment string, amount string) *Ingredient {
+	idg := &Ingredient{
+		Name:   width.Widen.String(strings.TrimSpace(nameAndComment)),
+		Amount: width.Fold.String(strings.TrimSpace(amount)),
+	}
+	if match := commentRegex.FindStringSubmatch(idg.Name); len(match) != 0 {
+		idg.Name = strings.TrimSuffix(idg.Name, match[0])
+		idg.Comment = match[1]
+	}
+	return idg
 }
 
 type Instruction struct {
