@@ -23,6 +23,8 @@ const (
 	stock_nolink            = "xy_~"
 )
 
+var unitedParser = united.NewParser()
+
 type Service struct {
 	client *notionapi.Client
 }
@@ -99,7 +101,7 @@ func (s *Service) GetRecipeByURL(ctx context.Context, url string) (*notionapi.Pa
 }
 
 func (s *Service) CreateRecipe(ctx context.Context, url string) (*notionapi.Page, error) {
-	rcp, err := united.Parsers.Parse(ctx, url)
+	rcp, err := unitedParser.Parse(ctx, url)
 	if err != nil {
 		return nil, err
 	}
@@ -149,7 +151,7 @@ func (s *Service) UpdateRecipe(ctx context.Context, pageID string) error {
 		}
 	}
 
-	rcp, err := united.Parsers.Parse(ctx, url)
+	rcp, err := unitedParser.Parse(ctx, url)
 	if err != nil {
 		return err
 	}
@@ -183,7 +185,7 @@ func (s *Service) UpdateRecipeIngredients(ctx context.Context, pageID string, st
 		return nil, err
 	}
 
-	rcp, err := united.Parsers.Parse(ctx, piop.(*notionapi.PropertyItem).URL)
+	rcp, err := unitedParser.Parse(ctx, piop.(*notionapi.PropertyItem).URL)
 	if err != nil {
 		return nil, err
 	}

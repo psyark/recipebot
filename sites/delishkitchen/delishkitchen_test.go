@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/psyark/recipebot/sites/common"
+	"github.com/psyark/recipebot/sites"
 )
 
 func TestNewParser(t *testing.T) {
@@ -26,7 +26,7 @@ func TestNewParser(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if err := common.RecipeMustBe(*rcp, want); err != nil {
+			if err := sites.RecipeMustBe(*rcp, want); err != nil {
 				t.Error(err)
 			}
 		})

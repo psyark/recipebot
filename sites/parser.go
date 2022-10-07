@@ -2,37 +2,25 @@ package sites
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
 
-	"github.com/psyark/recipebot/recipe"
-
 	"github.com/PuerkitoBio/goquery"
+	"github.com/psyark/recipebot/recipe"
+	"github.com/sergi/go-diff/diffmatchpatch"
 )
 
-var ErrUnsupportedURL = fmt.Errorf("unsupported url")
+var (
+	errUnmatch        = errors.New("unmatch")
+	ErrUnsupportedURL = errors.New("unsupported url")
+)
 
 type Parser interface {
 	Parse(ctx context.Context, url string) (*recipe.Recipe, error)
-}
-
-type Parsers []Parser
-
-func (p Parsers) Parse(ctx context.Context, url string) (*recipe.Recipe, error) {
-	for _, c := range p {
-		rcp, err := c.Parse(ctx, url)
-		switch err {
-		case nil:
-			return rcp, nil
-		case ErrUnsupportedURL:
-			continue
-		default:
-			return nil, err
-		}
-	}
-	return nil, ErrUnsupportedURL
 }
 
 func NewDocumentFromURL(ctx context.Context, url string) (*goquery.Document, error) {
@@ -46,7 +34,9 @@ func NewDocumentFromURL(ctx context.Context, url string) (*goquery.Document, err
 		return nil, err
 	}
 
-	return goquery.NewDocumentFromResponse(res)
+	defer res.Body.Close()
+
+	return goquery.NewDocumentFromReader(res.Body)
 }
 
 func ResolvePath(baseURL, path string) string {
@@ -55,4 +45,28 @@ func ResolvePath(baseURL, path string) string {
 		return u.Scheme + "://" + u.Host + path
 	}
 	return path
+}
+
+func RecipeMustBe(rcp recipe.Recipe, want string) error {
+	got, _ := json.Marshal(rcp)
+	if want == "" {
+		fmt.Println(string(got))
+		return nil
+	}
+
+	if want != string(got) {
+		dmp := diffmatchpatch.New()
+		diffs := dmp.DiffMain(indent(want), indent(string(got)), false)
+		diffs = dmp.DiffCleanupSemantic(diffs)
+
+		return fmt.Errorf("%w: %v", errUnmatch, dmp.DiffPrettyText(diffs))
+	}
+	return nil
+}
+
+func indent(src string) string {
+	var x recipe.Recipe
+	json.Unmarshal([]byte(src), &x)
+	dst, _ := json.MarshalIndent(x, "", "  ")
+	return string(dst)
 }
