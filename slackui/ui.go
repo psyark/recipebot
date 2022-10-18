@@ -26,27 +26,27 @@ const (
 	ofTypeUpdateIngredients = ofType("updateIngredients")
 )
 
-type Service struct {
-	notion         *core.Service
+type UI struct {
+	core           *core.Service
 	client         *slack.Client
 	actionOverflow string
 }
 
-func New(slackClient *slack.Client, notionClient *notionapi.Client, registry *slackbot.Registry) *Service {
-	var svc *Service
-	svc = &Service{
-		notion:         core.New(notionClient),
+func New(slackClient *slack.Client, notionClient *notionapi.Client, registry *slackbot.Registry) *UI {
+	var ui *UI
+	ui = &UI{
+		core:           core.New(notionClient),
 		client:         slackClient,
-		actionOverflow: registry.GetActionID("overflow", func(args *slackbot.BlockActionHandlerArgs) error { return svc.onOverflow(args) }),
+		actionOverflow: registry.GetActionID("overflow", func(args *slackbot.BlockActionHandlerArgs) error { return ui.onOverflow(args) }),
 	}
-	return svc
+	return ui
 }
 
-func (b *Service) OnError(args *slackbot.ErrorHandlerArgs) {
+func (b *UI) OnError(args *slackbot.ErrorHandlerArgs) {
 	b.client.PostMessage(cookingChannelID, slack.MsgOptionText(fmt.Sprintf("⚠️ %v", args.Err.Error()), true))
 }
 
-func (b *Service) OnCallbackMessage(args *slackbot.MessageHandlerArgs) error {
+func (b *UI) OnCallbackMessage(args *slackbot.MessageHandlerArgs) error {
 	event := args.MessageEvent
 
 	if args.Request.Header.Get("X-Slack-Retry-Num") != "" {
@@ -69,7 +69,7 @@ func (b *Service) OnCallbackMessage(args *slackbot.MessageHandlerArgs) error {
 }
 
 // ReactMessageWithURL はURL付きのメッセージに反応します
-func (s *Service) ReactMessageWithURL(event *slackevents.MessageEvent, url string) error {
+func (s *UI) ReactMessageWithURL(event *slackevents.MessageEvent, url string) error {
 	ctx := context.Background()
 
 	// 砂時計のプレースホルダを出しておく
@@ -79,14 +79,14 @@ func (s *Service) ReactMessageWithURL(event *slackevents.MessageEvent, url strin
 	}
 
 	// URLに対応するレシピページを探す
-	page, err := s.notion.GetRecipeByURL(ctx, url)
+	page, err := s.core.GetRecipeByURL(ctx, url)
 	if err != nil {
 		return err
 	}
 
 	// レシピページがなければ作成
 	if page == nil {
-		page, err = s.notion.CreateRecipe(ctx, url)
+		page, err = s.core.CreateRecipe(ctx, url)
 		if err != nil {
 			return err
 		}
@@ -102,7 +102,7 @@ func (s *Service) ReactMessageWithURL(event *slackevents.MessageEvent, url strin
 	return err
 }
 
-func (s *Service) onOverflow(args *slackbot.BlockActionHandlerArgs) error {
+func (s *UI) onOverflow(args *slackbot.BlockActionHandlerArgs) error {
 	ctx := context.Background()
 
 	ofArgs := OverflowArgs{}
@@ -112,15 +112,15 @@ func (s *Service) onOverflow(args *slackbot.BlockActionHandlerArgs) error {
 
 	switch ofArgs.Type {
 	case ofTypeRebuildRecipe:
-		return s.notion.UpdateRecipe(ctx, ofArgs.PageID)
+		return s.core.UpdateRecipe(ctx, ofArgs.PageID)
 
 	case ofTypeUpdateIngredients:
-		stockMap, err := s.notion.GetStockMap(ctx)
+		stockMap, err := s.core.GetStockMap(ctx)
 		if err != nil {
 			return err
 		}
 
-		result, err := s.notion.UpdateRecipeIngredients(ctx, ofArgs.PageID, stockMap)
+		result, err := s.core.UpdateRecipeIngredients(ctx, ofArgs.PageID, stockMap)
 		if err != nil {
 			return err
 		}
@@ -155,12 +155,12 @@ func (s *Service) onOverflow(args *slackbot.BlockActionHandlerArgs) error {
 	}
 }
 
-func (b *Service) getRecipeBlocks(ctx context.Context, page *notionapi.Page) ([]slack.Block, error) {
+func (b *UI) getRecipeBlocks(ctx context.Context, page *notionapi.Page) ([]slack.Block, error) {
 	var pageURL string
 	var thumbnail *slack.Accessory
 
 	// タイトルの取得
-	pageTitle, err := b.notion.GetRecipeTitle(ctx, page.ID)
+	pageTitle, err := b.core.GetRecipeTitle(ctx, page.ID)
 	if err != nil {
 		return nil, err
 	}
