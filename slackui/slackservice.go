@@ -9,7 +9,7 @@ import (
 
 	"github.com/mvdan/xurls"
 	"github.com/psyark/notionapi"
-	"github.com/psyark/recipebot/service/notion"
+	"github.com/psyark/recipebot/core"
 	"github.com/psyark/slackbot"
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
@@ -27,7 +27,7 @@ const (
 )
 
 type Service struct {
-	notion         *notion.Service
+	notion         *core.Service
 	client         *slack.Client
 	actionOverflow string
 }
@@ -35,7 +35,7 @@ type Service struct {
 func New(slackClient *slack.Client, notionClient *notionapi.Client, registry *slackbot.Registry) *Service {
 	var svc *Service
 	svc = &Service{
-		notion:         notion.New(notionClient),
+		notion:         core.New(notionClient),
 		client:         slackClient,
 		actionOverflow: registry.GetActionID("overflow", func(args *slackbot.BlockActionHandlerArgs) error { return svc.onOverflow(args) }),
 	}

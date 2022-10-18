@@ -1,4 +1,4 @@
-package notion
+package core
 
 import (
 	"os"
@@ -10,7 +10,7 @@ import (
 var client *notionapi.Client
 
 func init() {
-	if err := godotenv.Load("../../test.env"); err != nil {
+	if err := godotenv.Load("../test.env"); err != nil {
 		panic(err)
 	}
 
