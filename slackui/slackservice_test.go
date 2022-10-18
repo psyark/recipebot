@@ -1,4 +1,4 @@
-package slack
+package slackui
 
 // func TestXxx(t *testing.T) {
 // 	ctx := context.Background()
