@@ -71,6 +71,7 @@ func (p *parser) Parse2(ctx context.Context, url string) (*rexch.Recipe, error) 
 	})
 
 	doc.Find(`#makeList ol li`).Each(func(i int, s *goquery.Selection) {
+		s.Find(`.num`).Remove() // 番号を削除
 		ist := rexch.Instruction{
 			Elements: []rexch.InstructionElement{
 				&rexch.TextInstructionElement{Text: strings.TrimSpace(s.Text())},
