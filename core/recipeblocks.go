@@ -21,19 +21,20 @@ func toBlocks(rcp recipe.Recipe) []notionapi.Block {
 		toHeading1("材料"),
 	}
 	for _, group := range rcp.IngredientGroups {
+		if group.Name == "" {
+			width := group.LongestNameWidth() + 1
+			for _, igd := range group.Children {
+				blocks = append(blocks, toIngredient(igd, width))
+			}
+		}
+	}
+	for _, group := range rcp.IngredientGroups {
 		if group.Name != "" {
 			blocks = append(blocks, toHeading3(group.Name))
-		}
-
-		width := group.LongestNameWidth() + 1
-		for _, idg := range group.Children {
-			todo := toToDo(idg.Name + strings.Repeat("　", width-idg.NameWidth()) + idg.Amount)
-			if idg.Comment != "" {
-				comment := toRichTextArray(" （" + idg.Comment + "）")
-				comment[0].Annotations = &notionapi.Annotations{Color: "green"}
-				todo.ToDo.RichText = append(todo.ToDo.RichText, comment...)
+			width := group.LongestNameWidth() + 1
+			for _, igd := range group.Children {
+				blocks = append(blocks, toIngredient(igd, width))
 			}
-			blocks = append(blocks, todo)
 		}
 	}
 	blocks = append(blocks, toHeading1("手順"))
@@ -69,6 +70,16 @@ func toToDo(str string) notionapi.Block {
 		Type:   "to_do",
 		ToDo:   notionapi.ToDoBlockData{RichText: toRichTextArray(str), Color: "default"},
 	}
+}
+
+func toIngredient(igd recipe.Ingredient, width int) notionapi.Block {
+	todo := toToDo(igd.Name + strings.Repeat("　", width-igd.NameWidth()) + igd.Amount)
+	if igd.Comment != "" {
+		comment := toRichTextArray(" （" + igd.Comment + "）")
+		comment[0].Annotations = &notionapi.Annotations{Color: "green"}
+		todo.ToDo.RichText = append(todo.ToDo.RichText, comment...)
+	}
+	return todo
 }
 
 func toCallout(str string, emoji string, images []string) notionapi.Block {
