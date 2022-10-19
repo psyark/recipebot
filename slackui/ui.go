@@ -184,7 +184,7 @@ func (b *UI) getRecipeBlocks(ctx context.Context, page *notionapi.Page) ([]slack
 
 	return []slack.Block{
 		slack.NewSectionBlock(
-			slack.NewTextBlockObject(slack.MarkdownType, fmt.Sprintf("*<%v|%v>*", strings.ReplaceAll(pageURL, "\n", ""), pageTitle), false, false),
+			slack.NewTextBlockObject(slack.MarkdownType, fmt.Sprintf("*<%v|%v>*", pageURL, strings.ReplaceAll(pageTitle, "\n", " ")), false, false),
 			nil,
 			thumbnail,
 		),
