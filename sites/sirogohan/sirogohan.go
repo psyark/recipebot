@@ -42,6 +42,9 @@ func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) 
 		}
 		s.Find(`li`).Each(func(i int, s *goquery.Selection) {
 			parts := strings.Split(s.Text(), "　…　")
+			if len(parts) == 1 {
+				parts = append(parts, "")
+			}
 			rcp.AddIngredient(groupName, recipe.Ingredient{
 				Name:   strings.TrimSpace(parts[0]),
 				Amount: strings.TrimSpace(parts[1]),
