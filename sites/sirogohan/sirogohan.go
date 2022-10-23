@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/psyark/recipebot/recipe"
+	"github.com/psyark/recipebot/rexch"
 	"github.com/psyark/recipebot/sites"
 
 	"github.com/PuerkitoBio/goquery"
@@ -13,6 +14,14 @@ import (
 type parser struct{}
 
 func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) {
+	rex, err := p.Parse2(ctx, url)
+	if err != nil {
+		return nil, err
+	}
+	return rex.BackCompat(), nil
+}
+
+func (p *parser) Parse2(ctx context.Context, url string) (*rexch.Recipe, error) {
 	url = p.normalizeURL(url)
 
 	if !strings.HasPrefix(url, "https://www.sirogohan.com/recipe/") {
@@ -24,7 +33,7 @@ func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) 
 		return nil, err
 	}
 
-	rcp := &recipe.Recipe{
+	rex := &rexch.Recipe{
 		// h1#recipe-name には余分な文言が入っている場合があるので使わない
 		Title: strings.TrimSuffix(strings.TrimSpace(doc.Find(`.howto .recipe-sttl`).Text()), "の作り方"),
 		Image: doc.Find(`p#recipe-main img`).AttrOr("src", ""),
@@ -45,23 +54,26 @@ func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) 
 			if len(parts) == 1 {
 				parts = append(parts, "")
 			}
-			rcp.AddIngredient(groupName, recipe.Ingredient{
-				Name:   strings.TrimSpace(parts[0]),
-				Amount: strings.TrimSpace(parts[1]),
-			})
+			igd := rexch.NewIngredient(strings.TrimSpace(parts[0]), strings.TrimSpace(parts[1]))
+			igd.Group = groupName
+			rex.Ingredients = append(rex.Ingredients, *igd)
 		})
 	})
 
 	doc.Find(`.howto-block`).Not(`#recipe_movie`).Each(func(i int, s *goquery.Selection) {
-		rcp.Steps = append(rcp.Steps, recipe.Step{
+		ist := rexch.Instruction{}
+		ist.Elements = append(ist.Elements, &rexch.TextInstructionElement{
 			Text: strings.TrimSpace(s.Text()),
-			Images: s.Find("img").Map(func(i int, s *goquery.Selection) string {
-				return sites.ResolvePath(url, s.AttrOr("src", ""))
-			}),
 		})
+		s.Find("img").Each(func(i int, s *goquery.Selection) {
+			ist.Elements = append(ist.Elements, &rexch.ImageInstructionElement{
+				URL: sites.ResolvePath(url, s.AttrOr("src", "")),
+			})
+		})
+		rex.Instructions = append(rex.Instructions, ist)
 	})
 
-	return rcp, nil
+	return rex, nil
 }
 
 func (p *parser) normalizeURL(url string) string {
@@ -74,6 +86,6 @@ func (p *parser) normalizeURL(url string) string {
 	return url
 }
 
-func NewParser() sites.Parser {
+func NewParser() sites.Parser2 {
 	return &parser{}
 }
