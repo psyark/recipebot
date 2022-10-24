@@ -1,4 +1,6 @@
-package jsonld
+// Package foodie はfoodieに特化したパーサです
+// foodieはJSONLDを提供していますが、内容があまりにも酷いので特別な対応を要します
+package foodie
 
 import (
 	"context"
@@ -13,6 +15,10 @@ import (
 type parser struct{}
 
 func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) {
+	if !strings.HasPrefix(url, "https://mi-journey.jp/foodie/") {
+		return nil, sites.ErrUnsupportedURL
+	}
+
 	doc, err := sites.NewDocumentFromURL(ctx, url)
 	if err != nil {
 		return nil, err
@@ -42,14 +48,22 @@ func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) 
 					rcp.Image = text
 				}
 			}
-			for _, text := range ldRcp.RecipeIngredient {
-				if text, ok := text.(string); ok {
-					fields := strings.SplitN(text, " ", 2)
-					ingr := recipe.Ingredient{Name: fields[0]}
-					if len(fields) == 2 {
-						ingr.Amount = fields[1]
+			for _, ingr := range ldRcp.RecipeIngredient {
+				switch ingr := ingr.(type) {
+				case string:
+					group := ""
+					ingr = strings.ReplaceAll(ingr, "\r", "\n") // 改行コード統一
+					for _, line := range strings.Split(ingr, "\n") {
+						line = strings.TrimSpace(line)
+						if line != "" {
+							if strings.Contains(line, "…") {
+								fields := strings.SplitN(line, "…", 2)
+								rcp.AddIngredient(group, recipe.GetIngredient(fields[0], fields[1]))
+							} else if strings.HasPrefix(line, "【") {
+								group = line
+							}
+						}
 					}
-					rcp.AddIngredient("", ingr)
 				}
 			}
 			for _, inst := range ldRcp.RecipeInstructions {
