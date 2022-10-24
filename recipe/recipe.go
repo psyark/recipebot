@@ -28,15 +28,15 @@ type Ingredient struct {
 }
 
 func GetIngredient(nameAndComment string, amount string) Ingredient {
-	idg := Ingredient{
+	igd := Ingredient{
 		Name:   width.Widen.String(strings.TrimSpace(nameAndComment)),
 		Amount: width.Fold.String(strings.TrimSpace(amount)),
 	}
-	if match := commentRegex.FindStringSubmatch(idg.Name); len(match) != 0 {
-		idg.Name = strings.TrimSuffix(idg.Name, match[0])
-		idg.Comment = match[1]
+	if match := commentRegex.FindStringSubmatch(igd.Name); len(match) != 0 {
+		igd.Name = strings.TrimSuffix(igd.Name, match[0])
+		igd.Comment = match[1]
 	}
-	return idg
+	return igd
 }
 
 type Step struct {

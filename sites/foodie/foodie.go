@@ -4,6 +4,7 @@ package foodie
 
 import (
 	"context"
+	"regexp"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
@@ -11,6 +12,8 @@ import (
 	"github.com/psyark/recipebot/recipe"
 	"github.com/psyark/recipebot/sites"
 )
+
+var nameAmountRegex = regexp.MustCompile(`([^…]+)…+([^…]+)`)
 
 type parser struct{}
 
@@ -56,9 +59,11 @@ func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) 
 					for _, line := range strings.Split(ingr, "\n") {
 						line = strings.TrimSpace(line)
 						if line != "" {
-							if strings.Contains(line, "…") {
-								fields := strings.SplitN(line, "…", 2)
-								rcp.AddIngredient(group, recipe.GetIngredient(fields[0], fields[1]))
+							line = strings.TrimPrefix(line, "・")
+							line = strings.TrimPrefix(line, "〇")
+
+							if match := nameAmountRegex.FindStringSubmatch(line); len(match) != 0 {
+								rcp.AddIngredient(group, recipe.GetIngredient(match[1], match[2]))
 							} else if strings.HasPrefix(line, "【") {
 								group = line
 							}
