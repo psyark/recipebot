@@ -13,7 +13,10 @@ import (
 	"github.com/psyark/recipebot/sites"
 )
 
-var nameAmountRegex = regexp.MustCompile(`([^…]+)…+([^…]+)`)
+var (
+	nameAmountRegex = regexp.MustCompile(`([^…]+)…+([^…]+)`)
+	instRegex       = regexp.MustCompile(`^\d+\.?`)
+)
 
 type parser struct{}
 
@@ -81,7 +84,7 @@ func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) 
 						}
 					}
 				case string:
-					step.Text = strings.TrimSpace(inst)
+					step.Text = instRegex.ReplaceAllString(strings.TrimSpace(inst), "")
 				}
 				rcp.Steps = append(rcp.Steps, step)
 			}
