@@ -2,54 +2,45 @@ package slackui
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"sort"
+	"net/http"
 	"strings"
 
 	"github.com/mvdan/xurls"
 	"github.com/psyark/notionapi"
 	"github.com/psyark/recipebot/core"
-	"github.com/psyark/slackbot"
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
 )
-
-type ofType string
 
 const (
 	// botChannelID     = "D03SNU2C80H"
 	botMemberID      = "U03SCN7MYEQ"
 	cookingChannelID = "C03SNSP9HNV" // #料理 チャンネル
-
-	ofTypeRebuildRecipe     = ofType("rebuildRecipe")
-	ofTypeUpdateIngredients = ofType("updateIngredients")
 )
 
 type UI struct {
-	core           *core.Service
-	client         *slack.Client
-	actionOverflow string
+	coreService             *core.Service
+	slackClient             *slack.Client
+	rebuildRecipeButton     *rebuildRecipeButton
+	updateIngredientsButton *updateIngredientsButton
+	buttons                 BlockActionReacters
+	modals                  ViewSubmissionReacters
 }
 
-func New(slackClient *slack.Client, notionClient *notionapi.Client, registry *slackbot.Registry) *UI {
-	var ui *UI
-	ui = &UI{
-		core:           core.New(notionClient),
-		client:         slackClient,
-		actionOverflow: registry.GetActionID("overflow", func(args *slackbot.BlockActionHandlerArgs) error { return ui.onOverflow(args) }),
+func New(slackClient *slack.Client, notionClient *notionapi.Client) *UI {
+	ui := &UI{coreService: core.New(notionClient), slackClient: slackClient}
+	ui.rebuildRecipeButton = &rebuildRecipeButton{ui}
+	ui.updateIngredientsButton = &updateIngredientsButton{ui}
+	ui.buttons = []BlockActionReacter{
+		ui.rebuildRecipeButton,
+		ui.updateIngredientsButton,
 	}
 	return ui
 }
 
-func (b *UI) OnError(args *slackbot.ErrorHandlerArgs) {
-	b.client.PostMessage(cookingChannelID, slack.MsgOptionText(fmt.Sprintf("⚠️ %v", args.Err.Error()), true))
-}
-
-func (b *UI) OnCallbackMessage(args *slackbot.MessageHandlerArgs) error {
-	event := args.MessageEvent
-
-	if args.Request.Header.Get("X-Slack-Retry-Num") != "" {
+func (b *UI) handleCallbackMessage(req *http.Request, event *slackevents.MessageEvent) error {
+	if req.Header.Get("X-Slack-Retry-Num") != "" {
 		return nil // リトライは無視
 	} else if event.User == botMemberID {
 		return nil // 自分のメッセージは無視
@@ -68,25 +59,49 @@ func (b *UI) OnCallbackMessage(args *slackbot.MessageHandlerArgs) error {
 	return nil
 }
 
+func (ui *UI) handleBlockAction(req *http.Request, callback *slack.InteractionCallback, action *slack.BlockAction) error {
+	ok, err := ui.buttons.React(callback, action)
+	if err != nil || ok {
+		return err
+	}
+
+	// if action.ActionID != ignore {
+	// 	return fmt.Errorf("block action unhandled: %v", action.ActionID)
+	// }
+	return nil
+}
+
+func (ui *UI) handleViewSubmission(req *http.Request, callback *slack.InteractionCallback) (*slack.ViewSubmissionResponse, error) {
+	ok, resp, err := ui.modals.React(callback)
+	if err != nil || ok {
+		return resp, err
+	}
+
+	// if callback.View.CallbackID != ignore {
+	// 	return nil, fmt.Errorf("view submission unhandled: %#v", callback.View.CallbackID)
+	// }
+	return nil, nil
+}
+
 // ReactMessageWithURL はURL付きのメッセージに反応します
 func (s *UI) ReactMessageWithURL(event *slackevents.MessageEvent, url string) error {
 	ctx := context.Background()
 
 	// 砂時計のプレースホルダを出しておく
-	_, msgTs, err := s.client.PostMessage(event.Channel, slack.MsgOptionText(":hourglass_flowing_sand:", false))
+	_, msgTs, err := s.slackClient.PostMessage(event.Channel, slack.MsgOptionText(":hourglass_flowing_sand:", false))
 	if err != nil {
 		return err
 	}
 
 	// URLに対応するレシピページを探す
-	page, err := s.core.GetRecipeByURL(ctx, url)
+	page, err := s.coreService.GetRecipeByURL(ctx, url)
 	if err != nil {
 		return err
 	}
 
 	// レシピページがなければ作成
 	if page == nil {
-		page, err = s.core.CreateRecipe(ctx, url)
+		page, err = s.coreService.CreateRecipe(ctx, url)
 		if err != nil {
 			return err
 		}
@@ -98,61 +113,8 @@ func (s *UI) ReactMessageWithURL(event *slackevents.MessageEvent, url string) er
 		return err
 	}
 
-	_, _, _, err = s.client.UpdateMessage(event.Channel, msgTs, slack.MsgOptionBlocks(blocks...))
+	_, _, _, err = s.slackClient.UpdateMessage(event.Channel, msgTs, slack.MsgOptionBlocks(blocks...))
 	return err
-}
-
-func (s *UI) onOverflow(args *slackbot.BlockActionHandlerArgs) error {
-	ctx := context.Background()
-
-	ofArgs := OverflowArgs{}
-	if err := json.Unmarshal([]byte(args.BlockAction.SelectedOption.Value), &ofArgs); err != nil {
-		return err
-	}
-
-	switch ofArgs.Type {
-	case ofTypeRebuildRecipe:
-		return s.core.UpdateRecipe(ctx, ofArgs.PageID)
-
-	case ofTypeUpdateIngredients:
-		stockMap, err := s.core.GetStockMap(ctx)
-		if err != nil {
-			return err
-		}
-
-		result, err := s.core.UpdateRecipeIngredients(ctx, ofArgs.PageID, stockMap)
-		if err != nil {
-			return err
-		}
-
-		foundItems := []string{}
-		notFoundItems := []string{}
-		for name, found := range result {
-			if found {
-				foundItems = append(foundItems, name)
-			} else {
-				notFoundItems = append(notFoundItems, name)
-			}
-		}
-
-		if len(foundItems) != 0 {
-			sort.Strings(foundItems)
-			_, _, err := s.client.PostMessage(args.InteractionCallback.Channel.ID, slack.MsgOptionText(fmt.Sprintf("材料を設定しました: %v", foundItems), true))
-			if err != nil {
-				return err
-			}
-		}
-		if len(notFoundItems) != 0 {
-			sort.Strings(notFoundItems)
-			_, _, err := s.client.PostMessage(args.InteractionCallback.Channel.ID, slack.MsgOptionText(fmt.Sprintf("材料が見つかりませんでした: %v", notFoundItems), true))
-			if err != nil {
-				return err
-			}
-		}
-		return nil
-	default:
-		return fmt.Errorf("unknown ofType: %v", ofArgs.Type)
-	}
 }
 
 func (b *UI) getRecipeBlocks(ctx context.Context, page *notionapi.Page) ([]slack.Block, error) {
@@ -160,7 +122,7 @@ func (b *UI) getRecipeBlocks(ctx context.Context, page *notionapi.Page) ([]slack
 	var thumbnail *slack.Accessory
 
 	// タイトルの取得
-	pageTitle, err := b.core.GetRecipeTitle(ctx, page.ID)
+	pageTitle, err := b.coreService.GetRecipeTitle(ctx, page.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -188,24 +150,10 @@ func (b *UI) getRecipeBlocks(ctx context.Context, page *notionapi.Page) ([]slack
 			nil,
 			thumbnail,
 		),
-		slack.NewSectionBlock(
-			slack.NewTextBlockObject(slack.MarkdownType, "*このレシピの操作*", false, false),
-			nil,
-			slack.NewAccessory(slack.NewOverflowBlockElement(
-				b.actionOverflow,
-				slack.NewOptionBlockObject(OverflowArgs{ofTypeRebuildRecipe, page.ID}.String(), slack.NewTextBlockObject(slack.PlainTextType, "レシピを再構築", false, false), nil),
-				slack.NewOptionBlockObject(OverflowArgs{ofTypeUpdateIngredients, page.ID}.String(), slack.NewTextBlockObject(slack.PlainTextType, "主な材料を更新", false, false), nil),
-			)),
+		slack.NewActionBlock(
+			"",
+			b.rebuildRecipeButton.Render(page.ID),
+			b.updateIngredientsButton.Render(page.ID),
 		),
 	}, nil
-}
-
-type OverflowArgs struct {
-	Type   ofType `json:"type"`
-	PageID string `json:"page_id"`
-}
-
-func (a OverflowArgs) String() string {
-	data, _ := json.Marshal(a)
-	return string(data)
 }

@@ -204,13 +204,10 @@ github.com/psyark/jsonld v0.0.0-20221024015310-f6b6cba323ae h1:U4ZlYdX8LwdbAZZHG
 github.com/psyark/jsonld v0.0.0-20221024015310-f6b6cba323ae/go.mod h1:uootRS/s5cPfUC8IYEpgtZnwjkvQxJ9eWFMdvB/hCgw=
 github.com/psyark/notionapi v0.0.0-20221005024044-6d36d5bffc5a h1:SCR2c1MdKxc51DwqfeOEwbFU32joxQFOMUWPJCT+BYs=
 github.com/psyark/notionapi v0.0.0-20221005024044-6d36d5bffc5a/go.mod h1:gtp29ZJahnm4d9pi+me5zZcMfahnG4OTBLag4BqbZtY=
-github.com/psyark/slackbot v0.0.0-20221001084604-53e16179df81 h1:B39rq8cIAm8o+lLv9xkFk8P3c4F/ljInhaPrh/cg5hE=
-github.com/psyark/slackbot v0.0.0-20221001084604-53e16179df81/go.mod h1:H1fkDsKVc4rRmZM6ZTc4FWTMVu6tAyaYRDNFtbwpJWg=
 github.com/rogpeppe/fastuuid v1.2.0/go.mod h1:jVj6XXZzXRy/MSR5jhDC/2q6DgLz+nrA6LYCDYWNEvQ=
 github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
 github.com/sergi/go-diff v1.2.0 h1:XU+rvMAioB0UC3q1MFrIQy4Vo5/4VsRDQQXHsEya6xQ=
 github.com/sergi/go-diff v1.2.0/go.mod h1:STckp+ISIX8hZLjrqAeVduY0gWCT9IjLuqbuNXdaHfM=
-github.com/slack-go/slack v0.11.2/go.mod h1:hlGi5oXA+Gt+yWTPP0plCdRKmjsDxecdHxYQdlMQKOw=
 github.com/slack-go/slack v0.11.3 h1:GN7revxEMax4amCc3El9a+9SGnjmBvSUobs0QnO6ZO8=
 github.com/slack-go/slack v0.11.3/go.mod h1:hlGi5oXA+Gt+yWTPP0plCdRKmjsDxecdHxYQdlMQKOw=
 github.com/spaolacci/murmur3 v0.0.0-20180118202830-f09979ecbc72/go.mod h1:JwIasOWyU6f++ZhiEuf87xNszmSA2myDM2Kzu9HwQUA=
