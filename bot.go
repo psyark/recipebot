@@ -6,9 +6,9 @@ import (
 
 	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 	"github.com/psyark/notionapi"
+	"github.com/psyark/recipebot/async"
 	"github.com/psyark/recipebot/core"
 	"github.com/psyark/recipebot/slackui"
-	"github.com/psyark/recipebot/task"
 	"github.com/slack-go/slack"
 )
 
@@ -24,9 +24,9 @@ https://api.slack.com/apps/A03SNSS0S81
 */
 
 var (
-	coreService = core.New(notionapi.NewClient(os.Getenv("NOTION_API_KEY")))
-	ui          = slackui.New(slack.New(os.Getenv("SLACK_BOT_USER_OAUTH_TOKEN")), coreService)
-	taskHandler = task.NewHandler(coreService)
+	coreService  = core.New(notionapi.NewClient(os.Getenv("NOTION_API_KEY")))
+	ui           = slackui.New(slack.New(os.Getenv("SLACK_BOT_USER_OAUTH_TOKEN")), coreService)
+	asyncHandler = async.NewHandler(coreService)
 )
 
 func init() {
@@ -35,7 +35,7 @@ func init() {
 
 func HandleHTTP(rw http.ResponseWriter, req *http.Request) {
 	if _, ok := req.Header["X-Cloudtasks-Queuename"]; ok {
-		if err := taskHandler.HandleCloudTasksRequest(rw, req); err != nil {
+		if err := asyncHandler.HandleCloudTasksRequest(rw, req); err != nil {
 			ui.ShowError(err)
 			rw.WriteHeader(http.StatusInternalServerError)
 		}

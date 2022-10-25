@@ -3,7 +3,7 @@ package slackui
 import (
 	"context"
 
-	"github.com/psyark/recipebot/task"
+	"github.com/psyark/recipebot/async"
 	"github.com/slack-go/slack"
 )
 
@@ -22,5 +22,5 @@ func (b *rebuildRecipeButton) React(callback *slack.InteractionCallback, action 
 	}
 
 	ctx := context.Background()
-	return true, task.CreateRebuildRecipeTask(ctx, action.Value)
+	return true, async.RebuildRecipe(ctx, action.Value)
 }

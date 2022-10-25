@@ -1,4 +1,4 @@
-package task
+package async
 
 import (
 	"context"
@@ -17,7 +17,7 @@ type payload struct {
 	RecipeID string `json:"recipeID"`
 }
 
-func CreateRebuildRecipeTask(ctx context.Context, recipeID string) error {
+func RebuildRecipe(ctx context.Context, recipeID string) error {
 	return createTask(ctx, payload{Type: rebuildRecipe, RecipeID: recipeID})
 }
 
