@@ -25,8 +25,9 @@ https://api.slack.com/apps/A03SNSS0S81
 
 var (
 	coreService  = core.New(notionapi.NewClient(os.Getenv("NOTION_API_KEY")))
-	ui           = slackui.New(slack.New(os.Getenv("SLACK_BOT_USER_OAUTH_TOKEN")), coreService)
-	asyncHandler = async.NewHandler(coreService)
+	slackClient  = slack.New(os.Getenv("SLACK_BOT_USER_OAUTH_TOKEN"))
+	slackUI      = slackui.New(coreService, slackClient)
+	asyncHandler = async.NewHandler(coreService, slackClient)
 )
 
 func init() {
@@ -36,11 +37,11 @@ func init() {
 func HandleHTTP(rw http.ResponseWriter, req *http.Request) {
 	if _, ok := req.Header["X-Cloudtasks-Queuename"]; ok {
 		if err := asyncHandler.HandleCloudTasksRequest(rw, req); err != nil {
-			ui.ShowError(err)
+			slackUI.ShowError(err)
 			rw.WriteHeader(http.StatusInternalServerError)
 		}
 	} else {
 		// slackuiに処理させる
-		ui.HandleHTTP(rw, req)
+		slackUI.HandleHTTP(rw, req)
 	}
 }

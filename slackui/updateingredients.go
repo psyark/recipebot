@@ -2,9 +2,8 @@ package slackui
 
 import (
 	"context"
-	"fmt"
-	"sort"
 
+	"github.com/psyark/recipebot/async"
 	"github.com/slack-go/slack"
 )
 
@@ -22,42 +21,5 @@ func (b *updateIngredientsButton) React(callback *slack.InteractionCallback, act
 		return false, nil
 	}
 
-	ctx := context.Background()
-
-	stockMap, err := b.ui.coreService.GetStockMap(ctx)
-	if err != nil {
-		return true, err
-	}
-
-	result, err := b.ui.coreService.UpdateRecipeIngredients(ctx, action.Value, stockMap)
-	if err != nil {
-		return true, err
-	}
-
-	foundItems := []string{}
-	notFoundItems := []string{}
-	for name, found := range result {
-		if found {
-			foundItems = append(foundItems, name)
-		} else {
-			notFoundItems = append(notFoundItems, name)
-		}
-	}
-
-	if len(foundItems) != 0 {
-		sort.Strings(foundItems)
-		_, _, err := b.ui.slackClient.PostMessage(callback.Channel.ID, slack.MsgOptionText(fmt.Sprintf("材料を設定しました: %v", foundItems), true))
-		if err != nil {
-			return true, err
-		}
-	}
-	if len(notFoundItems) != 0 {
-		sort.Strings(notFoundItems)
-		_, _, err := b.ui.slackClient.PostMessage(callback.Channel.ID, slack.MsgOptionText(fmt.Sprintf("材料が見つかりませんでした: %v", notFoundItems), true))
-		if err != nil {
-			return true, err
-		}
-	}
-
-	return true, nil
+	return true, async.UpdateIngredients(context.Background(), action.Value)
 }

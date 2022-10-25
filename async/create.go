@@ -9,7 +9,8 @@ import (
 )
 
 const (
-	rebuildRecipe = "rebuildRecipe"
+	rebuildRecipe     = "rebuildRecipe"
+	updateIngredients = "updateIngredients"
 )
 
 type payload struct {
@@ -19,6 +20,10 @@ type payload struct {
 
 func RebuildRecipe(ctx context.Context, recipeID string) error {
 	return createTask(ctx, payload{Type: rebuildRecipe, RecipeID: recipeID})
+}
+
+func UpdateIngredients(ctx context.Context, recipeID string) error {
+	return createTask(ctx, payload{Type: updateIngredients, RecipeID: recipeID})
 }
 
 func createTask(ctx context.Context, pay payload) error {
