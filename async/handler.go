@@ -32,16 +32,16 @@ func (h *Handler) HandleCloudTasksRequest(rw http.ResponseWriter, req *http.Requ
 	// X-Cloudtasks-Taskname:[05885295116503454631]
 	// X-Cloudtasks-Taskretrycount:[0]
 
-	pay := payload{}
+	pay := Payload{}
 	if err := json.NewDecoder(req.Body).Decode(&pay); err != nil {
 		return err
 	}
 
 	switch pay.Type {
-	case rebuildRecipe:
+	case TypeRebuildRecipe:
 		return h.coreService.UpdateRecipe(context.Background(), pay.RecipeID)
 
-	case updateIngredients:
+	case TypeUpdateIngredients:
 		ctx := context.Background()
 
 		_, _, err := h.slackClient.PostMessage(cookingChannelID, slack.MsgOptionText("材料を設定します", true))

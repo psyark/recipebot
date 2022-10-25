@@ -9,24 +9,16 @@ import (
 )
 
 const (
-	rebuildRecipe     = "rebuildRecipe"
-	updateIngredients = "updateIngredients"
+	TypeRebuildRecipe     = "rebuildRecipe"
+	TypeUpdateIngredients = "updateIngredients"
 )
 
-type payload struct {
+type Payload struct {
 	Type     string `json:"type"`
 	RecipeID string `json:"recipeID"`
 }
 
-func RebuildRecipe(ctx context.Context, recipeID string) error {
-	return createTask(ctx, payload{Type: rebuildRecipe, RecipeID: recipeID})
-}
-
-func UpdateIngredients(ctx context.Context, recipeID string) error {
-	return createTask(ctx, payload{Type: updateIngredients, RecipeID: recipeID})
-}
-
-func createTask(ctx context.Context, pay payload) error {
+func CallAsync(ctx context.Context, pay Payload) error {
 	ctCli, err := cloudtasks.NewClient(ctx)
 	if err != nil {
 		return err

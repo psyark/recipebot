@@ -8,6 +8,7 @@ import (
 
 	"github.com/mvdan/xurls"
 	"github.com/psyark/notionapi"
+	"github.com/psyark/recipebot/async"
 	"github.com/psyark/recipebot/core"
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
@@ -22,8 +23,8 @@ const (
 type UI struct {
 	coreService             *core.Service
 	slackClient             *slack.Client
-	rebuildRecipeButton     *rebuildRecipeButton
-	updateIngredientsButton *updateIngredientsButton
+	rebuildRecipeButton     *asyncButton
+	updateIngredientsButton *asyncButton
 	buttons                 BlockActionReacters
 	modals                  ViewSubmissionReacters
 }
@@ -33,8 +34,8 @@ func New(coreService *core.Service, slackClient *slack.Client) *UI {
 		coreService: coreService,
 		slackClient: slackClient,
 	}
-	ui.rebuildRecipeButton = &rebuildRecipeButton{ui}
-	ui.updateIngredientsButton = &updateIngredientsButton{ui}
+	ui.rebuildRecipeButton = &asyncButton{ui: ui, actionID: "rebuildRecipe", label: "レシピを再構築", asyncType: async.TypeRebuildRecipe}
+	ui.updateIngredientsButton = &asyncButton{ui: ui, actionID: "updateIngredients", label: "主な材料を更新", asyncType: async.TypeUpdateIngredients}
 	ui.buttons = []BlockActionReacter{
 		ui.rebuildRecipeButton,
 		ui.updateIngredientsButton,
