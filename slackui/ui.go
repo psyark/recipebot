@@ -28,8 +28,8 @@ type UI struct {
 	modals                  ViewSubmissionReacters
 }
 
-func New(slackClient *slack.Client, notionClient *notionapi.Client) *UI {
-	ui := &UI{coreService: core.New(notionClient), slackClient: slackClient}
+func New(slackClient *slack.Client, coreService *core.Service) *UI {
+	ui := &UI{coreService: coreService, slackClient: slackClient}
 	ui.rebuildRecipeButton = &rebuildRecipeButton{ui}
 	ui.updateIngredientsButton = &updateIngredientsButton{ui}
 	ui.buttons = []BlockActionReacter{

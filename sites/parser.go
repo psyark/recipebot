@@ -1,7 +1,6 @@
 package sites
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -13,7 +12,6 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"github.com/psyark/recipebot/recipe"
 	"github.com/psyark/recipebot/rexch"
-	"github.com/sergi/go-diff/diffmatchpatch"
 )
 
 var (
@@ -62,11 +60,12 @@ func RecipeMustBe(rcp recipe.Recipe, want string) error {
 	}
 
 	if want != string(got) {
-		dmp := diffmatchpatch.New()
-		diffs := dmp.DiffMain(indent(want), indent(string(got)), false)
-		diffs = dmp.DiffCleanupSemantic(diffs)
+		return errUnmatch
+		// // dmp := diffmatchpatch.New()
+		// // diffs := dmp.DiffMain(indent(want), indent(string(got)), false)
+		// // diffs = dmp.DiffCleanupSemantic(diffs)
 
-		return fmt.Errorf("%w: %v", errUnmatch, DiffPrettyText(diffs))
+		// return fmt.Errorf("%w: %v", errUnmatch, DiffPrettyText(diffs))
 	}
 	return nil
 }
@@ -79,11 +78,12 @@ func RecipeMustBe2(rex *rexch.Recipe, want string) error {
 	}
 
 	if want != string(got) {
-		dmp := diffmatchpatch.New()
-		diffs := dmp.DiffMain(indent2(want), indent2(string(got)), false)
-		diffs = dmp.DiffCleanupSemantic(diffs)
+		return errUnmatch
+		// dmp := diffmatchpatch.New()
+		// diffs := dmp.DiffMain(indent2(want), indent2(string(got)), false)
+		// diffs = dmp.DiffCleanupSemantic(diffs)
 
-		return fmt.Errorf("%w: %v", errUnmatch, DiffPrettyText(diffs))
+		// return fmt.Errorf("%w: %v", errUnmatch, DiffPrettyText(diffs))
 	}
 	return nil
 }
@@ -102,24 +102,24 @@ func indent2(src string) string {
 	return string(dst)
 }
 
-func DiffPrettyText(diffs []diffmatchpatch.Diff) string {
-	var buff bytes.Buffer
-	for _, diff := range diffs {
-		text := diff.Text
+// func DiffPrettyText(diffs []diffmatchpatch.Diff) string {
+// 	var buff bytes.Buffer
+// 	for _, diff := range diffs {
+// 		text := diff.Text
 
-		switch diff.Type {
-		case diffmatchpatch.DiffInsert:
-			_, _ = buff.WriteString("🍣")
-			_, _ = buff.WriteString(text)
-			_, _ = buff.WriteString("🍣")
-		case diffmatchpatch.DiffDelete:
-			_, _ = buff.WriteString("🍰")
-			_, _ = buff.WriteString(text)
-			_, _ = buff.WriteString("🍰")
-		case diffmatchpatch.DiffEqual:
-			_, _ = buff.WriteString(text)
-		}
-	}
+// 		switch diff.Type {
+// 		case diffmatchpatch.DiffInsert:
+// 			_, _ = buff.WriteString("🍣")
+// 			_, _ = buff.WriteString(text)
+// 			_, _ = buff.WriteString("🍣")
+// 		case diffmatchpatch.DiffDelete:
+// 			_, _ = buff.WriteString("🍰")
+// 			_, _ = buff.WriteString(text)
+// 			_, _ = buff.WriteString("🍰")
+// 		case diffmatchpatch.DiffEqual:
+// 			_, _ = buff.WriteString(text)
+// 		}
+// 	}
 
-	return buff.String()
-}
+// 	return buff.String()
+// }
