@@ -14,7 +14,7 @@ func (ui *UI) UpdateIngredientsWithInteraction(ctx context.Context, pay async.Pa
 		return nil
 	}
 
-	if err := ui.UpdateRecipeMessage(ctx, pay.ChannelID, pay.Timestamp, page, &RecipeBlocksOption{IsUpdateIngredientsButtonActive: true}); err != nil {
+	if err := ui.UpdateRecipeMessage(ctx, pay.ChannelID, pay.Timestamp, page, &RecipeMessageOption{IsUpdateIngredientsButtonActive: true}); err != nil {
 		return nil
 	}
 
@@ -48,7 +48,7 @@ func (ui *UI) UpdateIngredientsWithInteraction(ctx context.Context, pay async.Pa
 		additonalText += fmt.Sprintf("材料が見つかりませんでした: %v\n", notFoundItems)
 	}
 
-	if err := ui.UpdateRecipeMessage(ctx, pay.ChannelID, pay.Timestamp, page, &RecipeBlocksOption{AdditionalText: additonalText}); err != nil {
+	if err := ui.UpdateRecipeMessage(ctx, pay.ChannelID, pay.Timestamp, page, &RecipeMessageOption{AdditionalText: additonalText}); err != nil {
 		return nil
 	}
 

@@ -103,12 +103,12 @@ func (s *UI) ReactMessageWithURL(event *slackevents.MessageEvent, url string) er
 }
 
 // UpdateRecipeMessageは指定したメッセージを新たなレシピメッセージで更新します
-func (ui *UI) UpdateRecipeMessage(ctx context.Context, channelID, timestamp string, page *notionapi.Page, option *RecipeBlocksOption) error {
+func (ui *UI) UpdateRecipeMessage(ctx context.Context, channelID, timestamp string, page *notionapi.Page, option *RecipeMessageOption) error {
 	var pageURL string
 	var thumbnail slack.BlockElement
 
 	if option == nil {
-		option = &RecipeBlocksOption{}
+		option = &RecipeMessageOption{}
 	}
 
 	// タイトルの取得
@@ -154,7 +154,8 @@ func (ui *UI) UpdateRecipeMessage(ctx context.Context, channelID, timestamp stri
 	return err
 }
 
-type RecipeBlocksOption struct {
+type RecipeMessageOption struct {
+	// TODO ここにタイトル・URL・画像を追加することで UpdateRecipeMessage にレシピを不要にする
 	IsRebuildRecipeButtonActive     bool
 	IsUpdateIngredientsButtonActive bool
 	AdditionalText                  string
