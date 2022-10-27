@@ -9,14 +9,17 @@ import (
 
 // asyncButton は「主な材料を更新」ボタンです
 type asyncButton struct {
-	ui        *UI
 	actionID  string
 	label     string
 	asyncType string
 }
 
-func (b *asyncButton) Render(pageID string) slack.BlockElement {
-	return button(b.actionID, pageID, b.label)
+func (b *asyncButton) Render(pageID string, active bool) slack.BlockElement {
+	elem := button(b.actionID, pageID, b.label)
+	if active {
+		elem.Style = slack.StyleDanger
+	}
+	return elem
 }
 
 func (b *asyncButton) React(callback *slack.InteractionCallback, action *slack.BlockAction) (bool, error) {
@@ -24,5 +27,12 @@ func (b *asyncButton) React(callback *slack.InteractionCallback, action *slack.B
 		return false, nil
 	}
 
-	return true, async.CallAsync(context.Background(), async.Payload{Type: b.asyncType, RecipeID: action.Value})
+	pay := async.Payload{
+		Type:      b.asyncType,
+		ChannelID: callback.Channel.ID,
+		Timestamp: callback.Message.Timestamp,
+		RecipeID:  action.Value,
+	}
+
+	return true, async.CallAsync(context.Background(), pay)
 }

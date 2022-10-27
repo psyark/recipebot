@@ -14,8 +14,10 @@ const (
 )
 
 type Payload struct {
-	Type     string `json:"type"`
-	RecipeID string `json:"recipeID"`
+	Type      string `json:"type"`
+	ChannelID string `json:"channelID"`
+	Timestamp string `json:"timestamp"`
+	RecipeID  string `json:"recipeID"`
 }
 
 func CallAsync(ctx context.Context, pay Payload) error {

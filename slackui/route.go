@@ -69,21 +69,21 @@ func (ui *UI) handlePostRequest(rw http.ResponseWriter, req *http.Request) error
 		}
 		return nil
 
-	case string(slack.InteractionTypeViewSubmission):
-		callback := slack.InteractionCallback{}
-		if err := json.Unmarshal(payload, &callback); err != nil {
-			return fmt.Errorf("json.Unmarshal(%#v): %w", payload, err)
-		}
+	// case string(slack.InteractionTypeViewSubmission):
+	// 	callback := slack.InteractionCallback{}
+	// 	if err := json.Unmarshal(payload, &callback); err != nil {
+	// 		return fmt.Errorf("json.Unmarshal(%#v): %w", payload, err)
+	// 	}
 
-		if res, err := ui.handleViewSubmission(req, &callback); err != nil {
-			return err
-		} else if res != nil {
-			rw.Header().Add("Content-Type", "application/json")
-			rw.WriteHeader(http.StatusOK)
-			return json.NewEncoder(rw).Encode(res)
-		} else {
-			return nil
-		}
+	// 	if res, err := ui.handleViewSubmission(req, &callback); err != nil {
+	// 		return err
+	// 	} else if res != nil {
+	// 		rw.Header().Add("Content-Type", "application/json")
+	// 		rw.WriteHeader(http.StatusOK)
+	// 		return json.NewEncoder(rw).Encode(res)
+	// 	} else {
+	// 		return nil
+	// 	}
 
 	default:
 		return fmt.Errorf("unknown type: %#v", event.Type)

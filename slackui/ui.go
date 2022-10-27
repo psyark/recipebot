@@ -26,7 +26,6 @@ type UI struct {
 	rebuildRecipeButton     *asyncButton
 	updateIngredientsButton *asyncButton
 	buttons                 BlockActionReacters
-	modals                  ViewSubmissionReacters
 }
 
 func New(coreService *core.Service, slackClient *slack.Client) *UI {
@@ -34,8 +33,8 @@ func New(coreService *core.Service, slackClient *slack.Client) *UI {
 		coreService: coreService,
 		slackClient: slackClient,
 	}
-	ui.rebuildRecipeButton = &asyncButton{ui: ui, actionID: "rebuildRecipe", label: "レシピを再構築", asyncType: async.TypeRebuildRecipe}
-	ui.updateIngredientsButton = &asyncButton{ui: ui, actionID: "updateIngredients", label: "主な材料を更新", asyncType: async.TypeUpdateIngredients}
+	ui.rebuildRecipeButton = &asyncButton{actionID: "rebuildRecipe", label: "レシピを再構築", asyncType: async.TypeRebuildRecipe}
+	ui.updateIngredientsButton = &asyncButton{actionID: "updateIngredients", label: "主な材料を更新", asyncType: async.TypeUpdateIngredients}
 	ui.buttons = []BlockActionReacter{
 		ui.rebuildRecipeButton,
 		ui.updateIngredientsButton,
@@ -75,18 +74,6 @@ func (ui *UI) handleBlockAction(req *http.Request, callback *slack.InteractionCa
 	return nil
 }
 
-func (ui *UI) handleViewSubmission(req *http.Request, callback *slack.InteractionCallback) (*slack.ViewSubmissionResponse, error) {
-	ok, resp, err := ui.modals.React(callback)
-	if err != nil || ok {
-		return resp, err
-	}
-
-	// if callback.View.CallbackID != ignore {
-	// 	return nil, fmt.Errorf("view submission unhandled: %#v", callback.View.CallbackID)
-	// }
-	return nil, nil
-}
-
 // ReactMessageWithURL はURL付きのメッセージに反応します
 func (s *UI) ReactMessageWithURL(event *slackevents.MessageEvent, url string) error {
 	ctx := context.Background()
@@ -112,23 +99,22 @@ func (s *UI) ReactMessageWithURL(event *slackevents.MessageEvent, url string) er
 	}
 
 	// プレースホルダを更新
-	blocks, err := s.getRecipeBlocks(ctx, page)
-	if err != nil {
-		return err
-	}
-
-	_, _, _, err = s.slackClient.UpdateMessage(event.Channel, msgTs, slack.MsgOptionBlocks(blocks...))
-	return err
+	return s.UpdateRecipeMessage(ctx, event.Channel, msgTs, page, nil)
 }
 
-func (b *UI) getRecipeBlocks(ctx context.Context, page *notionapi.Page) ([]slack.Block, error) {
+// UpdateRecipeMessageは指定したメッセージを新たなレシピメッセージで更新します
+func (ui *UI) UpdateRecipeMessage(ctx context.Context, channelID, timestamp string, page *notionapi.Page, option *RecipeBlocksOption) error {
 	var pageURL string
-	var thumbnail *slack.Accessory
+	var thumbnail slack.BlockElement
+
+	if option == nil {
+		option = &RecipeBlocksOption{}
+	}
 
 	// タイトルの取得
-	pageTitle, err := b.coreService.GetRecipeTitle(ctx, page.ID)
+	pageTitle, err := ui.coreService.GetRecipeTitle(ctx, page.ID)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if pageTitle == "" {
 		pageTitle = "無題"
@@ -142,22 +128,34 @@ func (b *UI) getRecipeBlocks(ctx context.Context, page *notionapi.Page) ([]slack
 	}
 	if page.Cover != nil {
 		if page.Cover.External != nil {
-			thumbnail = slack.NewAccessory(slack.NewImageBlockElement(page.Cover.External.URL, "レシピの写真"))
+			thumbnail = slack.NewImageBlockElement(page.Cover.External.URL, "レシピの写真")
 		} else if page.Cover.File != nil {
-			thumbnail = slack.NewAccessory(slack.NewImageBlockElement(page.Cover.File.URL, "レシピの写真"))
+			thumbnail = slack.NewImageBlockElement(page.Cover.File.URL, "レシピの写真")
 		}
 	}
 
-	return []slack.Block{
-		slack.NewSectionBlock(
-			slack.NewTextBlockObject(slack.MarkdownType, fmt.Sprintf("*<%v|%v>*", pageURL, strings.ReplaceAll(pageTitle, "\n", " ")), false, false),
-			nil,
+	blocks := []slack.Block{
+		section(
+			mrkdwn(fmt.Sprintf("*<%v|%v>*", pageURL, strings.ReplaceAll(pageTitle, "\n", " "))),
 			thumbnail,
 		),
 		slack.NewActionBlock(
 			"",
-			b.rebuildRecipeButton.Render(page.ID),
-			b.updateIngredientsButton.Render(page.ID),
+			ui.rebuildRecipeButton.Render(page.ID, option.IsRebuildRecipeButtonActive),
+			ui.updateIngredientsButton.Render(page.ID, option.IsUpdateIngredientsButtonActive),
 		),
-	}, nil
+	}
+
+	if strings.TrimSpace(option.AdditionalText) != "" {
+		blocks = append(blocks, section(plain(strings.TrimSpace(option.AdditionalText)), nil))
+	}
+
+	_, _, _, err = ui.slackClient.UpdateMessage(channelID, timestamp, slack.MsgOptionBlocks(blocks...))
+	return err
+}
+
+type RecipeBlocksOption struct {
+	IsRebuildRecipeButtonActive     bool
+	IsUpdateIngredientsButtonActive bool
+	AdditionalText                  string
 }

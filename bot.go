@@ -6,7 +6,7 @@ import (
 
 	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
 	"github.com/psyark/notionapi"
-	"github.com/psyark/recipebot/async"
+	"github.com/psyark/recipebot/async/handler"
 	"github.com/psyark/recipebot/core"
 	"github.com/psyark/recipebot/slackui"
 	"github.com/slack-go/slack"
@@ -27,7 +27,7 @@ var (
 	coreService  = core.New(notionapi.NewClient(os.Getenv("NOTION_API_KEY")))
 	slackClient  = slack.New(os.Getenv("SLACK_BOT_USER_OAUTH_TOKEN"))
 	slackUI      = slackui.New(coreService, slackClient)
-	asyncHandler = async.NewHandler(coreService, slackClient)
+	asyncHandler = handler.NewHandler(coreService, slackClient, slackUI)
 )
 
 func init() {
