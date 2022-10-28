@@ -14,10 +14,6 @@ func (ui *UI) UpdateIngredientsWithInteraction(ctx context.Context, pay async.Pa
 		return nil
 	}
 
-	// if err := ui.UpdateRecipeMessage(ctx, pay.ChannelID, pay.Timestamp, page, &RecipeMessageOption{IsUpdateIngredientsButtonActive: true}); err != nil {
-	// 	return nil
-	// }
-
 	stockMap, err := ui.coreService.GetStockMap(ctx)
 	if err != nil {
 		return err
@@ -38,19 +34,15 @@ func (ui *UI) UpdateIngredientsWithInteraction(ctx context.Context, pay async.Pa
 		}
 	}
 
-	additonalText := ""
+	opt := &RecipeMessageOption{}
 	if len(foundItems) != 0 {
 		sort.Strings(foundItems)
-		additonalText += fmt.Sprintf("材料を設定しました: %v\n", foundItems)
+		opt.AdditionalText += fmt.Sprintf("材料を設定しました: %v\n", foundItems)
 	}
 	if len(notFoundItems) != 0 {
 		sort.Strings(notFoundItems)
-		additonalText += fmt.Sprintf("材料が見つかりませんでした: %v\n", notFoundItems)
+		opt.AdditionalText += fmt.Sprintf("材料が見つかりませんでした: %v\n", notFoundItems)
 	}
 
-	if err := ui.UpdateRecipeMessage(ctx, pay.ChannelID, pay.Timestamp, page, &RecipeMessageOption{AdditionalText: additonalText}); err != nil {
-		return nil
-	}
-
-	return nil
+	return ui.UpdateRecipeMessage(ctx, pay.ChannelID, pay.Timestamp, page, opt)
 }

@@ -9,22 +9,16 @@ import (
 	"net/http"
 
 	"github.com/psyark/recipebot/async"
-	"github.com/psyark/recipebot/core"
 	"github.com/psyark/recipebot/slackui"
-	"github.com/slack-go/slack"
 )
 
 type Handler struct {
-	coreService *core.Service
-	slackClient *slack.Client
-	slackUI     *slackui.UI
+	slackUI *slackui.UI
 }
 
-func NewHandler(coreService *core.Service, slackClient *slack.Client, slackUI *slackui.UI) *Handler {
+func NewHandler(slackUI *slackui.UI) *Handler {
 	return &Handler{
-		coreService: coreService,
-		slackClient: slackClient,
-		slackUI:     slackUI,
+		slackUI: slackUI,
 	}
 }
 
@@ -40,12 +34,13 @@ func (h *Handler) HandleCloudTasksRequest(rw http.ResponseWriter, req *http.Requ
 		return err
 	}
 
+	ctx := context.Background()
+
 	switch pay.Type {
 	case async.TypeRebuildRecipe:
-		return h.coreService.UpdateRecipe(context.Background(), pay.RecipeID)
+		return h.slackUI.UpdateRecipeWithInteraction(ctx, pay)
 
 	case async.TypeUpdateIngredients:
-		ctx := context.Background()
 		return h.slackUI.UpdateIngredientsWithInteraction(ctx, pay)
 
 	default:

@@ -23,25 +23,22 @@ recipebot
 https://api.slack.com/apps/A03SNSS0S81
 */
 
-var (
-	coreService  = core.New(notionapi.NewClient(os.Getenv("NOTION_API_KEY")))
-	slackClient  = slack.New(os.Getenv("SLACK_BOT_USER_OAUTH_TOKEN"))
-	slackUI      = slackui.New(coreService, slackClient)
-	asyncHandler = handler.NewHandler(coreService, slackClient, slackUI)
-)
-
 func init() {
-	functions.HTTP("main", HandleHTTP)
-}
+	coreService := core.New(notionapi.NewClient(os.Getenv("NOTION_API_KEY")))
+	slackClient := slack.New(os.Getenv("SLACK_BOT_USER_OAUTH_TOKEN"))
 
-func HandleHTTP(rw http.ResponseWriter, req *http.Request) {
-	if _, ok := req.Header["X-Cloudtasks-Queuename"]; ok {
-		if err := asyncHandler.HandleCloudTasksRequest(rw, req); err != nil {
-			slackUI.ShowError(err)
-			rw.WriteHeader(http.StatusInternalServerError)
+	slackUI := slackui.New(coreService, slackClient)
+	asyncHandler := handler.NewHandler(slackUI)
+
+	functions.HTTP("main", func(rw http.ResponseWriter, req *http.Request) {
+		if _, ok := req.Header["X-Cloudtasks-Queuename"]; ok {
+			if err := asyncHandler.HandleCloudTasksRequest(rw, req); err != nil {
+				slackUI.ShowError(err)
+				rw.WriteHeader(http.StatusInternalServerError)
+			}
+		} else {
+			// slackuiに処理させる
+			slackUI.HandleHTTP(rw, req)
 		}
-	} else {
-		// slackuiに処理させる
-		slackUI.HandleHTTP(rw, req)
-	}
+	})
 }
