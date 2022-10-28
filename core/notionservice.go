@@ -178,7 +178,7 @@ func (s *Service) UpdateRecipe(ctx context.Context, pageID string) error {
 	return s.updatePageContent(ctx, page.ID, rcp)
 }
 
-func (s *Service) UpdateRecipeIngredients(ctx context.Context, pageID string, stockMap map[*regexp.Regexp]string) (map[string]bool, error) {
+func (s *Service) UpdateRecipeIngredients(ctx context.Context, pageID string, stockMap StockMap) (map[string]bool, error) {
 	piop, err := s.client.RetrievePagePropertyItem(ctx, pageID, recipe_original)
 	if err != nil {
 		return nil, err
@@ -193,19 +193,12 @@ func (s *Service) UpdateRecipeIngredients(ctx context.Context, pageID string, st
 	foundMap := map[string]bool{}
 	for _, g := range rcp.IngredientGroups {
 		for _, igd := range g.Children {
-			found := false
-			for regex, pageID := range stockMap {
-				if regex.MatchString(igd.Name) {
-					found = true
-					if pageID != "" { // リンクしない
-						foundMap[igd.Name] = true
-						stockRelation = append(stockRelation, notionapi.PageReference{ID: pageID})
-					}
-					break
-				}
-			}
+			pageID, found := stockMap.Get(igd.Name)
 			if !found {
 				foundMap[igd.Name] = false
+			} else if pageID != "" {
+				foundMap[igd.Name] = true
+				stockRelation = append(stockRelation, notionapi.PageReference{ID: pageID})
 			}
 		}
 	}
@@ -261,7 +254,7 @@ func (s *Service) SetRecipeCategory(ctx context.Context, pageID string, category
 }
 
 // GetStockMap は 食材ストック の材料名からIDを引くマップを返します
-func (s *Service) GetStockMap(ctx context.Context) (map[*regexp.Regexp]string, error) {
+func (s *Service) GetStockMap(ctx context.Context) (StockMap, error) {
 	opt := &notionapi.QueryDatabaseOptions{
 		PageSize: 200,
 	}
@@ -271,7 +264,7 @@ func (s *Service) GetStockMap(ctx context.Context) (map[*regexp.Regexp]string, e
 		return nil, err
 	}
 
-	stockMap := map[*regexp.Regexp]string{}
+	stockMap := StockMap{}
 
 	for _, page := range pagi.Results {
 		title := page.Properties.Get("title").Title.PlainText()
