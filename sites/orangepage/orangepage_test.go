@@ -10,8 +10,9 @@ import (
 
 var tests = map[string]*rexch.Recipe{
 	"https://www.orangepage.net/ymsr/news/daily/posts/5716": {
-		Title: "玉ねぎ好きの飛田和緒さん直伝『丸ごと玉ねぎのとろとろカレー』がおいしすぎ！",
-		Image: "https://images.orangepage.net/media/article/5716/images/main_626f06d7f88bb6c7d7a2b0815792876c.jpg?d=960x540",
+		Title:    "玉ねぎ好きの飛田和緒さん直伝『丸ごと玉ねぎのとろとろカレー』がおいしすぎ！",
+		Image:    "https://images.orangepage.net/media/article/5716/images/main_626f06d7f88bb6c7d7a2b0815792876c.jpg?d=960x540",
+		Servings: 2,
 		Ingredients: []rexch.Ingredient{
 			{Name: "玉ねぎ", Amount: "5個(約500g)", Comment: "小"},
 			{Name: "ブロックベーコン", Amount: "40g"},
@@ -70,8 +71,9 @@ var tests = map[string]*rexch.Recipe{
 		},
 	},
 	"https://www.orangepage.net/ymsr/news/daily/posts/5763": {
-		Title: "【白メシが美味い！ 秋おかず】絶品『れんこんと豚肉の甘辛揚げ』のレシピ",
-		Image: "https://images.orangepage.net/media/article/5763/images/main_cf8cf4f59904c49016298e414deccdef.jpg?d=960x540",
+		Title:    "【白メシが美味い！ 秋おかず】絶品『れんこんと豚肉の甘辛揚げ』のレシピ",
+		Image:    "https://images.orangepage.net/media/article/5763/images/main_cf8cf4f59904c49016298e414deccdef.jpg?d=960x540",
+		Servings: 2,
 		Ingredients: []rexch.Ingredient{
 			{Group: "", Name: "れんこん", Amount: "1節(約150g)"},
 			{Group: "", Name: "豚ロース肉", Amount: "2枚(約200g)", Comment: "とんカツ用"},

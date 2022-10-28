@@ -54,6 +54,11 @@ func (p *parser) Parse2(ctx context.Context, url string) (*rexch.Recipe, error) 
 			switch mode {
 			case "intro":
 				if strings.Contains(line, "材料") {
+					if match := servingsRegex.FindStringSubmatch(line); len(match) != 0 {
+						i, _ := strconv.Atoi(match[1])
+						rex.Servings = i
+					}
+
 					// fmt.Println(mode, line)
 					mode = "ingredients"
 				}
@@ -78,11 +83,6 @@ func (p *parser) Parse2(ctx context.Context, url string) (*rexch.Recipe, error) 
 				}
 			}
 		}
-	}
-
-	if match := servingsRegex.FindStringSubmatch(doc.Find(`.bigTitle_quantity`).Text()); len(match) != 0 {
-		i, _ := strconv.Atoi(match[1])
-		rex.Servings = i
 	}
 
 	return rex, nil
