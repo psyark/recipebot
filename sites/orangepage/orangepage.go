@@ -71,8 +71,11 @@ func (p *parser) Parse2(ctx context.Context, url string) (*rexch.Recipe, error) 
 						rex.Servings = i
 					}
 
-					// fmt.Println(mode, line)
-					mode = "ingredients"
+					if strings.Contains(line, "作り方") { // 材料を飛ばす場合がある
+						mode = "instructions"
+					} else {
+						mode = "ingredients"
+					}
 				}
 			case "ingredients":
 				if strings.Contains(line, "作り方") {

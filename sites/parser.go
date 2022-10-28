@@ -73,6 +73,10 @@ func RecipeMustBe(rcp recipe.Recipe, want string) error {
 }
 
 func RecipeMustBe2(want, got *rexch.Recipe) error {
+	if want == nil {
+		// bytes, _ := json.MarshalIndent(got, "", "  ")
+		return fmt.Errorf("%w: %#v", errUnmatch, got)
+	}
 	if !reflect.DeepEqual(want, got) {
 		return fmt.Errorf("%w: %v", errUnmatch, pretty.Compare(want, got))
 	}

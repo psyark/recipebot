@@ -9,6 +9,23 @@ import (
 )
 
 var tests = map[string]*rexch.Recipe{
+	"https://www.orangepage.net/ymsr/news/daily/posts/5552": {
+		Title:       "【レシピあり】豆腐の『めんつゆ漬け』が簡単＆おいしすぎる！",
+		Image:       "https://images.orangepage.net/media/article/5552/images/main_e58d54aa086fef082e40c486dda80244.jpg?d=960x540",
+		Servings:    2,
+		Ingredients: []rexch.Ingredient{},
+		Instructions: []rexch.Instruction{
+			{Elements: []rexch.InstructionElement{
+				&rexch.TextInstructionElement{Text: "(1)めんつゆを作る。鍋にだし汁1カップを入れて中火で煮立てる。みりん1/3カップ、しょうゆ1/2カップを加えてひと煮立ちさせ、火を止めてさます。"},
+			}},
+			{Elements: []rexch.InstructionElement{
+				&rexch.TextInstructionElement{Text: "(2)絹ごし豆腐1丁(300〜350g)は横半分に切り、保存容器に入れる。殻をむいた半熟ゆで卵(沸騰してから7分ゆでたもの)2個を加え、(1)を注ぐ。ふたをして冷蔵庫に入れ、半日ほど漬ける。\n※豆腐と卵がめんつゆにしっかり浸かる大きさの保存容器に入れてください。残った漬け汁は煮ものなどに使えます。"},
+			}},
+			{Elements: []rexch.InstructionElement{
+				&rexch.TextInstructionElement{Text: "(3)器に温かいご飯どんぶり2杯分(360〜400g)を等分に盛り、豆腐とゆで卵をのせ、漬け汁適宜をかける。好みで練りわさび適宜をのせる。\nう~ん、めんつゆのうまみがしみた豆腐が絶品……!\n甘じょっぱい味つけに、わさびがピリッときいて、もうたまりません。\nひんやりした豆腐と、あったかいご飯の組み合わせが、また最高!\nとろりとした半熟味たまといっしょに食べれば、至福のおいしさですよ♪\nさくっと済ませたい平日ランチや、飲んだあとのシメにもおすすめ。\n『めんつゆ漬け豆腐めし』、ぜひ作ってみてくださいね♪\n(『オレンジページ』2022年9月2日号より)"},
+			}},
+		},
+	},
 	"https://www.orangepage.net/ymsr/news/daily/posts/5716": {
 		Title:    "玉ねぎ好きの飛田和緒さん直伝『丸ごと玉ねぎのとろとろカレー』がおいしすぎ！",
 		Image:    "https://images.orangepage.net/media/article/5716/images/main_626f06d7f88bb6c7d7a2b0815792876c.jpg?d=960x540",
