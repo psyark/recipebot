@@ -45,7 +45,10 @@ type Instruction struct {
 func (i *Instruction) AddText(text string) {
 	if len(i.Elements) != 0 {
 		if elem, ok := i.Elements[len(i.Elements)-1].(*TextInstructionElement); ok {
-			elem.Text += "\n" + text
+			if elem.Text != "" {
+				elem.Text += "\n"
+			}
+			elem.Text += text
 			return
 		}
 	}
