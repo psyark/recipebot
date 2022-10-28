@@ -27,46 +27,26 @@ var tests = map[string]*rexch.Recipe{
 		},
 		Instructions: []rexch.Instruction{
 			{Elements: []rexch.InstructionElement{
-				&rexch.TextInstructionElement{Text: "（1）"},
-			}},
-			{Elements: []rexch.InstructionElement{
+				&rexch.TextInstructionElement{Text: "(1)"},
 				&rexch.TextInstructionElement{Text: "玉ねぎ1個はみじん切りにする。残りは、根元を薄く切り落とす。ベーコンは5mm角の棒状に切る。"},
 			}},
 			{Elements: []rexch.InstructionElement{
-				&rexch.TextInstructionElement{Text: "（2）"},
+				&rexch.TextInstructionElement{Text: "(2)"},
+				&rexch.TextInstructionElement{Text: "鍋ににんにく、しょうが、バターを入れ、弱火にかける。香りが立ったらみじん切りの玉ねぎを加えて炒める。途中ふたをして蒸し焼きにしながら、全体に色づくまで15~20分炒める。"},
+				&rexch.TextInstructionElement{Text: "POINT みじん切りの玉ねぎは、あめ色になるまでじっくり炒めて。"},
 			}},
 			{Elements: []rexch.InstructionElement{
-				&rexch.TextInstructionElement{Text: "鍋ににんにく、しょうが、バターを入れ、弱火にかける。香りが立ったらみじん切りの玉ねぎを加えて炒める。途中ふたをして蒸し焼きにしながら、全体に色づくまで15～20分炒める。"},
-			}},
-			{Elements: []rexch.InstructionElement{
-				&rexch.TextInstructionElement{Text: "POINT\u3000みじん切りの玉ねぎは、あめ色になるまでじっくり炒めて。"},
-			}},
-			{Elements: []rexch.InstructionElement{
-				&rexch.TextInstructionElement{Text: "（3）"},
-			}},
-			{Elements: []rexch.InstructionElement{
+				&rexch.TextInstructionElement{Text: "(3)"},
 				&rexch.TextInstructionElement{Text: "ベーコンとカレー粉、あればガラムマサラを加えて炒め、カレーの香りが立ったら水300mlと残りの玉ねぎを加える。弱めの中火にして煮立ったらふたをし、玉ねぎが柔らかくなるまで30分ほど煮る。途中、煮汁が煮つまりすぎていたら、適宜水をたす。"},
 			}},
 			{Elements: []rexch.InstructionElement{
-				&rexch.TextInstructionElement{Text: "（4）"},
-			}},
-			{Elements: []rexch.InstructionElement{
+				&rexch.TextInstructionElement{Text: "(4)"},
 				&rexch.TextInstructionElement{Text: "玉ねぎにすっと竹串が通るくらいになったら、味をみてから塩としょうゆを加える。ご飯を器に盛り、カレーをかける。"},
-			}},
-			{Elements: []rexch.InstructionElement{
 				&rexch.TextInstructionElement{Text: "メインの具は玉ねぎとベーコンのみと、本当にシンプル。"},
-			}},
-			{Elements: []rexch.InstructionElement{
 				&rexch.TextInstructionElement{Text: "けれどちょっとしたひと工夫で、いつものカレーがこんなそそる一皿になるんですねー。"},
-			}},
-			{Elements: []rexch.InstructionElement{
-				&rexch.TextInstructionElement{Text: "これは絶対に試してみるべき！"},
-			}},
-			{Elements: []rexch.InstructionElement{
+				&rexch.TextInstructionElement{Text: "これは絶対に試してみるべき!"},
 				&rexch.TextInstructionElement{Text: "『丸ごと玉ねぎのとろとろカレー』ぜひ作ってみて下さいねー♪"},
-			}},
-			{Elements: []rexch.InstructionElement{
-				&rexch.TextInstructionElement{Text: "（『オレンジページCooking2022夕飯\u3000夕飯、即決、迷わない。』より）"},
+				&rexch.TextInstructionElement{Text: "(『オレンジページCooking2022夕飯 夕飯、即決、迷わない。』より)"},
 			}},
 		},
 	},
@@ -89,34 +69,20 @@ var tests = map[string]*rexch.Recipe{
 
 		Instructions: []rexch.Instruction{
 			{Elements: []rexch.InstructionElement{
-				&rexch.TextInstructionElement{Text: "（1）材料の下ごしらえをする"},
-			}},
-			{Elements: []rexch.InstructionElement{
+				&rexch.TextInstructionElement{Text: "(1)材料の下ごしらえをする"},
 				&rexch.TextInstructionElement{Text: "れんこんはよく洗い、皮つきのまま幅1cmの輪切りにする。豚肉は大きめの一口大に切る。ボールに豚肉を入れ、酒、しょうゆ各大さじ1/2をもみ込み、15分おく。汁けをかるくきって小麦粉を薄くまぶす。"},
 			}},
 			{Elements: []rexch.InstructionElement{
-				&rexch.TextInstructionElement{Text: "（2）フライパンで揚げる"},
+				&rexch.TextInstructionElement{Text: "(2)フライパンで揚げる"},
+				&rexch.TextInstructionElement{Text: "フライパンにサラダ油を高さ2cmほど入れて低温(約160℃。乾いた菜箸の先を底に当てると、細かい泡がゆっくりと揺れながら出る程度)に熱し、れんこんを入れてきつね色になるまで5~6分揚げ、油をきる。油を中温(約170℃。乾いた菜箸の先を底に当てると、細かい泡がシュワシュワッとまっすぐ出る程度)に熱し、豚肉を2~3分揚げ、油をきる。"},
 			}},
 			{Elements: []rexch.InstructionElement{
-				&rexch.TextInstructionElement{Text: "フライパンにサラダ油を高さ2cmほど入れて低温（約160℃。乾いた菜箸の先を底に当てると、細かい泡がゆっくりと揺れながら出る程度）に熱し、れんこんを入れてきつね色になるまで5～6分揚げ、油をきる。油を中温（約170℃。乾いた菜箸の先を底に当てると、細かい泡がシュワシュワッとまっすぐ出る程度）に熱し、豚肉を2～3分揚げ、油をきる。"},
-			}},
-			{Elements: []rexch.InstructionElement{
-				&rexch.TextInstructionElement{Text: "（3）たれをからめる"},
-			}},
-			{Elements: []rexch.InstructionElement{
+				&rexch.TextInstructionElement{Text: "(3)たれをからめる"},
 				&rexch.TextInstructionElement{Text: "ボールにたれの材料を混ぜ合わせ、れんこんと豚肉を加えてからめる。たれごと器に盛る。"},
-			}},
-			{Elements: []rexch.InstructionElement{
-				&rexch.TextInstructionElement{Text: "とんカツ用肉を使うので食べごたえも満点！"},
-			}},
-			{Elements: []rexch.InstructionElement{
+				&rexch.TextInstructionElement{Text: "とんカツ用肉を使うので食べごたえも満点!"},
 				&rexch.TextInstructionElement{Text: "「食欲の秋」という通り、本当に箸が止まらなくなりそうなおいしさです。"},
-			}},
-			{Elements: []rexch.InstructionElement{
-				&rexch.TextInstructionElement{Text: "たれをバウンドさせたご飯といっしょにかき込む至福のひとときを、ぜひご体感ください！"},
-			}},
-			{Elements: []rexch.InstructionElement{
-				&rexch.TextInstructionElement{Text: "（『オレンジページ』2022年10月17日号より）"},
+				&rexch.TextInstructionElement{Text: "たれをバウンドさせたご飯といっしょにかき込む至福のひとときを、ぜひご体感ください!"},
+				&rexch.TextInstructionElement{Text: "(『オレンジページ』2022年10月17日号より)"},
 			}},
 		},
 	},

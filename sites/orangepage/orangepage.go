@@ -9,11 +9,15 @@ import (
 	"github.com/psyark/recipebot/recipe"
 	"github.com/psyark/recipebot/rexch"
 	"github.com/psyark/recipebot/sites"
+	"golang.org/x/text/width"
 
 	"github.com/PuerkitoBio/goquery"
 )
 
-var servingsRegex = regexp.MustCompile(`（(\d+)人分）`)
+var (
+	servingsRegex    = regexp.MustCompile(`（(\d+)人分）`)
+	instructionRegex = regexp.MustCompile(`^\(\d+\)`)
+)
 
 type parser struct{}
 
@@ -76,10 +80,13 @@ func (p *parser) Parse2(ctx context.Context, url string) (*rexch.Recipe, error) 
 				if strings.Contains(line, "関連記事") {
 					mode = "outro"
 				} else {
-					inst := rexch.Instruction{Elements: []rexch.InstructionElement{
-						&rexch.TextInstructionElement{Text: line},
-					}}
-					rex.Instructions = append(rex.Instructions, inst)
+					line = width.Fold.String(line)
+					if instructionRegex.MatchString(line) || len(rex.Instructions) == 0 {
+						rex.Instructions = append(rex.Instructions, rexch.Instruction{})
+					}
+
+					inst := &rex.Instructions[len(rex.Instructions)-1]
+					inst.Elements = append(inst.Elements, &rexch.TextInstructionElement{Text: line})
 				}
 			}
 		}
