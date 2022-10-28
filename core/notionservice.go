@@ -3,6 +3,7 @@ package core
 import (
 	"context"
 	"fmt"
+	"regexp"
 
 	"github.com/psyark/notionapi"
 	"github.com/psyark/recipebot/recipe"
@@ -17,8 +18,7 @@ const (
 	recipe_ingredients      = "%5C~%7C%40"
 	recipe_shared_header_id = "60a4999c-b1fa-4e3d-9d6b-48034ad7b675"
 	stock_db_id             = "923bfcb7c9014273b417ddc966fd17b8"
-	stock_regex             = ""
-	stock_alias             = "pK%3Ag"
+	stock_regex             = "jpb%3D"
 	stock_nolink            = "xy_~"
 )
 
@@ -178,7 +178,7 @@ func (s *Service) UpdateRecipe(ctx context.Context, pageID string) error {
 	return s.updatePageContent(ctx, page.ID, rcp)
 }
 
-func (s *Service) UpdateRecipeIngredients(ctx context.Context, pageID string, stockMap map[string]string) (map[string]bool, error) {
+func (s *Service) UpdateRecipeIngredients(ctx context.Context, pageID string, stockMap map[*regexp.Regexp]string) (map[string]bool, error) {
 	piop, err := s.client.RetrievePagePropertyItem(ctx, pageID, recipe_original)
 	if err != nil {
 		return nil, err
@@ -192,14 +192,16 @@ func (s *Service) UpdateRecipeIngredients(ctx context.Context, pageID string, st
 	stockRelation := []notionapi.PageReference{}
 	found := map[string]bool{}
 	for _, g := range rcp.IngredientGroups {
-		for _, idg := range g.Children {
-			if id, ok := stockMap[idg.Name]; ok {
-				if id != "" { // リンクしない
-					stockRelation = append(stockRelation, notionapi.PageReference{ID: id})
-					found[idg.Name] = true
+		for _, igd := range g.Children {
+			found[igd.Name] = false
+			for regex, pageID := range stockMap {
+				if regex.MatchString(igd.Name) {
+					if pageID != "" { // リンクしない
+						stockRelation = append(stockRelation, notionapi.PageReference{ID: pageID})
+						found[igd.Name] = true
+					}
+					break
 				}
-			} else {
-				found[idg.Name] = false
 			}
 		}
 	}
@@ -255,7 +257,7 @@ func (s *Service) SetRecipeCategory(ctx context.Context, pageID string, category
 }
 
 // GetStockMap は 食材ストック の材料名からIDを引くマップを返します
-func (s *Service) GetStockMap(ctx context.Context) (map[string]string, error) {
+func (s *Service) GetStockMap(ctx context.Context) (map[*regexp.Regexp]string, error) {
 	opt := &notionapi.QueryDatabaseOptions{
 		PageSize: 200,
 	}
@@ -265,19 +267,25 @@ func (s *Service) GetStockMap(ctx context.Context) (map[string]string, error) {
 		return nil, err
 	}
 
-	stockMap := map[string]string{}
+	stockMap := map[*regexp.Regexp]string{}
 
 	for _, page := range pagi.Results {
-		value := page.ID
+		title := page.Properties.Get("title").Title.PlainText()
+
+		regexStr := page.Properties.Get(stock_regex).RichText.PlainText()
+		if regexStr == "" {
+			regexStr = fmt.Sprintf("^%v$", title)
+		}
+		regex, err := regexp.Compile(regexStr)
+		if err != nil {
+			return nil, err
+		}
 
 		// リンクしない
 		if page.Properties.Get(stock_nolink).Checkbox {
-			value = ""
-		}
-
-		stockMap[page.Properties.Get("title").Title.PlainText()] = value
-		for _, opt := range page.Properties.Get(stock_alias).MultiSelect {
-			stockMap[opt.Name] = value
+			stockMap[regex] = ""
+		} else {
+			stockMap[regex] = page.ID
 		}
 	}
 

@@ -15,7 +15,6 @@ require (
 	github.com/psyark/notionapi v0.0.0-20221005024044-6d36d5bffc5a
 	github.com/slack-go/slack v0.11.3
 	golang.org/x/net v0.0.0-20221002022538-bcab6841153b
-	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f
 	golang.org/x/text v0.3.7
 	google.golang.org/genproto v0.0.0-20220920201722-2b89144ce006
 )
