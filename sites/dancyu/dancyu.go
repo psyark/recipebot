@@ -53,11 +53,11 @@ func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) 
 			for _, image := range rcp2.Image {
 				switch image := image.(type) {
 				case string:
-					rcp.Image = strings.TrimSpace(image)
+					rcp.Image = sites.ResolvePath(url, strings.TrimSpace(image))
 				case *jsonld.ImageObject:
-					for _, url := range image.Url {
-						if url, ok := url.(string); ok {
-							rcp.Image = strings.TrimSpace(url)
+					for _, imgURL := range image.Url {
+						if imgURL, ok := imgURL.(string); ok {
+							rcp.Image = sites.ResolvePath(url, strings.TrimSpace(imgURL))
 						}
 					}
 				}
