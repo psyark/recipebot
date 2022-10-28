@@ -190,18 +190,22 @@ func (s *Service) UpdateRecipeIngredients(ctx context.Context, pageID string, st
 	}
 
 	stockRelation := []notionapi.PageReference{}
-	found := map[string]bool{}
+	foundMap := map[string]bool{}
 	for _, g := range rcp.IngredientGroups {
 		for _, igd := range g.Children {
-			found[igd.Name] = false
+			found := false
 			for regex, pageID := range stockMap {
 				if regex.MatchString(igd.Name) {
-					found[igd.Name] = true
+					found = true
 					if pageID != "" { // リンクしない
+						foundMap[igd.Name] = true
 						stockRelation = append(stockRelation, notionapi.PageReference{ID: pageID})
 					}
 					break
 				}
+			}
+			if !found {
+				foundMap[igd.Name] = false
 			}
 		}
 	}
@@ -215,7 +219,7 @@ func (s *Service) UpdateRecipeIngredients(ctx context.Context, pageID string, st
 		}
 	}
 
-	return found, nil
+	return foundMap, nil
 }
 
 func (s *Service) updatePageContent(ctx context.Context, pageID string, rcp *recipe.Recipe) error {
