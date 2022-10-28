@@ -3,12 +3,10 @@ package core
 import (
 	"context"
 	"fmt"
-	"sync"
 
 	"github.com/psyark/notionapi"
 	"github.com/psyark/recipebot/recipe"
 	"github.com/psyark/recipebot/sites/united"
-	"golang.org/x/sync/errgroup"
 )
 
 const (
@@ -19,6 +17,7 @@ const (
 	recipe_ingredients      = "%5C~%7C%40"
 	recipe_shared_header_id = "60a4999c-b1fa-4e3d-9d6b-48034ad7b675"
 	stock_db_id             = "923bfcb7c9014273b417ddc966fd17b8"
+	stock_regex             = ""
 	stock_alias             = "pK%3Ag"
 	stock_nolink            = "xy_~"
 )
@@ -266,54 +265,20 @@ func (s *Service) GetStockMap(ctx context.Context) (map[string]string, error) {
 		return nil, err
 	}
 
-	eg := errgroup.Group{}
-	mu := sync.Mutex{}
 	stockMap := map[string]string{}
 
-	for _, result := range pagi.Results {
-		result := result
+	for _, page := range pagi.Results {
+		value := page.ID
 
-		eg.Go(func() error {
-			piop, err := s.client.RetrievePagePropertyItem(ctx, result.ID, stock_alias)
-			if err != nil {
-				return err
-			}
+		// リンクしない
+		if page.Properties.Get(stock_nolink).Checkbox {
+			value = ""
+		}
 
-			mu.Lock()
-			defer mu.Unlock()
-			for _, pi := range piop.(*notionapi.PropertyItem).MultiSelect {
-				stockMap[pi.Name] = result.ID
-			}
-			return nil
-		})
-
-		eg.Go(func() error {
-			page, err := s.client.RetrievePage(ctx, result.ID)
-			if err != nil {
-				return err
-			}
-
-			value := page.ID
-
-			// リンクしない
-			if page.Properties.Get(stock_nolink).Checkbox {
-				value = ""
-			}
-
-			mu.Lock()
-			defer mu.Unlock()
-
-			stockMap[page.Properties.Get("title").Title.PlainText()] = value
-			for _, opt := range page.Properties.Get(stock_alias).MultiSelect {
-				stockMap[opt.Name] = value
-			}
-
-			return nil
-		})
-	}
-
-	if err := eg.Wait(); err != nil {
-		return nil, err
+		stockMap[page.Properties.Get("title").Title.PlainText()] = value
+		for _, opt := range page.Properties.Get(stock_alias).MultiSelect {
+			stockMap[opt.Name] = value
+		}
 	}
 
 	return stockMap, nil
