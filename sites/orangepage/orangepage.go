@@ -61,7 +61,11 @@ func (p *parser) Parse2(ctx context.Context, url string) (*rexch.Recipe, error) 
 				if strings.Contains(line, "作り方") {
 					mode = "instructions"
 				} else {
-					rex.Ingredients = append(rex.Ingredients, *rexch.NewIngredient(line, ""))
+					parts := strings.SplitN(line, "……", 2)
+					if len(parts) == 1 {
+						parts = append(parts, "")
+					}
+					rex.Ingredients = append(rex.Ingredients, *rexch.NewIngredient(parts[0], parts[1]))
 				}
 			case "instructions":
 				if strings.Contains(line, "関連記事") {
