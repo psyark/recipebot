@@ -17,6 +17,7 @@ import (
 	"github.com/psyark/recipebot/sites/lettuceclub"
 	"github.com/psyark/recipebot/sites/macaroni"
 	"github.com/psyark/recipebot/sites/nadia"
+	"github.com/psyark/recipebot/sites/orangepage"
 	"github.com/psyark/recipebot/sites/sbfoods"
 	"github.com/psyark/recipebot/sites/sirogohan"
 )
@@ -34,6 +35,7 @@ func NewParser() sites.Parser {
 		lettuceclub.NewParser(),
 		macaroni.NewParser(),
 		nadia.NewParser(),
+		orangepage.NewParser(),
 		sbfoods.NewParser(),
 		sirogohan.NewParser(),
 		jsonld.NewParser(), // 最後
