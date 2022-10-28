@@ -1,16 +1,56 @@
 package slackui
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 
+	"github.com/psyark/recipebot/async"
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/slackevents"
 )
 
 func (ui *UI) HandleHTTP(rw http.ResponseWriter, req *http.Request) {
+	if _, ok := req.Header["X-Cloudtasks-Queuename"]; ok {
+		if err := ui.handleCloudTasks(rw, req); err != nil {
+			ui.ShowError(err)
+			rw.WriteHeader(http.StatusInternalServerError)
+		}
+	} else {
+		ui.handleSlack(rw, req)
+	}
+}
+
+// handleCloudTasks はCloud Tasksのリクエストを処理します
+// 以下のヘッダーが利用できます
+// X-Cloudtasks-Queuename:[rebuild-recipe]
+// X-Cloudtasks-Tasketa:[1666670855.3296249]
+// X-Cloudtasks-Taskexecutioncount:[0]
+// X-Cloudtasks-Taskname:[05885295116503454631]
+// X-Cloudtasks-Taskretrycount:[0]
+func (ui *UI) handleCloudTasks(rw http.ResponseWriter, req *http.Request) error {
+	pay := async.Payload{}
+	if err := json.NewDecoder(req.Body).Decode(&pay); err != nil {
+		return err
+	}
+
+	ctx := context.Background()
+
+	switch pay.Type {
+	case async.TypeRebuildRecipe:
+		return ui.UpdateRecipeWithInteraction(ctx, pay)
+
+	case async.TypeUpdateIngredients:
+		return ui.UpdateIngredientsWithInteraction(ctx, pay)
+
+	default:
+		return fmt.Errorf("unknown type: %v", pay.Type)
+	}
+}
+
+func (ui *UI) handleSlack(rw http.ResponseWriter, req *http.Request) {
 	switch req.Method {
 	case http.MethodPost:
 		defer func() {
