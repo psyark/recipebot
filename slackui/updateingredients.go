@@ -14,9 +14,9 @@ func (ui *UI) UpdateIngredientsWithInteraction(ctx context.Context, pay async.Pa
 		return nil
 	}
 
-	if err := ui.UpdateRecipeMessage(ctx, pay.ChannelID, pay.Timestamp, page, &RecipeMessageOption{IsUpdateIngredientsButtonActive: true}); err != nil {
-		return nil
-	}
+	// if err := ui.UpdateRecipeMessage(ctx, pay.ChannelID, pay.Timestamp, page, &RecipeMessageOption{IsUpdateIngredientsButtonActive: true}); err != nil {
+	// 	return nil
+	// }
 
 	stockMap, err := ui.coreService.GetStockMap(ctx)
 	if err != nil {

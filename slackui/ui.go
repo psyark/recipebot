@@ -33,8 +33,8 @@ func New(coreService *core.Service, slackClient *slack.Client) *UI {
 		coreService: coreService,
 		slackClient: slackClient,
 	}
-	ui.rebuildRecipeButton = &asyncButton{actionID: "rebuildRecipe", label: "レシピを再構築", asyncType: async.TypeRebuildRecipe}
-	ui.updateIngredientsButton = &asyncButton{actionID: "updateIngredients", label: "主な材料を更新", asyncType: async.TypeUpdateIngredients}
+	ui.rebuildRecipeButton = &asyncButton{ui: ui, actionID: "rebuildRecipe", label: "レシピを再構築", asyncType: async.TypeRebuildRecipe}
+	ui.updateIngredientsButton = &asyncButton{ui: ui, actionID: "updateIngredients", label: "主な材料を更新", asyncType: async.TypeUpdateIngredients}
 	ui.buttons = []BlockActionReacter{
 		ui.rebuildRecipeButton,
 		ui.updateIngredientsButton,
@@ -141,8 +141,8 @@ func (ui *UI) UpdateRecipeMessage(ctx context.Context, channelID, timestamp stri
 		),
 		slack.NewActionBlock(
 			"",
-			ui.rebuildRecipeButton.Render(page.ID, option.IsRebuildRecipeButtonActive),
-			ui.updateIngredientsButton.Render(page.ID, option.IsUpdateIngredientsButtonActive),
+			ui.rebuildRecipeButton.Render(page.ID),
+			ui.updateIngredientsButton.Render(page.ID),
 		),
 	}
 
@@ -155,8 +155,5 @@ func (ui *UI) UpdateRecipeMessage(ctx context.Context, channelID, timestamp stri
 }
 
 type RecipeMessageOption struct {
-	// TODO ここにタイトル・URL・画像を追加することで UpdateRecipeMessage にレシピを不要にする
-	IsRebuildRecipeButtonActive     bool
-	IsUpdateIngredientsButtonActive bool
-	AdditionalText                  string
+	AdditionalText string
 }
