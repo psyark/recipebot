@@ -110,13 +110,7 @@ func (ui *UI) UpdateRecipeMessage(ctx context.Context, channelID, timestamp stri
 		option = &RecipeMessageOption{}
 	}
 
-	pageTitle := ""
-	for _, pv := range page.Properties {
-		if pv.Type == "title" {
-			pageTitle = pv.Title.PlainText()
-			break
-		}
-	}
+	pageTitle := page.Properties.Get("title").Title.PlainText()
 	if pageTitle == "" {
 		pageTitle = "無題"
 	}
