@@ -104,23 +104,23 @@ func (s *UI) ReactMessageWithURL(event *slackevents.MessageEvent, url string) er
 
 // UpdateRecipeMessageは指定したメッセージを新たなレシピメッセージで更新します
 func (ui *UI) UpdateRecipeMessage(ctx context.Context, channelID, timestamp string, page *notionapi.Page, option *RecipeMessageOption) error {
-	var pageURL string
 	var thumbnail slack.BlockElement
 
 	if option == nil {
 		option = &RecipeMessageOption{}
 	}
 
-	// タイトルの取得
-	pageTitle, err := ui.coreService.GetRecipeTitle(ctx, page.ID)
-	if err != nil {
-		return err
+	pageTitle := ""
+	for _, pv := range page.Properties {
+		if pv.Type == "title" {
+			pageTitle = pv.Title.PlainText()
+			break
+		}
 	}
 	if pageTitle == "" {
 		pageTitle = "無題"
 	}
 
-	pageURL = page.URL
 	if page.Icon != nil {
 		if emoji, ok := page.Icon.(*notionapi.Emoji); ok {
 			pageTitle = emoji.Emoji + pageTitle
@@ -136,7 +136,7 @@ func (ui *UI) UpdateRecipeMessage(ctx context.Context, channelID, timestamp stri
 
 	blocks := []slack.Block{
 		section(
-			mrkdwn(fmt.Sprintf("*<%v|%v>*", pageURL, strings.ReplaceAll(pageTitle, "\n", " "))),
+			mrkdwn(fmt.Sprintf("*<%v|%v>*", page.URL, strings.ReplaceAll(pageTitle, "\n", " "))),
 			thumbnail,
 		),
 		slack.NewActionBlock(
@@ -150,7 +150,7 @@ func (ui *UI) UpdateRecipeMessage(ctx context.Context, channelID, timestamp stri
 		blocks = append(blocks, section(plain(strings.TrimSpace(option.AdditionalText)), nil))
 	}
 
-	_, _, _, err = ui.slackClient.UpdateMessage(channelID, timestamp, slack.MsgOptionBlocks(blocks...))
+	_, _, _, err := ui.slackClient.UpdateMessage(channelID, timestamp, slack.MsgOptionBlocks(blocks...))
 	return err
 }
 

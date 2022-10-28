@@ -65,18 +65,18 @@ func (s *Service) GetRecipeCategory(ctx context.Context, pageID string) (string,
 }
 
 // GetRecipeTitle は レシピ データベースのページからタイトルを取得して返します
-func (s *Service) GetRecipeTitle(ctx context.Context, pageID string) (string, error) {
-	// タイトルの取得
-	if piop, err := s.client.RetrievePagePropertyItem(ctx, pageID, "title"); err != nil {
-		return "", err
-	} else {
-		title := ""
-		for _, item := range piop.(*notionapi.PropertyItemPagination).Results {
-			title += item.Title.Text.Content
-		}
-		return title, nil
-	}
-}
+// func (s *Service) GetRecipeTitle(ctx context.Context, pageID string) (string, error) {
+// 	// タイトルの取得
+// 	if piop, err := s.client.RetrievePagePropertyItem(ctx, pageID, "title"); err != nil {
+// 		return "", err
+// 	} else {
+// 		title := ""
+// 		for _, item := range piop.(*notionapi.PropertyItemPagination).Results {
+// 			title += item.Title.Text.Content
+// 		}
+// 		return title, nil
+// 	}
+// }
 
 // RetrievePage は単純な RetrievePage APIの呼び出しです
 func (s *Service) RetrievePage(ctx context.Context, pageID string) (*notionapi.Page, error) {
