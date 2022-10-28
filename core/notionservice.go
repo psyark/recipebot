@@ -196,9 +196,9 @@ func (s *Service) UpdateRecipeIngredients(ctx context.Context, pageID string, st
 			found[igd.Name] = false
 			for regex, pageID := range stockMap {
 				if regex.MatchString(igd.Name) {
+					found[igd.Name] = true
 					if pageID != "" { // リンクしない
 						stockRelation = append(stockRelation, notionapi.PageReference{ID: pageID})
-						found[igd.Name] = true
 					}
 					break
 				}
