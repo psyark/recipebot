@@ -49,91 +49,10 @@ func init() {
 
 // 	fmt.Printf("%v件のストック\n", len(stockMap))
 
-// 	opt := &notionapi.QueryDatabaseOptions{
-// 		Filter: &notionapi.CompoundFilter{
-// 			And: []notionapi.Filter{
-// 				&notionapi.PropertyFilter{
-// 					Property: recipe_ingredients,
-// 					Relation: &notionapi.RelationFilterCondition{IsEmpty: true},
-// 				},
-// 				&notionapi.PropertyFilter{
-// 					Property: recipe_original,
-// 					URL:      &notionapi.TextFilterCondition{IsNotEmpty: true},
-// 				},
-// 			},
-// 		},
-// 		PageSize: 100,
-// 	}
-
-// 	recipes, err := client.QueryDatabase(ctx, recipe_db_id, opt)
+// 	result, err := service.UpdateRecipeIngredients(ctx, "2aed1d7818ad463bb2b894ca1812571d", stockMap)
 // 	if err != nil {
 // 		t.Fatal(err)
 // 	}
 
-// 	fmt.Printf("%v件のレシピ\n", len(recipes.Results))
-
-// 	eg := errgroup.Group{}
-// 	for i, recipePage := range recipes.Results {
-// 		recipePage := recipePage
-// 		i := i
-// 		eg.Go(func() error {
-// 			piop, err := client.RetrievePagePropertyItem(ctx, recipePage.ID, recipe_original)
-// 			if err != nil {
-// 				return err
-// 			}
-
-// 			pi := piop.(*notionapi.PropertyItem)
-
-// 			rcp, err := united.Parsers.Parse(ctx, pi.URL)
-// 			if errors.Is(err, sites.ErrUnsupportedURL) {
-// 				// fmt.Printf("%2d, unsupported: %v\n", i, pi.URL)
-// 				return nil
-// 			} else if err != nil {
-// 				return fmt.Errorf("%v: %w", pi.URL, err)
-// 			}
-
-// 			title, err := service.GetRecipeTitle(ctx, recipePage.ID)
-// 			if err != nil {
-// 				return err
-// 			}
-
-// 			stockFound := []string{}
-// 			stockNotFound := []string{}
-// 			stockRelation := []notionapi.PageReference{}
-
-// 			for _, g := range rcp.IngredientGroups {
-// 				for _, idg := range g.Children {
-// 					if id, ok := stockMap[idg.Name]; ok {
-// 						stockFound = append(stockFound, idg.Name)
-// 						stockRelation = append(stockRelation, notionapi.PageReference{ID: id})
-// 					} else {
-// 						stockNotFound = append(stockNotFound, idg.Name)
-// 					}
-// 				}
-// 			}
-
-// 			if len(stockRelation) != 0 {
-// 				// opt := &notionapi.UpdatePageOptions{
-// 				// 	Properties: map[string]notionapi.PropertyValue{
-// 				// 		recipe_ingredients: {Type: "relation", Relation: stockRelation},
-// 				// 	},
-// 				// }
-// 				// if _, err := client.UpdatePage(ctx, recipePage.ID, opt); err != nil {
-// 				// 	return err
-// 				// }
-
-// 				fmt.Printf("%2d %v %v の材料 %v を設定しました (%v は見つかりませんでした）\n", i, recipePage.URL, title, stockFound, stockNotFound)
-// 			} else if len(stockNotFound) != 0 {
-// 				// fmt.Printf("%2d %v %v の材料は一つも見つかりませんでした (%v）\n", i, recipePage.URL, title, stockNotFound)
-// 			} else {
-// 				// fmt.Printf("%2d %v %v の材料は設定されていません\n", i, recipePage.URL, title)
-// 			}
-
-// 			return nil
-// 		})
-// 	}
-
-// 	if err := eg.Wait(); err != nil {
-// 		t.Fatal(err)
-// 	}
+// 	fmt.Println(result)
 // }
