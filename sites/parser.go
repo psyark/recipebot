@@ -7,9 +7,11 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"reflect"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/kylelemons/godebug/pretty"
 	"github.com/psyark/recipebot/recipe"
 	"github.com/psyark/recipebot/rexch"
 )
@@ -70,56 +72,9 @@ func RecipeMustBe(rcp recipe.Recipe, want string) error {
 	return nil
 }
 
-func RecipeMustBe2(rex *rexch.Recipe, want string) error {
-	got, _ := json.Marshal(rex)
-	if want == "" {
-		fmt.Println(string(got))
-		return nil
-	}
-
-	if want != string(got) {
-		return errUnmatch
-		// dmp := diffmatchpatch.New()
-		// diffs := dmp.DiffMain(indent2(want), indent2(string(got)), false)
-		// diffs = dmp.DiffCleanupSemantic(diffs)
-
-		// return fmt.Errorf("%w: %v", errUnmatch, DiffPrettyText(diffs))
+func RecipeMustBe2(want, got *rexch.Recipe) error {
+	if !reflect.DeepEqual(want, got) {
+		return fmt.Errorf("%w: %v", errUnmatch, pretty.Compare(want, got))
 	}
 	return nil
 }
-
-func indent(src string) string {
-	var x recipe.Recipe
-	json.Unmarshal([]byte(src), &x)
-	dst, _ := json.MarshalIndent(x, "", "  ")
-	return string(dst)
-}
-
-func indent2(src string) string {
-	var x rexch.Recipe
-	json.Unmarshal([]byte(src), &x)
-	dst, _ := json.MarshalIndent(x, "", "  ")
-	return string(dst)
-}
-
-// func DiffPrettyText(diffs []diffmatchpatch.Diff) string {
-// 	var buff bytes.Buffer
-// 	for _, diff := range diffs {
-// 		text := diff.Text
-
-// 		switch diff.Type {
-// 		case diffmatchpatch.DiffInsert:
-// 			_, _ = buff.WriteString("🍣")
-// 			_, _ = buff.WriteString(text)
-// 			_, _ = buff.WriteString("🍣")
-// 		case diffmatchpatch.DiffDelete:
-// 			_, _ = buff.WriteString("🍰")
-// 			_, _ = buff.WriteString(text)
-// 			_, _ = buff.WriteString("🍰")
-// 		case diffmatchpatch.DiffEqual:
-// 			_, _ = buff.WriteString(text)
-// 		}
-// 	}
-
-// 	return buff.String()
-// }
