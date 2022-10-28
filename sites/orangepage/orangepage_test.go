@@ -29,11 +29,13 @@ var tests = map[string]*rexch.Recipe{
 			{Elements: []rexch.InstructionElement{
 				&rexch.TextInstructionElement{Text: "(1)"},
 				&rexch.TextInstructionElement{Text: "玉ねぎ1個はみじん切りにする。残りは、根元を薄く切り落とす。ベーコンは5mm角の棒状に切る。"},
+				&rexch.ImageInstructionElement{URL: "https://images.orangepage.net/media/article/5716/images/e760acc36976d8c8f5c2a530f9b75dda42ce1dc0.jpg?w=1200"},
 			}},
 			{Elements: []rexch.InstructionElement{
 				&rexch.TextInstructionElement{Text: "(2)"},
 				&rexch.TextInstructionElement{Text: "鍋ににんにく、しょうが、バターを入れ、弱火にかける。香りが立ったらみじん切りの玉ねぎを加えて炒める。途中ふたをして蒸し焼きにしながら、全体に色づくまで15~20分炒める。"},
 				&rexch.TextInstructionElement{Text: "POINT みじん切りの玉ねぎは、あめ色になるまでじっくり炒めて。"},
+				&rexch.ImageInstructionElement{URL: "https://images.orangepage.net/media/article/5716/images/0503a1ed88865d0fdd207a2712bc08ee356893a5.jpg?w=1200"},
 			}},
 			{Elements: []rexch.InstructionElement{
 				&rexch.TextInstructionElement{Text: "(3)"},
@@ -75,6 +77,7 @@ var tests = map[string]*rexch.Recipe{
 			{Elements: []rexch.InstructionElement{
 				&rexch.TextInstructionElement{Text: "(2)フライパンで揚げる"},
 				&rexch.TextInstructionElement{Text: "フライパンにサラダ油を高さ2cmほど入れて低温(約160℃。乾いた菜箸の先を底に当てると、細かい泡がゆっくりと揺れながら出る程度)に熱し、れんこんを入れてきつね色になるまで5~6分揚げ、油をきる。油を中温(約170℃。乾いた菜箸の先を底に当てると、細かい泡がシュワシュワッとまっすぐ出る程度)に熱し、豚肉を2~3分揚げ、油をきる。"},
+				&rexch.ImageInstructionElement{URL: "https://images.orangepage.net/media/article/5763/images/19cfa836913fbdcd96a345a31461def0b4f25862.jpg?w=1200"},
 			}},
 			{Elements: []rexch.InstructionElement{
 				&rexch.TextInstructionElement{Text: "(3)たれをからめる"},

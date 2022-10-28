@@ -2,6 +2,7 @@ package orangepage
 
 import (
 	"context"
+	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
@@ -51,6 +52,13 @@ func (p *parser) Parse2(ctx context.Context, url string) (*rexch.Recipe, error) 
 		s.ReplaceWithHtml("\n")
 	})
 
+	// 画像をURLに
+	body.Find("img").Each(func(i int, s *goquery.Selection) {
+		if src, ok := s.Attr("src"); ok {
+			s.ReplaceWithHtml(fmt.Sprintf("\nIMAGE:%s\n", src))
+		}
+	})
+
 	mode := "intro"
 	for _, line := range strings.Split(body.Text(), "\n") {
 		line = strings.TrimSpace(line)
@@ -85,8 +93,12 @@ func (p *parser) Parse2(ctx context.Context, url string) (*rexch.Recipe, error) 
 						rex.Instructions = append(rex.Instructions, rexch.Instruction{})
 					}
 
-					inst := &rex.Instructions[len(rex.Instructions)-1]
-					inst.Elements = append(inst.Elements, &rexch.TextInstructionElement{Text: line})
+					lastInstruction := &rex.Instructions[len(rex.Instructions)-1]
+					if strings.HasPrefix(line, "IMAGE:") {
+						lastInstruction.Elements = append(lastInstruction.Elements, &rexch.ImageInstructionElement{URL: strings.TrimPrefix(line, "IMAGE:")})
+					} else {
+						lastInstruction.Elements = append(lastInstruction.Elements, &rexch.TextInstructionElement{Text: line})
+					}
 				}
 			}
 		}
