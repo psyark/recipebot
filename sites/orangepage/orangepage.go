@@ -95,13 +95,9 @@ func (p *parser) Parse2(ctx context.Context, url string) (*rexch.Recipe, error) 
 
 					lastInst := &rex.Instructions[len(rex.Instructions)-1]
 					if strings.HasPrefix(line, "IMAGE:") {
-						lastInst.Elements = append(lastInst.Elements, &rexch.ImageInstructionElement{URL: strings.TrimPrefix(line, "IMAGE:")})
-					} else if len(lastInst.Elements) == 0 {
-						lastInst.Elements = append(lastInst.Elements, &rexch.TextInstructionElement{Text: line})
-					} else if text, ok := lastInst.Elements[len(lastInst.Elements)-1].(*rexch.TextInstructionElement); ok {
-						text.Text += "\n" + line
+						lastInst.AddImage(strings.TrimPrefix(line, "IMAGE:"))
 					} else {
-						lastInst.Elements = append(lastInst.Elements, &rexch.TextInstructionElement{Text: line})
+						lastInst.AddText(line)
 					}
 				}
 			}

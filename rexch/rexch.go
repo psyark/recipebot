@@ -42,6 +42,20 @@ type Instruction struct {
 	Elements []InstructionElement `json:"elements"`
 }
 
+func (i *Instruction) AddText(text string) {
+	if len(i.Elements) != 0 {
+		if elem, ok := i.Elements[len(i.Elements)-1].(*TextInstructionElement); ok {
+			elem.Text += "\n" + text
+			return
+		}
+	}
+	i.Elements = append(i.Elements, &TextInstructionElement{Text: text})
+}
+
+func (i *Instruction) AddImage(url string) {
+	i.Elements = append(i.Elements, &ImageInstructionElement{URL: url})
+}
+
 type InstructionElement interface {
 	instructionElement()
 }
