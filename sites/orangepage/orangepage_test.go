@@ -93,7 +93,7 @@ var tests = map[string]*rexch.Recipe{
 	"https://www.orangepage.net/recipes/detail_302394": {
 		Title:    "じゃがいものガレット",
 		Image:    "https://production-orp.s3.amazonaws.com/uploads/recipes/image/0000302394/20200907150806_w300hf.jpg",
-		Servings: 0,
+		Servings: 2,
 		Ingredients: []rexch.Ingredient{
 			{Name: "じゃがいも", Amount: "4個(約500g)"},
 			{Name: "仕上げ用の塩", Amount: "適宜", Comment: "あれば粒が大きめのもの"},

@@ -16,7 +16,7 @@ import (
 )
 
 var (
-	servingsRegex    = regexp.MustCompile(`（(\d+)人分）`)
+	servingsRegex    = regexp.MustCompile(`(\d+)(?:～\d+)?人分`)
 	instructionRegex = regexp.MustCompile(`^\(\d+\)`)
 )
 
