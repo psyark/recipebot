@@ -102,19 +102,19 @@ var tests = map[string]*rexch.Recipe{
 		Instructions: []rexch.Instruction{
 			{Elements: []rexch.InstructionElement{
 				&rexch.TextInstructionElement{Text: "じゃがいもは皮をむき、スライサーで細切りにする（なければ包丁でせん切りにする）。塩小さじ1/3をふり、混ぜる。フライパンにサラダ油大さじ3をひき、じゃがいもを全体に広げ入れる。"},
-				&rexch.ImageInstructionElement{URL: "https://production-orp.s3.amazonaws.com/uploads/recipe_mades/image/0000051362/20200907150916_w150hf.jpg"},
+				&rexch.ImageInstructionElement{URL: "https://production-orp.s3.amazonaws.com/uploads/recipe_mades/image/0000051362/20200907150916.jpg"},
 			}},
 			{Elements: []rexch.InstructionElement{
 				&rexch.TextInstructionElement{Text: "強火にかけ、フライ返しで全体をときどき押さえながら2分ほど焼く。パチパチと音がしてきたら中火にし、こんがりと焼き色がつくまで7～8分焼く。"},
-				&rexch.ImageInstructionElement{URL: "https://production-orp.s3.amazonaws.com/uploads/recipe_mades/image/0000051363/20200907150916_w150hf.jpg"},
+				&rexch.ImageInstructionElement{URL: "https://production-orp.s3.amazonaws.com/uploads/recipe_mades/image/0000051363/20200907150916.jpg"},
 			}},
 			{Elements: []rexch.InstructionElement{
 				&rexch.TextInstructionElement{Text: "火を止め、フライパンを少し傾けて油をため、その状態のまま、フライ返しをすきまに差し入れてひっくり返す。こうすると、油がはねにくくなる。"},
-				&rexch.ImageInstructionElement{URL: "https://production-orp.s3.amazonaws.com/uploads/recipe_mades/image/0000051364/20200907150916_w150hf.jpg"},
+				&rexch.ImageInstructionElement{URL: "https://production-orp.s3.amazonaws.com/uploads/recipe_mades/image/0000051364/20200907150916.jpg"},
 			}},
 			{Elements: []rexch.InstructionElement{
 				&rexch.TextInstructionElement{Text: "中火にかけ、サラダ油大さじ2をフライパンの縁から回し入れる。こんがりと焼き色がつくまで7～8分焼く。切り分けて器に盛り、仕上げ用の塩と粗びき黒こしょう適宜をふる。"},
-				&rexch.ImageInstructionElement{URL: "https://production-orp.s3.amazonaws.com/uploads/recipe_mades/image/0000051365/20200907150917_w150hf.jpg"},
+				&rexch.ImageInstructionElement{URL: "https://production-orp.s3.amazonaws.com/uploads/recipe_mades/image/0000051365/20200907150917.jpg"},
 			}},
 		},
 	},

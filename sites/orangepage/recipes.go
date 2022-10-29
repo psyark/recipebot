@@ -42,7 +42,11 @@ func (p *parser) ParseRecipes(ctx context.Context, url string) (*rexch.Recipe, e
 		inst := rexch.Instruction{}
 		inst.AddText(strings.TrimSpace(s.Text()))
 		s.Find("img").Each(func(i int, s *goquery.Selection) {
-			inst.AddImage(s.AttrOr("src", ""))
+			src := s.AttrOr("src", "")
+			if strings.HasSuffix(src, "_w150hf.jpg") {
+				src = strings.TrimSuffix(src, "_w150hf.jpg") + ".jpg"
+			}
+			inst.AddImage(src)
 		})
 		rex.Instructions = append(rex.Instructions, inst)
 	})
