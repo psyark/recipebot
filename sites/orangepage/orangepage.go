@@ -40,17 +40,32 @@ func (p *parser) Parse2(ctx context.Context, url string) (*rexch.Recipe, error) 
 		return nil, err
 	}
 
-	rex := &rexch.Recipe{
-		Title: strings.TrimSpace(doc.Find(`h1.articleTitle`).Text()),
-		Image: doc.Find(`.articleDetailImg img`).AttrOr("src", ""),
+	rex := &rexch.Recipe{}
+
+	var ingredientsDelim string
+	var body *goquery.Selection
+
+	if body_ := doc.Find("#opDailyBody"); body_.Length() != 0 {
+		body = body_
+		rex.Title = strings.TrimSpace(doc.Find(`h1.articleTitle`).Text())
+		rex.Image = doc.Find(`.articleDetailImg img`).AttrOr("src", "")
+		ingredientsDelim = "……"
+	} else if body_ := doc.Find(".recipesDetailSection"); body_.Length() != 0 {
+		body = body_
+		body.Find(".freeArea").Remove()
+		body.Find(".recipesDetailInfo").Remove()
+		body.Find("[itemprop=nutrition]").Remove()
+		rex.Title = strings.TrimSpace(doc.Find(`h1.recipesTitle`).Text())
+		rex.Image = doc.Find(`.recipesDetailImg img`).AttrOr("src", "")
+		ingredientsDelim = "　"
 	}
 
-	body := doc.Find("#opDailyBody")
+	// script除去
+	body.Find("script").Remove()
+	body.Find("style").Remove()
 
 	// brを改行に
-	body.Find("br").Each(func(i int, s *goquery.Selection) {
-		s.ReplaceWithHtml("\n")
-	})
+	body.Find("br").ReplaceWithHtml("\n")
 
 	// 画像をURLに
 	body.Find("img").Each(func(i int, s *goquery.Selection) {
@@ -78,10 +93,12 @@ func (p *parser) Parse2(ctx context.Context, url string) (*rexch.Recipe, error) 
 					}
 				}
 			case "ingredients":
-				if strings.Contains(line, "作り方") {
+				if strings.HasPrefix(line, "IMAGE:") {
+					// skip
+				} else if strings.Contains(line, "作り方") {
 					mode = "instructions"
 				} else {
-					parts := strings.SplitN(line, "……", 2)
+					parts := strings.SplitN(line, ingredientsDelim, 2)
 					if len(parts) == 1 {
 						parts = append(parts, "")
 					}
