@@ -112,7 +112,7 @@ var tests = map[string]*rexch.Recipe{
 		},
 	},
 	"https://park.ajinomoto.co.jp/recipe/card/702479/": {
-		Title:    "パラっと香ばしい！  \n                納豆チャーハン",
+		Title:    "納豆チャーハン",
 		Image:    "https://park.ajinomoto.co.jp/wp-content/uploads/2018/03/702479.jpeg",
 		Servings: 2,
 		Ingredients: []rexch.Ingredient{
@@ -149,7 +149,7 @@ var tests = map[string]*rexch.Recipe{
 		},
 	},
 	"https://park.ajinomoto.co.jp/recipe/card/706078/": {
-		Title:    "ふんわり卵で絶品  \n                オムライス", // TODO:
+		Title:    "オムライス",
 		Image:    "https://park.ajinomoto.co.jp/wp-content/uploads/2018/03/706078.jpeg",
 		Servings: 2,
 		Ingredients: []rexch.Ingredient{
@@ -195,7 +195,7 @@ var tests = map[string]*rexch.Recipe{
 		},
 	},
 	"https://park.ajinomoto.co.jp/recipe/card/706119/": {
-		Title:    "ふっくら焼ける！  \n                ホットケーキ", // TODO
+		Title:    "ホットケーキ",
 		Image:    "https://park.ajinomoto.co.jp/wp-content/uploads/2018/03/706119.jpeg",
 		Servings: 0,
 		Ingredients: []rexch.Ingredient{

@@ -55,6 +55,11 @@ func (p *parser) Parse2(ctx context.Context, url string) (*rexch.Recipe, error) 
 		Image: doc.Find(`.recipeImageArea img`).AttrOr("src", ""),
 	}
 
+	// "ふっくら焼ける！  \n                ホットケーキ" -> "ホットケーキ"
+	if parts := strings.SplitN(rex.Title, "\n", 2); len(parts) == 2 {
+		rex.Title = strings.TrimSpace(parts[1])
+	}
+
 	if match := servingsRegex.FindStringSubmatch(doc.Find(`.bigTitle_quantity`).Text()); len(match) != 0 {
 		i, _ := strconv.Atoi(match[1])
 		rex.Servings = i
