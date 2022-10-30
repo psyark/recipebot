@@ -146,6 +146,6 @@ func parseCTB(ctb *html.Node) []string {
 	return strings.Split(lines, "\n")
 }
 
-func NewParser() sites.Parser {
+func NewParser() sites.Parser2 {
 	return &parser{}
 }
