@@ -54,20 +54,18 @@ func ResolvePath(baseURL, path string) string {
 	return path
 }
 
-func RecipeMustBe(rcp recipe.Recipe, want string) error {
-	got, _ := json.Marshal(rcp)
-	if want == "" {
-		fmt.Println(string(got))
+func RecipeMustBe(got recipe.Recipe, wantStr string) error {
+	want := recipe.Recipe{}
+	json.Unmarshal([]byte(wantStr), &want)
+
+	if wantStr == "" {
+		gotBytes, _ := json.Marshal(got)
+		fmt.Println(string(gotBytes))
 		return nil
 	}
 
-	if want != string(got) {
-		return errUnmatch
-		// // dmp := diffmatchpatch.New()
-		// // diffs := dmp.DiffMain(indent(want), indent(string(got)), false)
-		// // diffs = dmp.DiffCleanupSemantic(diffs)
-
-		// return fmt.Errorf("%w: %v", errUnmatch, DiffPrettyText(diffs))
+	if !reflect.DeepEqual(want, got) {
+		return fmt.Errorf("%w: %v", errUnmatch, pretty.Compare(want, got))
 	}
 	return nil
 }

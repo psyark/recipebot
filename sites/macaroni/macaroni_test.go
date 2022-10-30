@@ -4,8 +4,11 @@ import (
 	"context"
 	"testing"
 
+	"github.com/psyark/recipebot/rexch"
 	"github.com/psyark/recipebot/sites"
 )
+
+var tests = map[string]*rexch.Recipe{}
 
 func TestNewParser(t *testing.T) {
 	ctx := context.Background()

@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/psyark/recipebot/recipe"
+	"github.com/psyark/recipebot/rexch"
 	"github.com/psyark/recipebot/sites"
 
 	"github.com/PuerkitoBio/goquery"
@@ -18,6 +19,14 @@ type parser struct{}
 var idgRegex = regexp.MustCompile(`・(.+?)(?:（(.+?)）)?……(.+)`)
 
 func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) {
+	rex, err := p.Parse2(ctx, url)
+	if err != nil {
+		return nil, err
+	}
+	return rex.BackCompat(), nil
+}
+
+func (p *parser) Parse2(ctx context.Context, url string) (*rexch.Recipe, error) {
 	if !strings.HasPrefix(url, "https://macaro-ni.jp/") {
 		return nil, sites.ErrUnsupportedURL
 	}
@@ -27,7 +36,7 @@ func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) 
 		return nil, err
 	}
 
-	rcp := &recipe.Recipe{}
+	rex := &rexch.Recipe{}
 
 	doc.Find(`script[type="application/ld+json"]`).Each(func(i int, s *goquery.Selection) {
 		tmp := Recipe{}
@@ -36,8 +45,8 @@ func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) 
 		}
 
 		if tmp.Type == "Recipe" && len(tmp.RecipeIngredient) != 0 && len(tmp.RecipeInstructions) != 0 {
-			rcp.Title = tmp.Name
-			rcp.Image = tmp.Image[0]
+			rex.Title = tmp.Name
+			rex.Image = tmp.Image[0]
 			for _, idg := range tmp.RecipeIngredient {
 				parts := strings.Split(idg, " ")
 
@@ -47,42 +56,46 @@ func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) 
 					parts = parts[1:]
 				}
 
-				rcp.AddIngredient(group, recipe.GetIngredient(parts[0], parts[1]))
+				igd := rexch.NewIngredient(parts[0], parts[1])
+				igd.Group = group
+				rex.Ingredients = append(rex.Ingredients, *igd)
 			}
 			for _, ins := range tmp.RecipeInstructions {
-				step := recipe.Step{Text: ins.Text}
+				inst := rexch.Instruction{}
+				inst.AddText(ins.Text)
 				if ins.Image != "" {
-					step.Images = append(step.Images, ins.Image)
+					inst.AddImage(ins.Image)
 				}
-				rcp.Steps = append(rcp.Steps, step)
+				rex.Instructions = append(rex.Instructions, inst)
 			}
 		}
 	})
 
-	if len(rcp.Steps) != 0 {
-		return rcp, nil
+	if len(rex.Instructions) != 0 {
+		return rex, nil
 	}
 
-	rcp.Title = strings.TrimSpace(doc.Find(`h1.articleInfo__title`).Text())
-	rcp.Image = doc.Find(`img.articleInfo__thumbnail`).AttrOr("src", "")
+	rex.Title = strings.TrimSpace(doc.Find(`h1.articleInfo__title`).Text())
+	rex.Image = doc.Find(`img.articleInfo__thumbnail`).AttrOr("src", "")
 
-	var curStep *recipe.Step
+	var curStep *rexch.Instruction
 	parseSteps := func(i int, s *goquery.Selection) {
 		switch s.AttrOr("class", "") {
 		case "articleShow__contentsHeading":
-			rcp.Steps = append(rcp.Steps, recipe.Step{Text: strings.TrimSpace(s.Text())})
-			curStep = &rcp.Steps[len(rcp.Steps)-1]
+			rex.Instructions = append(rex.Instructions, rexch.Instruction{})
+			curStep = &rex.Instructions[len(rex.Instructions)-1]
+			curStep.AddText(strings.TrimSpace(s.Text()))
 		case "articleShow__contentsText":
 			if curStep == nil {
-				rcp.Steps = append(rcp.Steps, recipe.Step{})
-				curStep = &rcp.Steps[len(rcp.Steps)-1]
+				rex.Instructions = append(rex.Instructions, rexch.Instruction{})
+				curStep = &rex.Instructions[len(rex.Instructions)-1]
 			}
 			for _, line := range parseCTB(s.Find(`.articleShow__contentsTextBody`).Get(0)) {
-				curStep.Text += "\n" + line
+				curStep.AddText(strings.TrimSpace(line))
 			}
 		case "articleShow__contentsImage":
 			s.Find("img").Each(func(i int, s *goquery.Selection) {
-				curStep.Images = append(curStep.Images, s.AttrOr("data-original", s.AttrOr("src", "")))
+				curStep.AddImage(s.AttrOr("data-original", s.AttrOr("src", "")))
 			})
 		}
 	}
@@ -95,7 +108,8 @@ func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) 
 					groupName = "" // 改行が連続したらグループ解除
 				} else if strings.HasPrefix(line, "・") {
 					match := idgRegex.FindStringSubmatch(line)
-					rcp.AddIngredient(groupName, recipe.Ingredient{Name: match[1], Amount: match[3], Comment: match[2]})
+					igd := rexch.Ingredient{Group: groupName, Name: match[1], Amount: match[3], Comment: match[2]}
+					rex.Ingredients = append(rex.Ingredients, igd)
 				} else {
 					groupName = line
 				}
@@ -113,7 +127,7 @@ func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) 
 		doc.Find(`.articleShow__contents div`).Each(parseSteps)
 	}
 
-	return rcp, nil
+	return rex, nil
 }
 
 func parseCTB(ctb *html.Node) []string {
