@@ -8,6 +8,7 @@ require (
 	cloud.google.com/go/cloudtasks v1.6.0
 	github.com/GoogleCloudPlatform/functions-framework-go v1.6.1
 	github.com/PuerkitoBio/goquery v1.8.0
+	github.com/dave/jennifer v1.6.0
 	github.com/joho/godotenv v1.4.0
 	github.com/kylelemons/godebug v1.1.0
 	github.com/microcosm-cc/bluemonday v1.0.21
