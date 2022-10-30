@@ -4,19 +4,224 @@ import (
 	"context"
 	"testing"
 
+	"github.com/psyark/recipebot/rexch"
 	"github.com/psyark/recipebot/sites"
 )
 
+var tests = map[string]*rexch.Recipe{
+	"https://park.ajinomoto.co.jp/recipe/card/706051/": {
+		Title:    "こだわり手作り！エビのチリソース炒め（干焼蝦仁）",
+		Image:    "https://park.ajinomoto.co.jp/wp-content/uploads/2018/03/706051.jpeg",
+		Servings: 4,
+		Ingredients: []rexch.Ingredient{
+			{Group: "", Name: "むきえび", Amount: "350g", Comment: ""},
+			{Group: "", Name: "片栗粉", Amount: "大さじ1・1/2", Comment: ""},
+			{Group: "", Name: "にんにくのみじん切り", Amount: "小さじ1", Comment: ""},
+			{Group: "", Name: "ねぎ", Amount: "1/2本", Comment: ""},
+			{Group: "A", Name: "鶏がらスープ", Amount: "小さじ1", Comment: ""},
+			{Group: "A", Name: "トマトケチャップ", Amount: "大さじ3", Comment: ""},
+			{Group: "A", Name: "水", Amount: "大さじ5", Comment: ""},
+			{Group: "A", Name: "片栗粉", Amount: "小さじ2", Comment: ""},
+			{Group: "A", Name: "砂糖", Amount: "小さじ1", Comment: ""},
+			{Group: "A", Name: "塩", Amount: "小さじ1/4", Comment: ""},
+			{Group: "", Name: "豆板醤", Amount: "小さじ1(5g)", Comment: ""},
+			{Group: "", Name: "酒", Amount: "大さじ1", Comment: ""},
+			{Group: "", Name: "サラダ油", Amount: "大さじ1", Comment: ""},
+			{Group: "", Name: "ごま油", Amount: "小さじ1", Comment: ""},
+			{Group: "", Name: "香菜", Amount: "少々", Comment: ""},
+		},
+		Instructions: []rexch.Instruction{
+			{Label: "", Elements: []rexch.InstructionElement{
+				&rexch.TextInstructionElement{Text: "えびは背ワタを取り、水で洗い、水気を拭く。ねぎは粗みじん切りにする。"},
+				&rexch.ImageInstructionElement{URL: "https://park.ajinomoto.co.jp/wp-content/uploads/2021/08/706051_direction_0_0.jpeg"},
+				&rexch.ImageInstructionElement{URL: "https://park.ajinomoto.co.jp/wp-content/uploads/2021/08/706051_direction_0_1.jpeg"},
+			}},
+			{Label: "", Elements: []rexch.InstructionElement{
+				&rexch.TextInstructionElement{Text: "ボウルにＡを入れて混ぜ合わせ、合わせ調味料を作る。"},
+			}},
+			{Label: "", Elements: []rexch.InstructionElement{
+				&rexch.TextInstructionElement{Text: "（１）のえびに片栗粉をまぶす。"},
+				&rexch.ImageInstructionElement{URL: "https://park.ajinomoto.co.jp/wp-content/uploads/2021/08/706051_direction_2_0.jpeg"},
+			}},
+			{Label: "", Elements: []rexch.InstructionElement{
+				&rexch.TextInstructionElement{Text: "フライパンに油を熱し、にんにくを入れて香りが出るまで炒め、（３）のえびを加えてほぐすようにして炒める。えびの色が変わったら、「熟成豆板醤」を加えて炒める。"},
+				&rexch.ImageInstructionElement{URL: "https://park.ajinomoto.co.jp/wp-content/uploads/2021/08/706051_direction_3_0.jpeg"},
+			}},
+			{Label: "", Elements: []rexch.InstructionElement{
+				&rexch.TextInstructionElement{Text: "（１）のねぎを加えてサッと炒め、酒をふり、（２）の合わせ調味料を加えてとろみがつくまで炒め合わせる。"},
+				&rexch.ImageInstructionElement{URL: "https://park.ajinomoto.co.jp/wp-content/uploads/2021/08/706051_direction_4_0.jpeg"},
+			}},
+			{Label: "", Elements: []rexch.InstructionElement{
+				&rexch.TextInstructionElement{Text: "器に盛り、ごま油をふり、香菜を飾る。"},
+			}},
+		},
+	},
+	"https://park.ajinomoto.co.jp/recipe/card/701300/": {
+		Title:    "豚肉・しめじ・小松菜のオイスターソース炒め",
+		Image:    "https://park.ajinomoto.co.jp/wp-content/uploads/2018/03/701300.jpeg",
+		Servings: 2,
+		Ingredients: []rexch.Ingredient{
+			{Group: "", Name: "豚こま切れ肉", Amount: "200g", Comment: ""},
+			{Group: "A", Name: "片栗粉", Amount: "大さじ1/2", Comment: ""},
+			{Group: "A", Name: "塩", Amount: "少々", Comment: ""},
+			{Group: "A", Name: "こしょう", Amount: "少々", Comment: ""},
+			{Group: "", Name: "しめじ", Amount: "1パック", Comment: ""},
+			{Group: "", Name: "小松菜", Amount: "150g", Comment: ""},
+			{Group: "B", Name: "オイスターソース", Amount: "大さじ1", Comment: ""},
+			{Group: "B", Name: "酒", Amount: "大さじ1", Comment: ""},
+			{Group: "B", Name: "鶏がらスープ", Amount: "小さじ1/3", Comment: ""},
+			{Group: "", Name: "ごま油", Amount: "小さじ1", Comment: ""},
+		},
+		Instructions: []rexch.Instruction{
+			{Elements: []rexch.InstructionElement{&rexch.TextInstructionElement{Text: "豚肉はＡをもみ込む。しめじは小房に分け、小松菜は４ｃｍ長さに切る。"}}},
+			{Elements: []rexch.InstructionElement{&rexch.TextInstructionElement{Text: "フライパンにごま油を熱し、（１）の豚肉をほぐしながら炒める。"}}},
+			{Elements: []rexch.InstructionElement{&rexch.TextInstructionElement{Text: "肉の色が変わってきたら、（１）のしめじ・小松菜を加えてＢで調味し、小松菜がしんなりしたら火を止める。"}}},
+		},
+	},
+	"https://park.ajinomoto.co.jp/recipe/card/700708/": {
+		Title:    "ミートボールの甘酢あんかけ",
+		Image:    "https://park.ajinomoto.co.jp/wp-content/uploads/2018/03/700708.jpeg",
+		Servings: 2,
+		Ingredients: []rexch.Ingredient{
+			{Group: "", Name: "豚ひき肉", Amount: "150g", Comment: ""},
+			{Group: "", Name: "パン粉", Amount: "大さじ2", Comment: ""},
+			{Group: "", Name: "酒", Amount: "小さじ1", Comment: ""},
+			{Group: "A", Name: "玉ねぎのみじん切り", Amount: "1/4個分(50g)", Comment: ""},
+			{Group: "A", Name: "にんにくのみじん切り", Amount: "1/2かけ分", Comment: ""},
+			{Group: "A", Name: "卵", Amount: "1/2個", Comment: ""},
+			{Group: "A", Name: "塩", Amount: "少々", Comment: ""},
+			{Group: "A", Name: "味の素", Amount: "少々", Comment: ""},
+			{Group: "A", Name: "こしょう", Amount: "少々", Comment: ""},
+			{Group: "", Name: "サラダ油", Amount: "適量", Comment: ""},
+			{Group: "B", Name: "水", Amount: "1/3カップ", Comment: ""},
+			{Group: "B", Name: "酢", Amount: "大さじ1・1/2", Comment: ""},
+			{Group: "B", Name: "トマトケチャップ", Amount: "大さじ1", Comment: ""},
+			{Group: "B", Name: "しょうゆ", Amount: "大さじ1/2", Comment: ""},
+			{Group: "B", Name: "砂糖", Amount: "大さじ1/2", Comment: ""},
+			{Group: "B", Name: "オイスターソース", Amount: "小さじ1/2", Comment: ""},
+			{Group: "B", Name: "ごま油", Amount: "小さじ1/2", Comment: ""},
+			{Group: "B", Name: "粉末中華スープ", Amount: "少々", Comment: ""},
+			{Group: "B", Name: "片栗粉", Amount: "大さじ1/4", Comment: ""},
+			{Group: "", Name: "レタス", Amount: "適量", Comment: ""},
+		},
+		Instructions: []rexch.Instruction{
+			{Elements: []rexch.InstructionElement{&rexch.TextInstructionElement{Text: "パン粉は酒をふって混ぜる。"}}},
+			{Elements: []rexch.InstructionElement{&rexch.TextInstructionElement{Text: "ひき肉に（１）のパン粉、Ａを加えて粘りが出るまでよく練り混ぜ、ひと口大に丸める。１６０～１７０℃の揚げ油できつね色に揚げる。"}}},
+			{Elements: []rexch.InstructionElement{&rexch.TextInstructionElement{Text: "小鍋にＢを入れてよく混ぜ、強火にかけて混ぜながら煮立て、とろみをつける。"}}},
+			{Elements: []rexch.InstructionElement{&rexch.TextInstructionElement{Text: "器にレタスを敷き、（２）のミートボールを盛り、（３）のあんかけをかける。"}}},
+		},
+	},
+	"https://park.ajinomoto.co.jp/recipe/card/702479/": {
+		Title:    "パラっと香ばしい！  \n                納豆チャーハン",
+		Image:    "https://park.ajinomoto.co.jp/wp-content/uploads/2018/03/702479.jpeg",
+		Servings: 2,
+		Ingredients: []rexch.Ingredient{
+			{Group: "", Name: "ご飯", Amount: "400g", Comment: ""},
+			{Group: "", Name: "納豆", Amount: "2パック", Comment: ""},
+			{Group: "", Name: "卵", Amount: "2個", Comment: ""},
+			{Group: "", Name: "ねぎ・粗みじん切り", Amount: "1/2本分", Comment: ""},
+			{Group: "A", Name: "しょうゆ", Amount: "大さじ1", Comment: ""},
+			{Group: "A", Name: "鶏がらスープ", Amount: "大さじ1", Comment: ""},
+			{Group: "A", Name: "こしょう", Amount: "少々", Comment: ""},
+			{Group: "", Name: "サラダ油", Amount: "大さじ3", Comment: ""},
+			{Group: "", Name: "ごま油", Amount: "小さじ1", Comment: ""},
+		},
+		Instructions: []rexch.Instruction{
+			{Elements: []rexch.InstructionElement{
+				&rexch.TextInstructionElement{Text: "卵は溶きほぐしておく。"},
+			}},
+			{Elements: []rexch.InstructionElement{
+				&rexch.TextInstructionElement{Text: "フライパンの中心に油を入れて熱し、（１）の溶き卵を油の中心に流し入れて包み込むように混ぜ、半熟状にする。"},
+				&rexch.ImageInstructionElement{URL: "https://park.ajinomoto.co.jp/wp-content/uploads/2021/08/702479_direction_1_0.jpeg"},
+			}},
+			{Elements: []rexch.InstructionElement{
+				&rexch.TextInstructionElement{Text: "ご飯を加えて卵をご飯の中に混ぜ込むようにして炒め合わせ、パラパラになってきたら、納豆、ねぎを加えてさらに炒める。"},
+				&rexch.ImageInstructionElement{URL: "https://park.ajinomoto.co.jp/wp-content/uploads/2021/08/702479_direction_2_0.jpeg"},
+				&rexch.ImageInstructionElement{URL: "https://park.ajinomoto.co.jp/wp-content/uploads/2021/08/702479_direction_2_1.jpeg"},
+			}},
+			{Elements: []rexch.InstructionElement{
+				&rexch.TextInstructionElement{Text: "納豆のネバネバが切れる程度に炒めたら、Ａを加え、仕上げにごま油を回し入れる。"},
+				&rexch.ImageInstructionElement{URL: "https://park.ajinomoto.co.jp/wp-content/uploads/2021/08/702479_direction_3_0.jpeg"},
+			}},
+			{Elements: []rexch.InstructionElement{
+				&rexch.TextInstructionElement{Text: "＊納豆のネバネバがなくなるまでしっかり炒めましょう。"},
+			}},
+		},
+	},
+	"https://park.ajinomoto.co.jp/recipe/card/706078/": {
+		Title:    "ふんわり卵で絶品  \n                オムライス", // TODO:
+		Image:    "https://park.ajinomoto.co.jp/wp-content/uploads/2018/03/706078.jpeg",
+		Servings: 2,
+		Ingredients: []rexch.Ingredient{
+			{Group: "", Name: "鶏むね肉", Amount: "100g", Comment: ""},
+			{Group: "", Name: "玉ねぎ", Amount: "1/2個", Comment: ""},
+			{Group: "", Name: "温かいご飯", Amount: "300g", Comment: ""},
+			{Group: "", Name: "コンソメ", Amount: "小さじ1", Comment: "顆粒"},
+			{Group: "", Name: "トマトケチャップ", Amount: "適量", Comment: ""},
+			{Group: "", Name: "卵", Amount: "4個", Comment: ""},
+			{Group: "", Name: "塩", Amount: "適量", Comment: ""},
+			{Group: "", Name: "こしょう", Amount: "適量", Comment: ""},
+			{Group: "", Name: "サラダ油", Amount: "適量", Comment: ""},
+			{Group: "", Name: "バター", Amount: "大さじ2", Comment: ""},
+			{Group: "", Name: "パセリ", Amount: "適量", Comment: ""},
+		},
+		Instructions: []rexch.Instruction{
+			{Elements: []rexch.InstructionElement{
+				&rexch.TextInstructionElement{Text: "鶏肉は１．５ｃｍ角に切り、塩・こしょう少々をふる。玉ねぎはみじん切りにする。"},
+				&rexch.ImageInstructionElement{URL: "https://park.ajinomoto.co.jp/wp-content/uploads/2021/08/706078_direction_0_0.jpeg"},
+			}},
+			{Elements: []rexch.InstructionElement{
+				&rexch.TextInstructionElement{Text: "フライパンに油小さじ１を熱し、（１）の鶏肉を炒める。焼き色がついたら、バター大さじ１、（１）の玉ねぎを加えてよく炒める。"},
+				&rexch.ImageInstructionElement{URL: "https://park.ajinomoto.co.jp/wp-content/uploads/2021/08/706078_direction_1_0.jpeg"},
+			}},
+			{Elements: []rexch.InstructionElement{
+				&rexch.TextInstructionElement{Text: "ご飯を加えて「コンソメ」をふり、混ぜながら炒める。トマトケチャップ大さじ２、塩・こしょう少々で味を調え、チキンライスを作る。"},
+				&rexch.ImageInstructionElement{URL: "https://park.ajinomoto.co.jp/wp-content/uploads/2021/08/706078_direction_2_0.jpeg"},
+			}},
+			{Elements: []rexch.InstructionElement{
+				&rexch.TextInstructionElement{Text: "小さめのボウルに卵２個を溶きほぐし、塩・こしょう少々を混ぜる。"},
+			}},
+			{Elements: []rexch.InstructionElement{
+				&rexch.TextInstructionElement{Text: "フライパンに油、バター各大さじ１／２を熱し、（４）の溶き卵を一気に流し入れて全体をサッと混ぜる。半熟状になったら（３）のチキンライスの半量を中央にのせ、両端からヘラで折り曲げる。"},
+				&rexch.ImageInstructionElement{URL: "https://park.ajinomoto.co.jp/wp-content/uploads/2021/08/706078_direction_4_0.jpeg"},
+			}},
+			{Elements: []rexch.InstructionElement{
+				&rexch.TextInstructionElement{Text: "フライパンの片側に寄せ、皿に返して盛りつける。トマトケチャップ少々をかけ、パセリを飾る。もう一つも同様に作る。"},
+				&rexch.ImageInstructionElement{URL: "https://park.ajinomoto.co.jp/wp-content/uploads/2021/08/706078_direction_5_0.jpeg"},
+			}},
+			{Elements: []rexch.InstructionElement{
+				&rexch.TextInstructionElement{Text: "＊フライパンのフチを利用すると形よく整えられます。"},
+			}},
+		},
+	},
+	"https://park.ajinomoto.co.jp/recipe/card/706119/": {
+		Title:    "ふっくら焼ける！  \n                ホットケーキ", // TODO
+		Image:    "https://park.ajinomoto.co.jp/wp-content/uploads/2018/03/706119.jpeg",
+		Servings: 0,
+		Ingredients: []rexch.Ingredient{
+			{Group: "A", Name: "薄力粉", Amount: "150g", Comment: ""},
+			{Group: "A", Name: "ベーキングパウダー", Amount: "小さじ2", Comment: ""},
+			{Group: "A", Name: "砂糖", Amount: "40g", Comment: ""},
+			{Group: "", Name: "卵", Amount: "1個", Comment: ""},
+			{Group: "", Name: "牛乳", Amount: "130ml", Comment: ""},
+			{Group: "", Name: "サラダ油", Amount: "少々", Comment: ""},
+		},
+		Instructions: []rexch.Instruction{
+			{Elements: []rexch.InstructionElement{&rexch.TextInstructionElement{Text: "ボウルにＡをふるい入れ、泡立て器で混ぜる。"}}},
+			{Elements: []rexch.InstructionElement{&rexch.TextInstructionElement{Text: "別のボウルに卵を割りほぐし、牛乳を加えて混ぜる。"}}},
+			{Elements: []rexch.InstructionElement{&rexch.TextInstructionElement{Text: "（１）のボウルに（２）を加え、泡立て器で粉っぽさがなくなるまで混ぜ、生地を作る。"}}},
+			{Elements: []rexch.InstructionElement{&rexch.TextInstructionElement{Text: "フライパンに油をしみ込ませたキッチンペーパーで油を薄く塗り、フライパンを熱する。"}}},
+			{Elements: []rexch.InstructionElement{&rexch.TextInstructionElement{Text: "ぬれたふきんの上にフライパンを置いて熱を取り、再び弱火にかけ、（３）の生地をおたま１杯、上から中心に落とす（こうすると丸い形になる）。"}}},
+			{Elements: []rexch.InstructionElement{&rexch.TextInstructionElement{Text: "約３分焼き、表面にプツプツと穴がでてきたら裏返し、約２分弱火のまま焼き、取り出す。"}}},
+			{Elements: []rexch.InstructionElement{&rexch.TextInstructionElement{Text: "２枚目からは油をひかずにフライパンをぬれふきんの上に置いて熱を取り、弱火にかけて同様に焼く。"}}},
+			{Elements: []rexch.InstructionElement{&rexch.TextInstructionElement{Text: "器に盛り、好みでバター、メープルシロップをかける。"}}},
+			{Elements: []rexch.InstructionElement{&rexch.TextInstructionElement{Text: "＊ベーキングパウダー入りの生地はすぐに焼かないとふくらみが悪くなるので、\u3000混ぜたらすぐに焼きましょう。"}}},
+		},
+	},
+}
+
 func TestNewParser(t *testing.T) {
 	ctx := context.Background()
-	tests := map[string]string{
-		"https://park.ajinomoto.co.jp/recipe/card/706051/": `{"title":"こだわり手作り！エビのチリソース炒め（干焼蝦仁）","image":"https://park.ajinomoto.co.jp/wp-content/uploads/2018/03/706051.jpeg","servings":4,"ingredients":[{"name":"むきえび","amount":"350g"},{"name":"片栗粉","amount":"大さじ1・1/2"},{"name":"にんにくのみじん切り","amount":"小さじ1"},{"name":"ねぎ","amount":"1/2本"},{"group":"A","name":"鶏がらスープ","amount":"小さじ1"},{"group":"A","name":"トマトケチャップ","amount":"大さじ3"},{"group":"A","name":"水","amount":"大さじ5"},{"group":"A","name":"片栗粉","amount":"小さじ2"},{"group":"A","name":"砂糖","amount":"小さじ1"},{"group":"A","name":"塩","amount":"小さじ1/4"},{"name":"豆板醤","amount":"小さじ1(5g)"},{"name":"酒","amount":"大さじ1"},{"name":"サラダ油","amount":"大さじ1"},{"name":"ごま油","amount":"小さじ1"},{"name":"香菜","amount":"少々"}],"instructions":[{"elements":[{"text":"えびは背ワタを取り、水で洗い、水気を拭く。ねぎは粗みじん切りにする。"},{"url":"https://park.ajinomoto.co.jp/wp-content/uploads/2021/08/706051_direction_0_0.jpeg"},{"url":"https://park.ajinomoto.co.jp/wp-content/uploads/2021/08/706051_direction_0_1.jpeg"}]},{"elements":[{"text":"ボウルにＡを入れて混ぜ合わせ、合わせ調味料を作る。"}]},{"elements":[{"text":"（１）のえびに片栗粉をまぶす。"},{"url":"https://park.ajinomoto.co.jp/wp-content/uploads/2021/08/706051_direction_2_0.jpeg"}]},{"elements":[{"text":"フライパンに油を熱し、にんにくを入れて香りが出るまで炒め、（３）のえびを加えてほぐすようにして炒める。えびの色が変わったら、「熟成豆板醤」を加えて炒める。"},{"url":"https://park.ajinomoto.co.jp/wp-content/uploads/2021/08/706051_direction_3_0.jpeg"}]},{"elements":[{"text":"（１）のねぎを加えてサッと炒め、酒をふり、（２）の合わせ調味料を加えてとろみがつくまで炒め合わせる。"},{"url":"https://park.ajinomoto.co.jp/wp-content/uploads/2021/08/706051_direction_4_0.jpeg"}]},{"elements":[{"text":"器に盛り、ごま油をふり、香菜を飾る。"}]}]}`,
-		"https://park.ajinomoto.co.jp/recipe/card/701300/": `{"title":"豚肉・しめじ・小松菜のオイスターソース炒め","image":"https://park.ajinomoto.co.jp/wp-content/uploads/2018/03/701300.jpeg","servings":2,"ingredients":[{"name":"豚こま切れ肉","amount":"200g"},{"group":"A","name":"片栗粉","amount":"大さじ1/2"},{"group":"A","name":"塩","amount":"少々"},{"group":"A","name":"こしょう","amount":"少々"},{"name":"しめじ","amount":"1パック"},{"name":"小松菜","amount":"150g"},{"group":"B","name":"オイスターソース","amount":"大さじ1"},{"group":"B","name":"酒","amount":"大さじ1"},{"group":"B","name":"鶏がらスープ","amount":"小さじ1/3"},{"name":"ごま油","amount":"小さじ1"}],"instructions":[{"elements":[{"text":"豚肉はＡをもみ込む。しめじは小房に分け、小松菜は４ｃｍ長さに切る。"}]},{"elements":[{"text":"フライパンにごま油を熱し、（１）の豚肉をほぐしながら炒める。"}]},{"elements":[{"text":"肉の色が変わってきたら、（１）のしめじ・小松菜を加えてＢで調味し、小松菜がしんなりしたら火を止める。"}]}]}`,
-		"https://park.ajinomoto.co.jp/recipe/card/700708/": `{"title":"ミートボールの甘酢あんかけ","image":"https://park.ajinomoto.co.jp/wp-content/uploads/2018/03/700708.jpeg","servings":2,"ingredients":[{"name":"豚ひき肉","amount":"150g"},{"name":"パン粉","amount":"大さじ2"},{"name":"酒","amount":"小さじ1"},{"group":"A","name":"玉ねぎのみじん切り","amount":"1/4個分(50g)"},{"group":"A","name":"にんにくのみじん切り","amount":"1/2かけ分"},{"group":"A","name":"卵","amount":"1/2個"},{"group":"A","name":"塩","amount":"少々"},{"group":"A","name":"味の素","amount":"少々"},{"group":"A","name":"こしょう","amount":"少々"},{"name":"サラダ油","amount":"適量"},{"group":"B","name":"水","amount":"1/3カップ"},{"group":"B","name":"酢","amount":"大さじ1・1/2"},{"group":"B","name":"トマトケチャップ","amount":"大さじ1"},{"group":"B","name":"しょうゆ","amount":"大さじ1/2"},{"group":"B","name":"砂糖","amount":"大さじ1/2"},{"group":"B","name":"オイスターソース","amount":"小さじ1/2"},{"group":"B","name":"ごま油","amount":"小さじ1/2"},{"group":"B","name":"粉末中華スープ","amount":"少々"},{"group":"B","name":"片栗粉","amount":"大さじ1/4"},{"name":"レタス","amount":"適量"}],"instructions":[{"elements":[{"text":"パン粉は酒をふって混ぜる。"}]},{"elements":[{"text":"ひき肉に（１）のパン粉、Ａを加えて粘りが出るまでよく練り混ぜ、ひと口大に丸める。１６０～１７０℃の揚げ油できつね色に揚げる。"}]},{"elements":[{"text":"小鍋にＢを入れてよく混ぜ、強火にかけて混ぜながら煮立て、とろみをつける。"}]},{"elements":[{"text":"器にレタスを敷き、（２）のミートボールを盛り、（３）のあんかけをかける。"}]}]}`,
-		"https://park.ajinomoto.co.jp/recipe/card/702479/": `{"title":"パラっと香ばしい！  \n                納豆チャーハン","image":"https://park.ajinomoto.co.jp/wp-content/uploads/2018/03/702479.jpeg","servings":2,"ingredients":[{"name":"ご飯","amount":"400g"},{"name":"納豆","amount":"2パック"},{"name":"卵","amount":"2個"},{"name":"ねぎ・粗みじん切り","amount":"1/2本分"},{"group":"A","name":"しょうゆ","amount":"大さじ1"},{"group":"A","name":"鶏がらスープ","amount":"大さじ1"},{"group":"A","name":"こしょう","amount":"少々"},{"name":"サラダ油","amount":"大さじ3"},{"name":"ごま油","amount":"小さじ1"}],"instructions":[{"elements":[{"text":"卵は溶きほぐしておく。"}]},{"elements":[{"text":"フライパンの中心に油を入れて熱し、（１）の溶き卵を油の中心に流し入れて包み込むように混ぜ、半熟状にする。"},{"url":"https://park.ajinomoto.co.jp/wp-content/uploads/2021/08/702479_direction_1_0.jpeg"}]},{"elements":[{"text":"ご飯を加えて卵をご飯の中に混ぜ込むようにして炒め合わせ、パラパラになってきたら、納豆、ねぎを加えてさらに炒める。"},{"url":"https://park.ajinomoto.co.jp/wp-content/uploads/2021/08/702479_direction_2_0.jpeg"},{"url":"https://park.ajinomoto.co.jp/wp-content/uploads/2021/08/702479_direction_2_1.jpeg"}]},{"elements":[{"text":"納豆のネバネバが切れる程度に炒めたら、Ａを加え、仕上げにごま油を回し入れる。"},{"url":"https://park.ajinomoto.co.jp/wp-content/uploads/2021/08/702479_direction_3_0.jpeg"}]},{"elements":[{"text":"＊納豆のネバネバがなくなるまでしっかり炒めましょう。"}]}]}`,
-		"https://park.ajinomoto.co.jp/recipe/card/706078/": `{"title":"ふんわり卵で絶品  \n                オムライス","image":"https://park.ajinomoto.co.jp/wp-content/uploads/2018/03/706078.jpeg","servings":2,"ingredients":[{"name":"鶏むね肉","amount":"100g"},{"name":"玉ねぎ","amount":"1/2個"},{"name":"温かいご飯","amount":"300g"},{"name":"コンソメ","amount":"小さじ1","comment":"顆粒"},{"name":"トマトケチャップ","amount":"適量"},{"name":"卵","amount":"4個"},{"name":"塩","amount":"適量"},{"name":"こしょう","amount":"適量"},{"name":"サラダ油","amount":"適量"},{"name":"バター","amount":"大さじ2"},{"name":"パセリ","amount":"適量"}],"instructions":[{"elements":[{"text":"鶏肉は１．５ｃｍ角に切り、塩・こしょう少々をふる。玉ねぎはみじん切りにする。"},{"url":"https://park.ajinomoto.co.jp/wp-content/uploads/2021/08/706078_direction_0_0.jpeg"}]},{"elements":[{"text":"フライパンに油小さじ１を熱し、（１）の鶏肉を炒める。焼き色がついたら、バター大さじ１、（１）の玉ねぎを加えてよく炒める。"},{"url":"https://park.ajinomoto.co.jp/wp-content/uploads/2021/08/706078_direction_1_0.jpeg"}]},{"elements":[{"text":"ご飯を加えて「コンソメ」をふり、混ぜながら炒める。トマトケチャップ大さじ２、塩・こしょう少々で味を調え、チキンライスを作る。"},{"url":"https://park.ajinomoto.co.jp/wp-content/uploads/2021/08/706078_direction_2_0.jpeg"}]},{"elements":[{"text":"小さめのボウルに卵２個を溶きほぐし、塩・こしょう少々を混ぜる。"}]},{"elements":[{"text":"フライパンに油、バター各大さじ１／２を熱し、（４）の溶き卵を一気に流し入れて全体をサッと混ぜる。半熟状になったら（３）のチキンライスの半量を中央にのせ、両端からヘラで折り曲げる。"},{"url":"https://park.ajinomoto.co.jp/wp-content/uploads/2021/08/706078_direction_4_0.jpeg"}]},{"elements":[{"text":"フライパンの片側に寄せ、皿に返して盛りつける。トマトケチャップ少々をかけ、パセリを飾る。もう一つも同様に作る。"},{"url":"https://park.ajinomoto.co.jp/wp-content/uploads/2021/08/706078_direction_5_0.jpeg"}]},{"elements":[{"text":"＊フライパンのフチを利用すると形よく整えられます。"}]}]}`,
-		"https://park.ajinomoto.co.jp/recipe/card/706119/": `{"title":"ふっくら焼ける！  \n                ホットケーキ","image":"https://park.ajinomoto.co.jp/wp-content/uploads/2018/03/706119.jpeg","ingredients":[{"group":"A","name":"薄力粉","amount":"150g"},{"group":"A","name":"ベーキングパウダー","amount":"小さじ2"},{"group":"A","name":"砂糖","amount":"40g"},{"name":"卵","amount":"1個"},{"name":"牛乳","amount":"130ml"},{"name":"サラダ油","amount":"少々"}],"instructions":[{"elements":[{"text":"ボウルにＡをふるい入れ、泡立て器で混ぜる。"}]},{"elements":[{"text":"別のボウルに卵を割りほぐし、牛乳を加えて混ぜる。"}]},{"elements":[{"text":"（１）のボウルに（２）を加え、泡立て器で粉っぽさがなくなるまで混ぜ、生地を作る。"}]},{"elements":[{"text":"フライパンに油をしみ込ませたキッチンペーパーで油を薄く塗り、フライパンを熱する。"}]},{"elements":[{"text":"ぬれたふきんの上にフライパンを置いて熱を取り、再び弱火にかけ、（３）の生地をおたま１杯、上から中心に落とす（こうすると丸い形になる）。"}]},{"elements":[{"text":"約３分焼き、表面にプツプツと穴がでてきたら裏返し、約２分弱火のまま焼き、取り出す。"}]},{"elements":[{"text":"２枚目からは油をひかずにフライパンをぬれふきんの上に置いて熱を取り、弱火にかけて同様に焼く。"}]},{"elements":[{"text":"器に盛り、好みでバター、メープルシロップをかける。"}]},{"elements":[{"text":"＊ベーキングパウダー入りの生地はすぐに焼かないとふくらみが悪くなるので、　混ぜたらすぐに焼きましょう。"}]}]}`,
-	}
 
 	for url, want := range tests {
 		url := url
@@ -30,7 +235,7 @@ func TestNewParser(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if err := sites.RecipeMustBe2(rex, want); err != nil {
+			if err := sites.RecipeMustBe2(want, rex); err != nil {
 				t.Error(err)
 			}
 		})
