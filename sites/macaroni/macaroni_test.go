@@ -8,7 +8,6 @@ import (
 	"github.com/psyark/recipebot/sites"
 )
 
-// TODO: 実装
 var tests = map[string]*rexch.Recipe{
 	"https://macaro-ni.jp/109611": {
 		Title:    "とろ〜り半熟卵で作る「ウフ・アン・ムーレット」【秋元さくらシェフ直伝】",
@@ -128,7 +127,7 @@ var tests = map[string]*rexch.Recipe{
 			{Group: "", Name: "卵", Amount: "1玉", Comment: ""},
 			{Group: "", Name: "酒", Amount: "大さじ1", Comment: ""},
 			{Group: "", Name: "揚げ油", Amount: "適量", Comment: ""},
-			{Group: "Ａ", Name: "パン粉", Amount: "1/2カップ", Comment: ""}, // TODO
+			{Group: "Ａ", Name: "パン粉", Amount: "1/2カップ", Comment: ""},
 			{Group: "Ａ", Name: "粉チーズ", Amount: "大さじ1", Comment: ""},
 			{Group: "", Name: "レモン", Amount: "お好みで", Comment: ""},
 			{Group: "＜タルタルソース＞", Name: "ゆで卵", Amount: "1個", Comment: ""},
@@ -137,7 +136,7 @@ var tests = map[string]*rexch.Recipe{
 			{Group: "Ｂ", Name: "マヨネーズ", Amount: "大さじ3", Comment: ""},
 			{Group: "Ｂ", Name: "塩胡椒", Amount: "少々", Comment: ""},
 		},
-		Instructions: []rexch.Instruction{ // TODO
+		Instructions: []rexch.Instruction{
 			{Elements: []rexch.InstructionElement{
 				&rexch.TextInstructionElement{Text: "下準備\n・溶き卵に酒を加えてよく混ぜておく。"},
 				&rexch.ImageInstructionElement{URL: "https://cdn.macaro-ni.jp/image/summary/35/35774/888df0a1adc2bccd77f08abe78b43cbe.jpg?p=medium"},
