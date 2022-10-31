@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/psyark/recipebot/recipe"
+	"github.com/psyark/recipebot/rexch"
 	"github.com/psyark/recipebot/sites"
 
 	"github.com/PuerkitoBio/goquery"
@@ -13,6 +14,14 @@ import (
 type parser struct{}
 
 func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) {
+	rex, err := p.Parse2(ctx, url)
+	if err != nil {
+		return nil, err
+	}
+	return rex.BackCompat(), nil
+}
+
+func (p *parser) Parse2(ctx context.Context, url string) (*rexch.Recipe, error) {
 	if !strings.HasPrefix(url, "https://www.lettuceclub.net/recipe/dish/") {
 		return nil, sites.ErrUnsupportedURL
 	}
@@ -22,23 +31,26 @@ func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) 
 		return nil, err
 	}
 
-	rcp := &recipe.Recipe{
+	rex := &rexch.Recipe{
 		Title: strings.TrimSpace(doc.Find(`h1.c-heading2__title`).Text()),
 		Image: sites.ResolvePath(url, doc.Find(`.p-mainvisual__item img`).AttrOr("src", "")),
 	}
 
 	doc.Find(`ul.c-textbox__ingredients li`).Each(func(i int, s *goquery.Selection) {
 		parts := strings.Split(strings.TrimSpace(s.Text()), "…")
-		rcp.AddIngredient("", recipe.Ingredient{Name: parts[0], Amount: parts[1]})
+		igd := rexch.Ingredient{Name: parts[0], Amount: parts[1]}
+		rex.Ingredients = append(rex.Ingredients, igd)
 	})
 
 	doc.Find(`#step ol li`).Each(func(i int, s *goquery.Selection) {
-		rcp.Steps = append(rcp.Steps, recipe.Step{Text: strings.TrimSpace(s.Text())})
+		ist := rexch.Instruction{}
+		ist.AddText(strings.TrimSpace(s.Text()))
+		rex.Instructions = append(rex.Instructions, ist)
 	})
 
-	return rcp, nil
+	return rex, nil
 }
 
-func NewParser() sites.Parser {
+func NewParser() sites.Parser2 {
 	return &parser{}
 }
