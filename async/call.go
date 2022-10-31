@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 
 	cloudtasks "cloud.google.com/go/cloudtasks/apiv2"
-	"google.golang.org/genproto/googleapis/cloud/tasks/v2"
+	taskspb "google.golang.org/genproto/googleapis/cloud/tasks/v2"
 )
 
 const (
@@ -33,10 +33,10 @@ func CallAsync(ctx context.Context, pay Payload) error {
 		return err
 	}
 
-	req := &tasks.CreateTaskRequest{
+	req := &taskspb.CreateTaskRequest{
 		Parent: `projects/notion-recipe-importer/locations/asia-northeast1/queues/recipebot`,
-		Task: &tasks.Task{
-			MessageType: &tasks.Task_HttpRequest{HttpRequest: &tasks.HttpRequest{Url: "https://recipebot2-n2nmszkvha-an.a.run.app", Body: body}},
+		Task: &taskspb.Task{
+			MessageType: &taskspb.Task_HttpRequest{HttpRequest: &taskspb.HttpRequest{Url: "https://recipebot2-n2nmszkvha-an.a.run.app", Body: body}},
 		},
 	}
 

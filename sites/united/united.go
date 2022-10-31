@@ -2,8 +2,9 @@ package united
 
 import (
 	"context"
+	"errors"
 
-	"github.com/psyark/recipebot/recipe"
+	"github.com/psyark/recipebot/rexch"
 	"github.com/psyark/recipebot/sites"
 	"github.com/psyark/recipebot/sites/ajinomotopark"
 	"github.com/psyark/recipebot/sites/buzzfeed"
@@ -22,7 +23,7 @@ import (
 	"github.com/psyark/recipebot/sites/sirogohan"
 )
 
-func NewParser() sites.Parser {
+func NewParser() sites.Parser2 {
 	return &parsers{
 		ajinomotopark.NewParser(),
 		buzzfeed.NewParser(),
@@ -42,18 +43,12 @@ func NewParser() sites.Parser {
 	}
 }
 
-type parsers []sites.Parser
+type parsers []sites.Parser2
 
-func (p parsers) Parse(ctx context.Context, url string) (*recipe.Recipe, error) {
+func (p parsers) Parse2(ctx context.Context, url string) (*rexch.Recipe, error) {
 	for _, c := range p {
-		rcp, err := c.Parse(ctx, url)
-		switch err {
-		case nil:
-			return rcp, nil
-		case sites.ErrUnsupportedURL:
-			continue
-		default:
-			return nil, err
+		if rex, err := c.Parse2(ctx, url); !errors.Is(err, sites.ErrUnsupportedURL) {
+			return rex, err
 		}
 	}
 	return nil, sites.ErrUnsupportedURL

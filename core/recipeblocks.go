@@ -4,10 +4,10 @@ import (
 	"strings"
 
 	"github.com/psyark/notionapi"
-	"github.com/psyark/recipebot/recipe"
+	"github.com/psyark/recipebot/rexch"
 )
 
-func toBlocks(rcp recipe.Recipe) []notionapi.Block {
+func toBlocks(rex *rexch.Recipe) []notionapi.Block {
 	indices := []string{"1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟", "🔢"}
 
 	blocks := []notionapi.Block{
@@ -20,30 +20,32 @@ func toBlocks(rcp recipe.Recipe) []notionapi.Block {
 		},
 		toHeading1("材料"),
 	}
-	for _, group := range rcp.IngredientGroups {
-		if group.Name == "" {
-			width := group.LongestNameWidth() + 1
-			for _, igd := range group.Children {
+	for _, group := range rex.IngredientGroups() {
+		if group == "" {
+			items := rex.IngredientsByGroup(group)
+			width := getLongestNameWidth(items) + 1
+			for _, igd := range items {
 				blocks = append(blocks, toIngredient(igd, width))
 			}
 		}
 	}
-	for _, group := range rcp.IngredientGroups {
-		if group.Name != "" {
-			blocks = append(blocks, toHeading3(group.Name))
-			width := group.LongestNameWidth() + 1
-			for _, igd := range group.Children {
+	for _, group := range rex.IngredientGroups() {
+		if group != "" {
+			blocks = append(blocks, toHeading3(group))
+			items := rex.IngredientsByGroup(group)
+			width := getLongestNameWidth(items) + 1
+			for _, igd := range items {
 				blocks = append(blocks, toIngredient(igd, width))
 			}
 		}
 	}
 	blocks = append(blocks, toHeading1("手順"))
-	for idx, stp := range rcp.Steps {
+	for idx, ist := range rex.Instructions {
 		emoji := "🔢"
 		if idx < len(indices) {
 			emoji = indices[idx]
 		}
-		blocks = append(blocks, toCallout(stp.Text, emoji, stp.Images))
+		blocks = append(blocks, toCallout(emoji, ist.Elements))
 	}
 	return blocks
 }
@@ -72,8 +74,8 @@ func toToDo(str string) notionapi.Block {
 	}
 }
 
-func toIngredient(igd recipe.Ingredient, width int) notionapi.Block {
-	todo := toToDo(igd.Name + strings.Repeat("　", width-igd.NameWidth()) + igd.Amount)
+func toIngredient(igd rexch.Ingredient, width int) notionapi.Block {
+	todo := toToDo(igd.Name + strings.Repeat("　", width-len([]rune(igd.Name))) + igd.Amount)
 	if igd.Comment != "" {
 		comment := toRichTextArray(" （" + igd.Comment + "）")
 		comment[0].Annotations = &notionapi.Annotations{Color: "green"}
@@ -82,18 +84,26 @@ func toIngredient(igd recipe.Ingredient, width int) notionapi.Block {
 	return todo
 }
 
-func toCallout(str string, emoji string, images []string) notionapi.Block {
+func toCallout(emoji string, elements []rexch.InstructionElement) notionapi.Block {
 	block := notionapi.Block{
 		Object: "block",
 		Type:   "callout",
 		Callout: notionapi.CalloutBlockData{
-			RichText: toRichTextArray(str),
-			Icon:     &notionapi.Emoji{Type: "emoji", Emoji: emoji},
-			Color:    "gray_background",
+			Icon:  &notionapi.Emoji{Type: "emoji", Emoji: emoji},
+			Color: "gray_background",
 		},
 	}
-	for _, url := range images {
-		block.Callout.Children = append(block.Callout.Children, toImage(url))
+	for i, elem := range elements {
+		switch elem := elem.(type) {
+		case *rexch.TextInstructionElement:
+			if i == 0 {
+				block.Callout.RichText = toRichTextArray(elem.Text)
+			} else {
+				block.Callout.Children = append(block.Callout.Children, toParagraph(elem.Text))
+			}
+		case *rexch.ImageInstructionElement:
+			block.Callout.Children = append(block.Callout.Children, toImage(elem.URL))
+		}
 	}
 	return block
 }
@@ -108,4 +118,24 @@ func toImage(url string) notionapi.Block {
 
 func toRichTextArray(text string) []notionapi.RichText {
 	return []notionapi.RichText{{Type: "text", Text: &notionapi.Text{Content: text}}}
+}
+
+func toParagraph(str string) notionapi.Block {
+	return notionapi.Block{
+		Object: "block",
+		Type:   "paragraph",
+		Paragraph: notionapi.ParagraphBlockData{
+			RichText: toRichTextArray(str),
+		},
+	}
+}
+
+func getLongestNameWidth(ingredients []rexch.Ingredient) int {
+	longest := 0
+	for _, igd := range ingredients {
+		if longest < len([]rune(igd.Name)) {
+			longest = len([]rune(igd.Name))
+		}
+	}
+	return longest
 }

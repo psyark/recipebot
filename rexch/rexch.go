@@ -18,6 +18,28 @@ type Recipe struct {
 	Instructions []Instruction `json:"instructions"`
 }
 
+func (r *Recipe) IngredientGroups() []string {
+	groups := []string{}
+	exists := map[string]bool{}
+	for _, i := range r.Ingredients {
+		if !exists[i.Group] {
+			exists[i.Group] = true
+			groups = append(groups, i.Group)
+		}
+	}
+	return groups
+}
+
+func (r *Recipe) IngredientsByGroup(group string) []Ingredient {
+	igds := []Ingredient{}
+	for _, i := range r.Ingredients {
+		if i.Group == group {
+			igds = append(igds, i)
+		}
+	}
+	return igds
+}
+
 type Ingredient struct {
 	Group   string `json:"group,omitempty"`
 	Name    string `json:"name"`

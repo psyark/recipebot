@@ -4,7 +4,6 @@ import (
 	"context"
 	"strings"
 
-	"github.com/psyark/recipebot/recipe"
 	"github.com/psyark/recipebot/rexch"
 	"github.com/psyark/recipebot/sites"
 
@@ -19,14 +18,6 @@ var debrandMap = map[string]string{
 	"マンジョウ国産米こだわり仕込み料理の清酒":   "料理酒",
 	"マンジョウ濃厚熟成本みりん":          "みりん",
 	"マンジョウ米麹こだわり仕込み本みりん":     "みりん",
-}
-
-func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) {
-	rex, err := p.Parse2(ctx, url)
-	if err != nil {
-		return nil, err
-	}
-	return rex.BackCompat(), nil
 }
 
 func (p *parser) Parse2(ctx context.Context, url string) (*rexch.Recipe, error) {

@@ -1,7 +1,9 @@
-package recipe
+package core
 
 import (
 	"strings"
+
+	"github.com/psyark/recipebot/rexch"
 )
 
 type emojiRule struct {
@@ -54,9 +56,9 @@ func init() {
 	rule("🍖", "肉")
 }
 
-func (r Recipe) GetEmoji() string {
+func GetEmoji(rex *rexch.Recipe) string {
 	for _, rule := range emojiRules {
-		if strings.Contains(r.Title, rule.Substring) {
+		if strings.Contains(rex.Title, rule.Substring) {
 			return rule.Emoji
 		}
 	}

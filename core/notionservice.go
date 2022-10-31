@@ -6,7 +6,7 @@ import (
 	"regexp"
 
 	"github.com/psyark/notionapi"
-	"github.com/psyark/recipebot/recipe"
+	"github.com/psyark/recipebot/rexch"
 	"github.com/psyark/recipebot/sites/united"
 )
 
@@ -100,7 +100,7 @@ func (s *Service) GetRecipeByURL(ctx context.Context, url string) (*notionapi.Pa
 }
 
 func (s *Service) CreateRecipe(ctx context.Context, url string) (*notionapi.Page, error) {
-	rcp, err := unitedParser.Parse(ctx, url)
+	rex, err := unitedParser.Parse2(ctx, url)
 	if err != nil {
 		return nil, err
 	}
@@ -108,16 +108,16 @@ func (s *Service) CreateRecipe(ctx context.Context, url string) (*notionapi.Page
 	opt := &notionapi.CreatePageOptions{
 		Parent: &notionapi.Parent{Type: "database_id", DatabaseID: recipe_db_id},
 		Properties: map[string]notionapi.PropertyValue{
-			"title":         {Type: "title", Title: toRichTextArray(rcp.Title)},
+			"title":         {Type: "title", Title: toRichTextArray(rex.Title)},
 			recipe_original: {Type: "url", URL: &url},
 			recipe_eval:     {Type: "select", Select: &notionapi.SelectOption{Name: "👀次作る"}},
 		},
 	}
-	if rcp.GetEmoji() != "" {
-		opt.Icon = &notionapi.Emoji{Type: "emoji", Emoji: rcp.GetEmoji()}
+	if emoji := GetEmoji(rex); emoji != "" {
+		opt.Icon = &notionapi.Emoji{Type: "emoji", Emoji: emoji}
 	}
-	if rcp.Image != "" {
-		opt.Cover = &notionapi.File{Type: "external", External: &notionapi.ExternalFileData{URL: rcp.Image}}
+	if rex.Image != "" {
+		opt.Cover = &notionapi.File{Type: "external", External: &notionapi.ExternalFileData{URL: rex.Image}}
 	}
 
 	page, err := s.client.CreatePage(ctx, opt)
@@ -125,7 +125,7 @@ func (s *Service) CreateRecipe(ctx context.Context, url string) (*notionapi.Page
 		return nil, err
 	}
 
-	return page, s.updatePageContent(ctx, page.ID, rcp)
+	return page, s.updatePageContent(ctx, page.ID, rex)
 }
 
 func (s *Service) UpdateRecipe(ctx context.Context, pageID string) error {
@@ -150,23 +150,23 @@ func (s *Service) UpdateRecipe(ctx context.Context, pageID string) error {
 		}
 	}
 
-	rcp, err := unitedParser.Parse(ctx, url)
+	rex, err := unitedParser.Parse2(ctx, url)
 	if err != nil {
 		return err
 	}
 
 	opt := &notionapi.UpdatePageOptions{}
-	if title == "" && rcp.Title != "" {
+	if title == "" && rex.Title != "" {
 		if opt.Properties == nil {
 			opt.Properties = map[string]notionapi.PropertyValue{}
 		}
-		opt.Properties["title"] = notionapi.PropertyValue{Type: "title", Title: toRichTextArray(rcp.Title)}
+		opt.Properties["title"] = notionapi.PropertyValue{Type: "title", Title: toRichTextArray(rex.Title)}
 	}
-	if page.Icon == nil && rcp.GetEmoji() != "" {
-		opt.Icon = &notionapi.Emoji{Type: "emoji", Emoji: rcp.GetEmoji()}
+	if page.Icon == nil && GetEmoji(rex) != "" {
+		opt.Icon = &notionapi.Emoji{Type: "emoji", Emoji: GetEmoji(rex)}
 	}
-	if page.Cover == nil && rcp.Image != "" {
-		opt.Cover = &notionapi.File{Type: "external", External: &notionapi.ExternalFileData{URL: rcp.Image}}
+	if page.Cover == nil && rex.Image != "" {
+		opt.Cover = &notionapi.File{Type: "external", External: &notionapi.ExternalFileData{URL: rex.Image}}
 	}
 
 	if opt.Icon != nil || opt.Cover != nil || len(opt.Properties) != 0 {
@@ -175,7 +175,7 @@ func (s *Service) UpdateRecipe(ctx context.Context, pageID string) error {
 		}
 	}
 
-	return s.updatePageContent(ctx, page.ID, rcp)
+	return s.updatePageContent(ctx, page.ID, rex)
 }
 
 func (s *Service) UpdateRecipeIngredients(ctx context.Context, pageID string, stockMap StockMap) (map[string]bool, error) {
@@ -184,22 +184,20 @@ func (s *Service) UpdateRecipeIngredients(ctx context.Context, pageID string, st
 		return nil, err
 	}
 
-	rcp, err := unitedParser.Parse(ctx, piop.(*notionapi.PropertyItem).URL)
+	rex, err := unitedParser.Parse2(ctx, piop.(*notionapi.PropertyItem).URL)
 	if err != nil {
 		return nil, err
 	}
 
 	stockRelation := []notionapi.PageReference{}
 	foundMap := map[string]bool{}
-	for _, g := range rcp.IngredientGroups {
-		for _, igd := range g.Children {
-			pageID, found := stockMap.Get(igd.Name)
-			if !found {
-				foundMap[igd.Name] = false
-			} else if pageID != "" {
-				foundMap[igd.Name] = true
-				stockRelation = append(stockRelation, notionapi.PageReference{ID: pageID})
-			}
+	for _, igd := range rex.Ingredients {
+		pageID, found := stockMap.Get(igd.Name)
+		if !found {
+			foundMap[igd.Name] = false
+		} else if pageID != "" {
+			foundMap[igd.Name] = true
+			stockRelation = append(stockRelation, notionapi.PageReference{ID: pageID})
 		}
 	}
 
@@ -215,7 +213,7 @@ func (s *Service) UpdateRecipeIngredients(ctx context.Context, pageID string, st
 	return foundMap, nil
 }
 
-func (s *Service) updatePageContent(ctx context.Context, pageID string, rcp *recipe.Recipe) error {
+func (s *Service) updatePageContent(ctx context.Context, pageID string, rex *rexch.Recipe) error {
 	// 以前のブロックを削除
 	pagi, err := s.client.RetrieveBlockChildren(ctx, pageID)
 	if err != nil {
@@ -234,7 +232,7 @@ func (s *Service) updatePageContent(ctx context.Context, pageID string, rcp *rec
 	}
 
 	// 新しいブロックを作成
-	opt := &notionapi.AppendBlockChildrenOptions{Children: toBlocks(*rcp)}
+	opt := &notionapi.AppendBlockChildrenOptions{Children: toBlocks(rex)}
 	if _, err = s.client.AppendBlockChildren(ctx, pageID, opt); err != nil {
 		return fmt.Errorf("appendBlockChildren: %w", err)
 	}

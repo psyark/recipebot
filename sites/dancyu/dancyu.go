@@ -7,7 +7,6 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/psyark/jsonld"
-	"github.com/psyark/recipebot/recipe"
 	"github.com/psyark/recipebot/rexch"
 	"github.com/psyark/recipebot/sites"
 )
@@ -19,14 +18,6 @@ var (
 )
 
 type parser struct{}
-
-func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) {
-	rex, err := p.Parse2(ctx, url)
-	if err != nil {
-		return nil, err
-	}
-	return rex.BackCompat(), nil
-}
 
 func (p *parser) Parse2(ctx context.Context, url string) (*rexch.Recipe, error) {
 	if !strings.HasPrefix(url, "https://dancyu.jp/recipe/") {
