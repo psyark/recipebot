@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/psyark/recipebot/recipe"
+	"github.com/psyark/recipebot/rexch"
 	"github.com/psyark/recipebot/sites"
 
 	"github.com/PuerkitoBio/goquery"
@@ -13,6 +14,14 @@ import (
 type parser struct{}
 
 func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) {
+	rex, err := p.Parse2(ctx, url)
+	if err != nil {
+		return nil, err
+	}
+	return rex.BackCompat(), nil
+}
+
+func (p *parser) Parse2(ctx context.Context, url string) (*rexch.Recipe, error) {
 	if !strings.HasPrefix(url, "https://www.kurashiru.com/recipes/") {
 		return nil, sites.ErrUnsupportedURL
 	}
@@ -22,7 +31,7 @@ func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) 
 		return nil, err
 	}
 
-	rcp := &recipe.Recipe{
+	rex := &rexch.Recipe{
 		Title: strings.TrimSuffix(doc.Find(`h1.title`).Text(), "　レシピ・作り方"),
 		Image: doc.Find(`.main-video video`).AttrOr("poster", ""),
 	}
@@ -36,7 +45,7 @@ func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) 
 			groupName = ""
 			fallthrough
 		case "ingredient-list-item group-item":
-			idg := recipe.GetIngredient(s.Find(`.ingredient-name`).Text(), s.Find(`.ingredient-quantity-amount`).Text())
+			idg := rexch.NewIngredient(s.Find(`.ingredient-name`).Text(), s.Find(`.ingredient-quantity-amount`).Text())
 			groupName2 := groupName
 
 			for _, prefix := range []string{"（Ａ）", "（Ｂ）", "（Ｃ）"} {
@@ -47,17 +56,21 @@ func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) 
 				}
 			}
 
-			rcp.AddIngredient(groupName2, idg)
+			idg.Group = groupName2
+
+			rex.Ingredients = append(rex.Ingredients, *idg)
 		}
 	})
 
 	doc.Find(`li.instruction-list-item`).Each(func(i int, s *goquery.Selection) {
-		rcp.Steps = append(rcp.Steps, recipe.Step{Text: strings.TrimSpace(s.Find(`.content`).Text())})
+		ist := rexch.Instruction{}
+		ist.AddText(strings.TrimSpace(s.Find(`.content`).Text()))
+		rex.Instructions = append(rex.Instructions, ist)
 	})
 
-	return rcp, nil
+	return rex, nil
 }
 
-func NewParser() sites.Parser {
+func NewParser() sites.Parser2 {
 	return &parser{}
 }
