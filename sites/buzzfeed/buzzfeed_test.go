@@ -10,7 +10,7 @@ import (
 
 var tests = map[string]*rexch.Recipe{
 	"https://www.buzzfeed.com/jp/kazuyawakana/eggplant-ooba-mentsuyu-pickled-doubanjiang": {
-		Title:    "【めんつゆ×豆板醤で激ウマ！】ご飯がススム！なすと大葉のめんつゆ豆板醤漬け", // TODO
+		Title:    "ご飯がススム！なすと大葉のめんつゆ豆板醤漬け",
 		Image:    "https://img.buzzfeed.com/buzzfeed-static/static/2022-05/27/6/asset/5c946aa4fc12/sub-buzz-3082-1653632598-1.jpg?downsize=700%3A%2A&output-quality=auto&output-format=auto",
 		Servings: 1,
 		Ingredients: []rexch.Ingredient{
@@ -29,7 +29,7 @@ var tests = map[string]*rexch.Recipe{
 		},
 	},
 	"https://www.buzzfeed.com/jp/kazuyawakana/burdock-pickled-in-ponzu-sauce": {
-		Title:    "【美味しすぎて作り置きにならん…！】簡単さっぱり♪ごぼうのポン酢漬け", // TODO
+		Title:    "簡単さっぱり♪ごぼうのポン酢漬け",
 		Image:    "https://img.buzzfeed.com/buzzfeed-static/static/2022-06/14/2/asset/0d424cf2ac90/sub-buzz-1340-1655172520-17.jpg?downsize=700%3A%2A&output-quality=auto&output-format=auto",
 		Servings: 1,
 		Ingredients: []rexch.Ingredient{

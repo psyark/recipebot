@@ -13,6 +13,7 @@ import (
 )
 
 var (
+	titleRegex    = regexp.MustCompile(`^【[^】]+】`)
 	servingsRegex = regexp.MustCompile(`(\d+)人分`)
 	stepRegex     = regexp.MustCompile(`^[①-⑩]\s*`)
 	groupRegex    = regexp.MustCompile(`^([ABC])(.+)$`)
@@ -34,6 +35,8 @@ func (p *parser) Parse2(ctx context.Context, url string) (*rexch.Recipe, error) 
 		Title: strings.TrimSpace(doc.Find(`h2.subbuzz__title`).Eq(0).Text()),
 		Image: sites.ResolvePath(url, doc.Find(`img.subbuzz-picture`).Eq(0).AttrOr("src", "")),
 	}
+
+	rex.Title = titleRegex.ReplaceAllString(rex.Title, "")
 
 	doc.Find(".subbuzz__description").Each(func(i int, s *goquery.Selection) {
 		t := s.Text()
