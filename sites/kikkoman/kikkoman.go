@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/psyark/recipebot/recipe"
+	"github.com/psyark/recipebot/rexch"
 	"github.com/psyark/recipebot/sites"
 
 	"github.com/PuerkitoBio/goquery"
@@ -21,6 +22,14 @@ var debrandMap = map[string]string{
 }
 
 func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) {
+	rex, err := p.Parse2(ctx, url)
+	if err != nil {
+		return nil, err
+	}
+	return rex.BackCompat(), nil
+}
+
+func (p *parser) Parse2(ctx context.Context, url string) (*rexch.Recipe, error) {
 	if !strings.HasPrefix(url, "https://www.kikkoman.co.jp/homecook/") {
 		return nil, sites.ErrUnsupportedURL
 	}
@@ -30,7 +39,7 @@ func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) 
 		return nil, err
 	}
 
-	rcp := &recipe.Recipe{
+	rex := &rexch.Recipe{
 		Title: strings.TrimSpace(doc.Find(`.elem-heading-lv1`).Text()),
 		Image: sites.ResolvePath(url, doc.Find(`img.photo`).AttrOr("src", "")),
 	}
@@ -40,20 +49,24 @@ func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) 
 		switch s.AttrOr("class", "") {
 		case "elem-heading-lv2": // 料理名
 		case "ingredients-form--list": // 材料
-			rcp.AddIngredient(groupName, recipe.Ingredient{
+			igd := rexch.Ingredient{
+				Group:  groupName,
 				Name:   debrand(strings.TrimSpace(s.Find("dt").Text())),
 				Amount: strings.TrimSpace(s.Find("dd").Text()),
-			})
+			}
+			rex.Ingredients = append(rex.Ingredients, igd)
 		case "elem-heading-lv4": // 材料グループ名
 			groupName = strings.TrimSpace(s.Text())
 		}
 	})
 
 	doc.Find(`.instruction`).Each(func(i int, s *goquery.Selection) {
-		rcp.Steps = append(rcp.Steps, recipe.Step{Text: strings.TrimSpace(s.Text())})
+		ist := rexch.Instruction{}
+		ist.AddText(strings.TrimSpace(s.Text()))
+		rex.Instructions = append(rex.Instructions, ist)
 	})
 
-	return rcp, nil
+	return rex, nil
 }
 
 func debrand(name string) string {
@@ -63,6 +76,6 @@ func debrand(name string) string {
 	return name
 }
 
-func NewParser() sites.Parser {
+func NewParser() sites.Parser2 {
 	return &parser{}
 }
