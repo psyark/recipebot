@@ -12,7 +12,7 @@ var tests = map[string]*rexch.Recipe{
 	"https://s.recipe-blog.jp/profile/313934/recipe/1432314": {
 		Title:    "自家製ごまダレで、牛肉と水菜の簡単しゃぶしゃぶ",
 		Image:    "https://asset.recipe-blog.jp/cache/images/recipe/bc/ae/fe6575effb49833f63fea6b56510cf2f8e21bcae.640x640.cut.jpg",
-		Servings: 0, // TODO
+		Servings: 3,
 		Ingredients: []rexch.Ingredient{
 			{Group: "", Name: "牛こま切れ", Amount: "３４０g", Comment: ""},
 			{Group: "", Name: "水菜", Amount: "１束", Comment: ""},
