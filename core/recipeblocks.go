@@ -1,6 +1,7 @@
 package core
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/psyark/notionapi"
@@ -18,8 +19,14 @@ func toBlocks(rex *rexch.Recipe) []notionapi.Block {
 				SyncedFrom: &notionapi.SyncedFrom{Type: "block_id", BlockID: recipe_shared_header_id},
 			},
 		},
-		toHeading1("材料"),
 	}
+
+	if rex.Servings != 0 {
+		blocks = append(blocks, toHeading1(fmt.Sprintf("材料（%d人分）", rex.Servings)))
+	} else {
+		blocks = append(blocks, toHeading1("材料"))
+	}
+
 	for _, group := range rex.IngredientGroups() {
 		if group == "" {
 			items := rex.IngredientsByGroup(group)

@@ -8,6 +8,7 @@ import (
 	"github.com/psyark/notionapi"
 	"github.com/psyark/recipebot/rexch"
 	"github.com/psyark/recipebot/sites/united"
+	"golang.org/x/sync/errgroup"
 )
 
 const (
@@ -131,23 +132,14 @@ func (s *Service) CreateRecipe(ctx context.Context, url string) (*notionapi.Page
 func (s *Service) UpdateRecipe(ctx context.Context, pageID string) error {
 	page, err := s.client.RetrievePage(ctx, pageID)
 	if err != nil {
-		return fmt.Errorf("recipeService.client.RetrievePage: %w", err)
+		return err
 	}
 
-	title := ""
 	url := ""
-	for _, pv := range page.Properties {
-		switch pv.ID {
-		case "title":
-			for _, t := range pv.Title {
-				title += t.PlainText
-			}
-		case recipe_original:
-			if pv.URL == nil {
-				return fmt.Errorf("url unset")
-			}
-			url = *pv.URL
-		}
+	if pv := page.Properties.Get(recipe_original); pv.URL == nil {
+		return fmt.Errorf("url unset")
+	} else {
+		url = *pv.URL
 	}
 
 	rex, err := unitedParser.Parse2(ctx, url)
@@ -155,8 +147,19 @@ func (s *Service) UpdateRecipe(ctx context.Context, pageID string) error {
 		return err
 	}
 
+	eg := errgroup.Group{}
+	eg.Go(func() error {
+		return s.updatePageHeader(ctx, page, rex)
+	})
+	eg.Go(func() error {
+		return s.updatePageContent(ctx, page.ID, rex)
+	})
+	return eg.Wait()
+}
+
+func (s *Service) updatePageHeader(ctx context.Context, page *notionapi.Page, rex *rexch.Recipe) error {
 	opt := &notionapi.UpdatePageOptions{}
-	if title == "" && rex.Title != "" {
+	if page.Properties.Get("title").Title.PlainText() == "" && rex.Title != "" {
 		if opt.Properties == nil {
 			opt.Properties = map[string]notionapi.PropertyValue{}
 		}
@@ -175,7 +178,7 @@ func (s *Service) UpdateRecipe(ctx context.Context, pageID string) error {
 		}
 	}
 
-	return s.updatePageContent(ctx, page.ID, rex)
+	return nil
 }
 
 func (s *Service) UpdateRecipeIngredients(ctx context.Context, pageID string, stockMap StockMap) (map[string]bool, error) {
@@ -217,7 +220,7 @@ func (s *Service) updatePageContent(ctx context.Context, pageID string, rex *rex
 	// 以前のブロックを削除
 	pagi, err := s.client.RetrieveBlockChildren(ctx, pageID)
 	if err != nil {
-		return fmt.Errorf("retrieveBlockChildren: %w", err)
+		return err
 	}
 
 	if pagi.HasMore {
@@ -227,14 +230,14 @@ func (s *Service) updatePageContent(ctx context.Context, pageID string, rex *rex
 	for _, block := range pagi.Results {
 		_, err := s.client.DeleteBlock(ctx, block.ID)
 		if err != nil {
-			return fmt.Errorf("deleteBlock: %w", err)
+			return err
 		}
 	}
 
 	// 新しいブロックを作成
 	opt := &notionapi.AppendBlockChildrenOptions{Children: toBlocks(rex)}
 	if _, err = s.client.AppendBlockChildren(ctx, pageID, opt); err != nil {
-		return fmt.Errorf("appendBlockChildren: %w", err)
+		return err
 	}
 	return nil
 }

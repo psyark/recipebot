@@ -15,6 +15,7 @@ require (
 	github.com/psyark/jsonld v0.0.0-20221024015310-f6b6cba323ae
 	github.com/psyark/notionapi v0.0.0-20221031030711-5d7e4a736c39
 	github.com/slack-go/slack v0.11.3
+	golang.org/x/sync v0.1.0
 	golang.org/x/text v0.4.0
 	google.golang.org/genproto v0.0.0-20221027153422-115e99e71e1c
 )
