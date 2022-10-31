@@ -2,21 +2,21 @@ package macaroni
 
 import (
 	"context"
-	"encoding/json"
+	"fmt"
 	"regexp"
 	"strings"
 
+	"github.com/psyark/jsonld"
 	"github.com/psyark/recipebot/recipe"
 	"github.com/psyark/recipebot/rexch"
 	"github.com/psyark/recipebot/sites"
 
 	"github.com/PuerkitoBio/goquery"
-	"golang.org/x/net/html"
 )
 
 type parser struct{}
 
-var idgRegex = regexp.MustCompile(`・(.+?)(?:（(.+?)）)?……(.+)`)
+var newInstRegex = regexp.MustCompile(`^(\d\. |[①-⑳])`)
 
 func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) {
 	rex, err := p.Parse2(ctx, url)
@@ -31,24 +31,36 @@ func (p *parser) Parse2(ctx context.Context, url string) (*rexch.Recipe, error) 
 		return nil, sites.ErrUnsupportedURL
 	}
 
-	doc, err := sites.NewDocumentFromURL(ctx, url)
-	if err != nil {
+	rex := &rexch.Recipe{}
+	if err := p.parseURL(ctx, url, rex); err != nil {
 		return nil, err
 	}
+	return rex, nil
+}
 
-	rex := &rexch.Recipe{}
+func (p *parser) parseURL(ctx context.Context, url string, rex *rexch.Recipe) error {
+	doc, err := sites.NewDocumentFromURL(ctx, url)
+	if err != nil {
+		return err
+	}
 
 	doc.Find(`script[type="application/ld+json"]`).Each(func(i int, s *goquery.Selection) {
-		tmp := Recipe{}
-		if err := json.Unmarshal([]byte(s.Text()), &tmp); err != nil {
+		obj, err := jsonld.DecodeObject([]byte(s.Text()))
+		if err != nil {
 			return
 		}
 
-		if tmp.Type == "Recipe" && len(tmp.RecipeIngredient) != 0 && len(tmp.RecipeInstructions) != 0 {
-			rex.Title = tmp.Name
-			rex.Image = tmp.Image[0]
-			for _, idg := range tmp.RecipeIngredient {
-				parts := strings.Split(idg, " ")
+		if obj, ok := obj.(*jsonld.Recipe); ok {
+			for _, text := range obj.Name {
+				rex.Title = text.(string)
+				break
+			}
+			for _, image := range obj.Image {
+				rex.Image = image.(string)
+				break
+			}
+			for _, igd := range obj.RecipeIngredient {
+				parts := strings.Split(igd.(string), " ")
 
 				group := ""
 				if len(parts) == 3 {
@@ -60,90 +72,109 @@ func (p *parser) Parse2(ctx context.Context, url string) (*rexch.Recipe, error) 
 				igd.Group = group
 				rex.Ingredients = append(rex.Ingredients, *igd)
 			}
-			for _, ins := range tmp.RecipeInstructions {
-				inst := rexch.Instruction{}
-				inst.AddText(ins.Text)
-				if ins.Image != "" {
-					inst.AddImage(ins.Image)
+			for _, ins := range obj.RecipeInstructions {
+				if ins, ok := ins.(*jsonld.HowToStep); ok {
+					inst := rexch.Instruction{}
+					for _, text := range ins.Text {
+						inst.AddText(text.(string))
+					}
+					for _, image := range ins.Image {
+						inst.AddImage(image.(string))
+					}
+					rex.Instructions = append(rex.Instructions, inst)
 				}
-				rex.Instructions = append(rex.Instructions, inst)
 			}
 		}
 	})
 
-	if len(rex.Instructions) != 0 {
-		return rex, nil
+	if len(rex.Ingredients) != 0 && len(rex.Instructions) != 0 {
+		return nil
 	}
 
-	rex.Title = strings.TrimSpace(doc.Find(`h1.articleInfo__title`).Text())
-	rex.Image = doc.Find(`img.articleInfo__thumbnail`).AttrOr("src", "")
+	mode := "intro"
+	group := ""
+	ins := rexch.Instruction{}
 
-	var curStep *rexch.Instruction
-	parseSteps := func(i int, s *goquery.Selection) {
-		switch s.AttrOr("class", "") {
-		case "articleShow__contentsHeading":
-			rex.Instructions = append(rex.Instructions, rexch.Instruction{})
-			curStep = &rex.Instructions[len(rex.Instructions)-1]
-			curStep.AddText(strings.TrimSpace(s.Text()))
-		case "articleShow__contentsText":
-			if curStep == nil {
-				rex.Instructions = append(rex.Instructions, rexch.Instruction{})
-				curStep = &rex.Instructions[len(rex.Instructions)-1]
-			}
-			for _, line := range parseCTB(s.Find(`.articleShow__contentsTextBody`).Get(0)) {
-				curStep.AddText(strings.TrimSpace(line))
-			}
-		case "articleShow__contentsImage":
-			s.Find("img").Each(func(i int, s *goquery.Selection) {
-				curStep.AddImage(s.AttrOr("data-original", s.AttrOr("src", "")))
-			})
-		}
-	}
+	for {
+		body := doc.Find(".articleShow__body")
+		body.Find(".articleShow__nutrition").Remove()       // 栄養情報
+		body.Find(".articleShow__contentsLink").Remove()    // 他レシピへのリンク
+		body.Find(".articleShow__contentsPhotoBy").Remove() // Photo by
+		body.Find("script").Remove()
+		body.Find("img").Each(func(i int, s *goquery.Selection) {
+			s.ReplaceWithHtml(fmt.Sprintf("\nIMAGE:%s\n", s.AttrOr("data-original", s.AttrOr("src", ""))))
+		})
+		body.Find("br").ReplaceWithHtml("\n")
 
-	doc.Find(`.articleShow__contents`).Each(func(i int, s *goquery.Selection) {
-		if strings.HasPrefix(strings.TrimSpace(s.Find(".articleShow__contentsHeading").Text()), "材料") {
-			groupName := ""
-			for _, line := range parseCTB(s.NextAll().Find(".articleShow__contentsTextBody").Get(0)) {
-				if line == "" {
-					groupName = "" // 改行が連続したらグループ解除
-				} else if strings.HasPrefix(line, "・") {
-					match := idgRegex.FindStringSubmatch(line)
-					igd := rexch.Ingredient{Group: groupName, Name: match[1], Amount: match[3], Comment: match[2]}
-					rex.Ingredients = append(rex.Ingredients, igd)
-				} else {
-					groupName = line
+		for _, line := range strings.Split(body.Text(), "\n") {
+			line = strings.TrimSpace(line)
+			if line != "" {
+				if mode == "intro" {
+					if strings.Contains(line, "材料") {
+						mode = "ingredients"
+					}
+					continue
 				}
-			}
-		} else if strings.TrimSpace(s.Find(".articleShow__contentsHeading").Text()) == "作り方" {
-			s.NextAll().Find("div").Each(parseSteps)
-		}
-	})
+				if mode == "ingredients" {
+					if strings.HasPrefix(line, "IMAGE:") {
+					} else if strings.Contains(line, "下準備") {
+						mode = "instructions"
+					} else if strings.Contains(line, "作り方") {
+						mode = "instructions"
+						continue
+					} else {
+						var fields []string
+						if strings.Contains(line, "……") {
+							fields = strings.SplitN(line, "……", 2)
+						} else if strings.Contains(line, "　") {
+							fields = strings.SplitN(line, "　", 2)
+						} else if strings.HasPrefix(line, "〈") {
+							group = line
+							continue
+						} else {
+							fields = []string{line}
+						}
 
-	for doc.Find(".articleShow__nextPage").Length() != 0 {
-		doc, err = sites.NewDocumentFromURL(ctx, doc.Find(".articleShow__nextPage a").AttrOr("href", ""))
-		if err != nil {
-			return nil, err
-		}
-		doc.Find(`.articleShow__contents div`).Each(parseSteps)
-	}
-
-	return rex, nil
-}
-
-func parseCTB(ctb *html.Node) []string {
-	lines := ""
-	for c := ctb.FirstChild; c != nil; c = c.NextSibling {
-		if c.Type == html.TextNode {
-			lines += c.Data
-		} else if c.Type == html.ElementNode {
-			if c.Data == "br" {
-				lines += "\n"
+						if len(fields) < 2 {
+							fields = append(fields, "")
+						}
+						igd := rexch.NewIngredient(strings.TrimPrefix(fields[0], "・"), fields[1])
+						igd.Group = group
+						rex.Ingredients = append(rex.Ingredients, *igd)
+					}
+				}
+				if mode == "instructions" {
+					if strings.Contains(line, "作り方") {
+						continue
+					}
+					if strings.HasPrefix(line, "IMAGE:") {
+						ins.AddImage(strings.TrimPrefix(line, "IMAGE:"))
+					} else {
+						if len(ins.Elements) != 0 && newInstRegex.MatchString(line) {
+							rex.Instructions = append(rex.Instructions, ins)
+							ins = rexch.Instruction{}
+						}
+						ins.AddText(line)
+					}
+				}
 			} else {
-				lines += goquery.NewDocumentFromNode(c).Text()
+				group = ""
 			}
 		}
+
+		if doc.Find(".articleShow__nextPage").Length() != 0 {
+			doc, err = sites.NewDocumentFromURL(ctx, doc.Find(".articleShow__nextPage a").AttrOr("href", ""))
+			if err != nil {
+				return err
+			}
+		} else {
+			break
+		}
 	}
-	return strings.Split(lines, "\n")
+
+	rex.Instructions = append(rex.Instructions, ins)
+
+	return nil
 }
 
 func NewParser() sites.Parser2 {
