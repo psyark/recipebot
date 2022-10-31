@@ -6,15 +6,23 @@ import (
 	"strings"
 
 	"github.com/psyark/recipebot/recipe"
+	"github.com/psyark/recipebot/rexch"
 	"github.com/psyark/recipebot/sites"
 
 	"github.com/PuerkitoBio/goquery"
-	"golang.org/x/text/width"
 )
 
 type parser struct{}
 
 func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) {
+	rex, err := p.Parse2(ctx, url)
+	if err != nil {
+		return nil, err
+	}
+	return rex.BackCompat(), nil
+}
+
+func (p *parser) Parse2(ctx context.Context, url string) (*rexch.Recipe, error) {
 	if !strings.HasPrefix(url, "https://cookpad.com/") {
 		return nil, sites.ErrUnsupportedURL
 	}
@@ -24,7 +32,7 @@ func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) 
 		return nil, err
 	}
 
-	rcp := &recipe.Recipe{
+	rex := &rexch.Recipe{
 		Title: strings.TrimSpace(doc.Find(`h1.recipe-title`).Text()),
 		Image: getSrc(doc.Find(`#main-photo img`)),
 	}
@@ -32,24 +40,18 @@ func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) 
 	igrRegex := regexp.MustCompile(`^(.*)（(.+)）$`)
 
 	doc.Find(`.ingredient_row`).Each(func(i int, s *goquery.Selection) {
-		igr := recipe.Ingredient{
-			Name:   strings.TrimSpace(width.Widen.String(s.Find(`.ingredient_name`).Text())),
-			Amount: strings.TrimSpace(width.Fold.String(s.Find(`.ingredient_quantity`).Text())),
-		}
-		if igr.Name != "" {
-			if match := igrRegex.FindStringSubmatch(igr.Name); len(match) != 0 {
-				igr.Name = match[1]
-				igr.Comment = match[2]
+		igd := rexch.NewIngredient(s.Find(`.ingredient_name`).Text(), s.Find(`.ingredient_quantity`).Text())
+		if igd.Name != "" {
+			if match := igrRegex.FindStringSubmatch(igd.Name); len(match) != 0 {
+				igd.Name = match[1]
+				igd.Comment = match[2]
 			}
-
-			rcp.AddIngredient("", igr)
+			rex.Ingredients = append(rex.Ingredients, *igd)
 		}
 	})
 
 	doc.Find(`li.step, li.step_last`).Each(func(i int, s *goquery.Selection) {
-		stp := recipe.Step{
-			Text: strings.TrimSpace(s.Find(`.step_text`).Text()),
-		}
+		text := strings.TrimSpace(s.Find(`.step_text`).Text())
 
 		// "Invalid image url." エラーとなるため画像は未サポート（CookpadのCDNがContent-Typeを送っていないの関係ある？）
 
@@ -59,21 +61,23 @@ func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) 
 		// })
 
 		for _, ngword := range []string{"クックパッドニュース", "感謝", "発売", "掲載", "検索", "話題", "ありがとう", "年"} {
-			if strings.Contains(stp.Text, ngword) {
+			if strings.Contains(text, ngword) {
 				return
 			}
 		}
-		if len([]rune(stp.Text)) < 3 {
+		if len([]rune(text)) < 3 {
 			return
 		}
 
-		rcp.Steps = append(rcp.Steps, stp)
+		ist := rexch.Instruction{}
+		ist.AddText(text)
+		rex.Instructions = append(rex.Instructions, ist)
 	})
 
-	return rcp, nil
+	return rex, nil
 }
 
-func NewParser() sites.Parser {
+func NewParser() sites.Parser2 {
 	return &parser{}
 }
 
