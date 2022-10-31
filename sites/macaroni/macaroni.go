@@ -129,7 +129,7 @@ func (p *parser) parseURL(ctx context.Context, url string, rex *rexch.Recipe) er
 							fields = strings.SplitN(line, "……", 2)
 						} else if strings.Contains(line, "　") {
 							fields = strings.SplitN(line, "　", 2)
-						} else if strings.HasPrefix(line, "〈") {
+						} else if strings.HasPrefix(line, "〈") || strings.HasPrefix(line, "＜") {
 							group = line
 							continue
 						} else {
@@ -140,11 +140,11 @@ func (p *parser) parseURL(ctx context.Context, url string, rex *rexch.Recipe) er
 							fields = append(fields, "")
 						}
 						igd := rexch.NewIngredient(strings.TrimPrefix(fields[0], "・"), fields[1])
-						if group != "" {
-							igd.Group = group
-						} else if match := groupRegex.FindStringSubmatch(igd.Name); len(match) != 0 {
+						if match := groupRegex.FindStringSubmatch(igd.Name); len(match) != 0 {
 							igd.Group = match[1]
 							igd.Name = match[2]
+						} else {
+							igd.Group = group
 						}
 						rex.Ingredients = append(rex.Ingredients, *igd)
 					}

@@ -131,9 +131,8 @@ var tests = map[string]*rexch.Recipe{
 			{Group: "Ａ", Name: "パン粉", Amount: "1/2カップ", Comment: ""}, // TODO
 			{Group: "Ａ", Name: "粉チーズ", Amount: "大さじ1", Comment: ""},
 			{Group: "", Name: "レモン", Amount: "お好みで", Comment: ""},
-			{Group: "", Name: "＜タルタルソース＞", Amount: "", Comment: ""},
-			{Group: "", Name: "ゆで卵", Amount: "1個", Comment: ""},
-			{Group: "", Name: "玉ねぎ", Amount: "1/4玉", Comment: ""},
+			{Group: "＜タルタルソース＞", Name: "ゆで卵", Amount: "1個", Comment: ""},
+			{Group: "＜タルタルソース＞", Name: "玉ねぎ", Amount: "1/4玉", Comment: ""},
 			{Group: "Ｂ", Name: "酢", Amount: "小さじ1/2", Comment: ""},
 			{Group: "Ｂ", Name: "マヨネーズ", Amount: "大さじ3", Comment: ""},
 			{Group: "Ｂ", Name: "塩胡椒", Amount: "少々", Comment: ""},
