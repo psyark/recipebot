@@ -17,6 +17,7 @@ import (
 type parser struct{}
 
 var newInstRegex = regexp.MustCompile(`^(\d\. |[①-⑳])`)
+var groupRegex = regexp.MustCompile(`^([ＡＢ])　(.+)$`)
 
 func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) {
 	rex, err := p.Parse2(ctx, url)
@@ -139,7 +140,12 @@ func (p *parser) parseURL(ctx context.Context, url string, rex *rexch.Recipe) er
 							fields = append(fields, "")
 						}
 						igd := rexch.NewIngredient(strings.TrimPrefix(fields[0], "・"), fields[1])
-						igd.Group = group
+						if group != "" {
+							igd.Group = group
+						} else if match := groupRegex.FindStringSubmatch(igd.Name); len(match) != 0 {
+							igd.Group = match[1]
+							igd.Name = match[2]
+						}
 						rex.Ingredients = append(rex.Ingredients, *igd)
 					}
 				}

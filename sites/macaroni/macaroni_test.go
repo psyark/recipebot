@@ -128,15 +128,15 @@ var tests = map[string]*rexch.Recipe{
 			{Group: "", Name: "卵", Amount: "1玉", Comment: ""},
 			{Group: "", Name: "酒", Amount: "大さじ1", Comment: ""},
 			{Group: "", Name: "揚げ油", Amount: "適量", Comment: ""},
-			{Group: "", Name: "Ａ\u3000パン粉", Amount: "1/2カップ", Comment: ""}, // TODO
-			{Group: "", Name: "Ａ\u3000粉チーズ", Amount: "大さじ1", Comment: ""},
+			{Group: "Ａ", Name: "パン粉", Amount: "1/2カップ", Comment: ""}, // TODO
+			{Group: "Ａ", Name: "粉チーズ", Amount: "大さじ1", Comment: ""},
 			{Group: "", Name: "レモン", Amount: "お好みで", Comment: ""},
 			{Group: "", Name: "＜タルタルソース＞", Amount: "", Comment: ""},
 			{Group: "", Name: "ゆで卵", Amount: "1個", Comment: ""},
 			{Group: "", Name: "玉ねぎ", Amount: "1/4玉", Comment: ""},
-			{Group: "", Name: "Ｂ\u3000酢", Amount: "小さじ1/2", Comment: ""},
-			{Group: "", Name: "Ｂ\u3000マヨネーズ", Amount: "大さじ3", Comment: ""},
-			{Group: "", Name: "Ｂ\u3000塩胡椒", Amount: "少々", Comment: ""},
+			{Group: "Ｂ", Name: "酢", Amount: "小さじ1/2", Comment: ""},
+			{Group: "Ｂ", Name: "マヨネーズ", Amount: "大さじ3", Comment: ""},
+			{Group: "Ｂ", Name: "塩胡椒", Amount: "少々", Comment: ""},
 		},
 		Instructions: []rexch.Instruction{ // TODO
 			{Elements: []rexch.InstructionElement{
