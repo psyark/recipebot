@@ -7,18 +7,27 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"github.com/psyark/jsonld"
 	"github.com/psyark/recipebot/recipe"
+	"github.com/psyark/recipebot/rexch"
 	"github.com/psyark/recipebot/sites"
 )
 
 type parser struct{}
 
 func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) {
+	rex, err := p.Parse2(ctx, url)
+	if err != nil {
+		return nil, err
+	}
+	return rex.BackCompat(), nil
+}
+
+func (p *parser) Parse2(ctx context.Context, url string) (*rexch.Recipe, error) {
 	doc, err := sites.NewDocumentFromURL(ctx, url)
 	if err != nil {
 		return nil, err
 	}
 
-	var rcp *recipe.Recipe
+	var rex *rexch.Recipe
 
 	doc.Find(`script[type="application/ld+json"]`).EachWithBreak(func(i int, s *goquery.Selection) bool {
 		jsonStr := s.Text()
@@ -30,41 +39,41 @@ func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) 
 		}
 
 		if ldRcp, ok := obj.(*jsonld.Recipe); ok {
-			rcp = &recipe.Recipe{}
+			rex = &rexch.Recipe{}
 
 			for _, text := range ldRcp.Name {
 				if text, ok := text.(string); ok {
-					rcp.Title = text
+					rex.Title = text
 				}
 			}
 			for _, text := range ldRcp.Image {
 				if text, ok := text.(string); ok {
-					rcp.Image = text
+					rex.Image = text
 				}
 			}
 			for _, text := range ldRcp.RecipeIngredient {
 				if text, ok := text.(string); ok {
 					fields := strings.SplitN(text, " ", 2)
-					ingr := recipe.Ingredient{Name: fields[0]}
+					igd := rexch.Ingredient{Name: fields[0]}
 					if len(fields) == 2 {
-						ingr.Amount = fields[1]
+						igd.Amount = fields[1]
 					}
-					rcp.AddIngredient("", ingr)
+					rex.Ingredients = append(rex.Ingredients, igd)
 				}
 			}
 			for _, inst := range ldRcp.RecipeInstructions {
-				step := recipe.Step{}
+				ist := rexch.Instruction{}
 				switch inst := inst.(type) {
 				case *jsonld.HowToStep:
 					for _, text := range inst.Text {
 						if text, ok := text.(string); ok {
-							step.Text += text
+							ist.AddText(text)
 						}
 					}
 				case string:
-					step.Text = strings.TrimSpace(inst)
+					ist.AddText(strings.TrimSpace(inst))
 				}
-				rcp.Steps = append(rcp.Steps, step)
+				rex.Instructions = append(rex.Instructions, ist)
 			}
 
 			return false // 1ページに複数レシピがある場合があるので必ず1個目で中止
@@ -73,13 +82,13 @@ func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) 
 		return true
 	})
 
-	if rcp == nil {
+	if rex == nil {
 		return nil, sites.ErrUnsupportedURL
 	}
 
-	return rcp, nil
+	return rex, nil
 }
 
-func NewParser() sites.Parser {
+func NewParser() sites.Parser2 {
 	return &parser{}
 }
