@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/psyark/jsonld"
@@ -15,8 +16,11 @@ import (
 
 type parser struct{}
 
-var newInstRegex = regexp.MustCompile(`^(\d\. |[①-⑳])`)
-var groupRegex = regexp.MustCompile(`^([ＡＢ])　(.+)$`)
+var (
+	groupRegex    = regexp.MustCompile(`^([ＡＢ])　(.+)$`)
+	servingsRegex = regexp.MustCompile(`(\d+)(〜\d+)?人分`)
+	newInstRegex  = regexp.MustCompile(`^(\d\. |[①-⑳])`)
+)
 
 func (p *parser) Parse2(ctx context.Context, url string) (*rexch.Recipe, error) {
 	if !strings.HasPrefix(url, "https://macaro-ni.jp/") {
@@ -104,6 +108,10 @@ func (p *parser) parseURL(ctx context.Context, url string, rex *rexch.Recipe) er
 				if mode == "intro" {
 					if strings.Contains(line, "材料") {
 						mode = "ingredients"
+						if match := servingsRegex.FindStringSubmatch(line); len(match) != 0 {
+							i, _ := strconv.Atoi(match[1])
+							rex.Servings = i
+						}
 					}
 					continue
 				}

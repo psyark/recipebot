@@ -12,7 +12,7 @@ var tests = map[string]*rexch.Recipe{
 	"https://macaro-ni.jp/109611": {
 		Title:    "とろ〜り半熟卵で作る「ウフ・アン・ムーレット」【秋元さくらシェフ直伝】",
 		Image:    "https://cdn.macaro-ni.jp/image/summary/109/109611/BN1C2JEIn3tfIUOSJZUGolyDUYOXsDN6BY3HjDBp.jpg?p=1x1",
-		Servings: 0,
+		Servings: 2,
 		Ingredients: []rexch.Ingredient{
 			{Group: "", Name: "玉ねぎ", Amount: "1/6個", Comment: "みじん切り"},
 			{Group: "", Name: "マッシュルーム", Amount: "6個", Comment: "薄切り"},
@@ -120,7 +120,7 @@ var tests = map[string]*rexch.Recipe{
 	"https://macaro-ni.jp/35774": {
 		Title:    "必見！コツをおさえた『基本の鮭フライ＆タルタルソース』の作り方",
 		Image:    "https://cdn.macaro-ni.jp/image/summary/35/35774/2a8f6aae712a66cdf5c8485a93a3f044.jpg?p=1x1",
-		Servings: 0,
+		Servings: 2,
 		Ingredients: []rexch.Ingredient{
 			{Group: "", Name: "鮭", Amount: "3〜4切れ", Comment: ""},
 			{Group: "", Name: "薄力粉", Amount: "大さじ1", Comment: ""},
