@@ -39,11 +39,13 @@ func (p *parser) Parse2(ctx context.Context, url string) (*rexch.Recipe, error) 
 			for _, text := range ldRcp.Name {
 				if text, ok := text.(string); ok {
 					rex.Title = text
+					break
 				}
 			}
 			for _, text := range ldRcp.Image {
 				if text, ok := text.(string); ok {
 					rex.Image = text
+					break
 				}
 			}
 
@@ -60,11 +62,11 @@ func (p *parser) Parse2(ctx context.Context, url string) (*rexch.Recipe, error) 
 			for _, text := range ldRcp.RecipeIngredient {
 				if text, ok := text.(string); ok {
 					fields := strings.SplitN(text, " ", 2)
-					igd := rexch.Ingredient{Name: fields[0]}
-					if len(fields) == 2 {
-						igd.Amount = fields[1]
+					if len(fields) < 2 {
+						fields = append(fields, "")
 					}
-					rex.Ingredients = append(rex.Ingredients, igd)
+					igd := rexch.NewIngredient(fields[0], fields[1])
+					rex.Ingredients = append(rex.Ingredients, *igd)
 				}
 			}
 			for _, inst := range ldRcp.RecipeInstructions {
@@ -74,6 +76,11 @@ func (p *parser) Parse2(ctx context.Context, url string) (*rexch.Recipe, error) 
 					for _, text := range inst.Text {
 						if text, ok := text.(string); ok {
 							ist.AddText(text)
+						}
+					}
+					for _, url := range inst.Image {
+						if url, ok := url.(string); ok {
+							ist.AddImage(url)
 						}
 					}
 				case string:

@@ -14,13 +14,13 @@ var tests = map[string]*rexch.Recipe{
 		Image:    "https://asset.recipe-blog.jp/cache/images/recipe/bc/ae/fe6575effb49833f63fea6b56510cf2f8e21bcae.640x640.cut.jpg",
 		Servings: 3,
 		Ingredients: []rexch.Ingredient{
-			{Group: "", Name: "牛こま切れ", Amount: "３４０g", Comment: ""},
-			{Group: "", Name: "水菜", Amount: "１束", Comment: ""},
-			{Group: "", Name: "Ａごま", Amount: "大さじ１", Comment: ""}, // TODO:
-			{Group: "", Name: "Ａポン酢", Amount: "大さじ１", Comment: ""},
-			{Group: "", Name: "Ａマヨネーズ", Amount: "大さじ１", Comment: ""},
-			{Group: "", Name: "Ａ砂糖", Amount: "大さじ１", Comment: ""},
-			{Group: "", Name: "Ａ味噌", Amount: "小さじ２分の１", Comment: ""},
+			{Group: "", Name: "牛こま切れ", Amount: "340g", Comment: ""},
+			{Group: "", Name: "水菜", Amount: "1束", Comment: ""},
+			{Group: "", Name: "Ａごま", Amount: "大さじ1", Comment: ""}, // TODO:
+			{Group: "", Name: "Ａポン酢", Amount: "大さじ1", Comment: ""},
+			{Group: "", Name: "Ａマヨネーズ", Amount: "大さじ1", Comment: ""},
+			{Group: "", Name: "Ａ砂糖", Amount: "大さじ1", Comment: ""},
+			{Group: "", Name: "Ａ味噌", Amount: "小さじ2分の1", Comment: ""},
 			{Group: "", Name: "ポン酢", Amount: "適量", Comment: ""},
 		},
 		Instructions: []rexch.Instruction{
