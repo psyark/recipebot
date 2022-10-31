@@ -7,14 +7,17 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"os"
+	"path"
 	"reflect"
+	"runtime"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/dave/jennifer/jen"
 	"github.com/kylelemons/godebug/pretty"
 	"github.com/psyark/recipebot/recipe"
 	"github.com/psyark/recipebot/rexch"
+	"golang.org/x/sync/errgroup"
 )
 
 var (
@@ -82,39 +85,78 @@ func RecipeMustBe2(want, got *rexch.Recipe) error {
 	return nil
 }
 
-func MigrateTest(packageName string, tests map[string]string) {
-	f := jen.NewFile(packageName)
-
-	{
-		dict := jen.Dict{}
-		for url := range tests {
-			dict[jen.Lit(url)] = jen.Nil()
-		}
-		f.Var().Id("tests").Op("=").Map(jen.String()).Op("*").Qual("github.com/psyark/recipebot/rexch", "Recipe").Block(dict)
+func MigrateTest(parser Parser2, tests map[string]string) {
+	pc, file, _, ok := runtime.Caller(1)
+	if !ok {
+		panic("caller")
 	}
 
-	f.Save(packageName + "_2_test.go")
+	fn := runtime.FuncForPC(pc)
+	packageName := strings.TrimSuffix(path.Base(fn.Name()), path.Ext(path.Base(fn.Name())))
+	// file = strings.Replace(file, "_test.go", "_2_test.go", 1)
 
-	// func TestNewParser(t *testing.T) {
-	// 	ctx := context.Background()
+	f, err := os.OpenFile(file, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0666)
+	if err != nil {
+		panic(err)
+	}
 
-	// 	for url, want := range tests {
-	// 		url := url
-	// 		want := want
+	defer f.Close()
 
-	// 		t.Run(url, func(t *testing.T) {
-	// 			t.Parallel()
+	lines := []string{}
+	eg := errgroup.Group{}
+	ctx := context.Background()
 
-	// 			rex, err := NewParser().Parse2(ctx, url)
-	// 			if err != nil {
-	// 				t.Fatal(err)
-	// 			}
+	for url := range tests {
+		url := url
+		eg.Go(func() error {
+			rex, err := parser.Parse2(ctx, url)
+			if err != nil {
+				return err
+			}
 
-	// 			if err := sites.RecipeMustBe2(want, rex); err != nil {
-	// 				t.Error(err)
-	// 			}
-	// 		})
-	// 	}
-	// }
+			lines = append(lines, fmt.Sprintf("%q: %#v,\n", url, rex))
+			return nil
+		})
+	}
+
+	if err := eg.Wait(); err != nil {
+		panic(err)
+	}
+
+	fmt.Fprintf(f, `package %s
+
+import (
+	"context"
+	"testing"
+
+	"github.com/psyark/recipebot/rexch"
+	"github.com/psyark/recipebot/sites"
+)
+
+var tests = map[string]*rexch.Recipe{
+%s}
+
+func TestNewParser(t *testing.T) {
+	ctx := context.Background()
+
+	for url, want := range tests {
+		url := url
+		want := want
+
+		t.Run(url, func(t *testing.T) {
+			t.Parallel()
+
+			rex, err := NewParser().Parse2(ctx, url)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if err := sites.RecipeMustBe2(want, rex); err != nil {
+				t.Error(err)
+			}
+		})
+	}
+}
+`, packageName, strings.Join(lines, ""))
 
 }
