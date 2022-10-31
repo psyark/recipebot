@@ -7,6 +7,7 @@ import (
 
 	"github.com/microcosm-cc/bluemonday"
 	"github.com/psyark/recipebot/recipe"
+	"github.com/psyark/recipebot/rexch"
 	"github.com/psyark/recipebot/sites"
 )
 
@@ -67,6 +68,14 @@ type Instruction struct {
 }
 
 func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) {
+	rex, err := p.Parse2(ctx, url)
+	if err != nil {
+		return nil, err
+	}
+	return rex.BackCompat(), nil
+}
+
+func (p *parser) Parse2(ctx context.Context, url string) (*rexch.Recipe, error) {
 	if !strings.HasPrefix(url, "https://oceans-nadia.com/") {
 		return nil, sites.ErrUnsupportedURL
 	}
@@ -81,34 +90,37 @@ func (p *parser) Parse(ctx context.Context, url string) (*recipe.Recipe, error) 
 
 	nr := n.Props.PageProps.Data.PublishedRecipe
 
-	rcp := &recipe.Recipe{Title: nr.Title}
+	rex := &rexch.Recipe{Title: nr.Title}
+
 	for _, is := range nr.ImageSet {
-		rcp.Image = sites.ResolvePath(assetURL, is.Path)
+		rex.Image = sites.ResolvePath(assetURL, is.Path)
 	}
 	for _, id := range nr.Ingredients {
-		idg := recipe.Ingredient{Name: id.Name, Amount: id.Amount, Comment: id.Memo}
+		igd := rexch.Ingredient{Name: id.Name, Amount: id.Amount, Comment: id.Memo}
 		if id.Kubun != nil {
-			rcp.AddIngredient(*id.Kubun, idg)
-		} else {
-			rcp.AddIngredient("", idg)
+			igd.Group = *id.Kubun
 		}
+		rex.Ingredients = append(rex.Ingredients, igd)
 	}
 	if nr.Tips != "" {
-		rcp.Steps = append(rcp.Steps, recipe.Step{Text: nr.Tips})
+		ist := rexch.Instruction{Label: "tips"}
+		ist.AddText(nr.Tips)
+		rex.Instructions = append(rex.Instructions, ist)
 	}
 	for _, in := range nr.Instructions {
 		if in.Comment != "" {
-			step := recipe.Step{Text: bmp.Sanitize(in.Comment)}
+			ist := rexch.Instruction{}
+			ist.AddText(bmp.Sanitize(in.Comment))
 			if in.ImageSet.Path != "" {
-				step.Images = append(step.Images, sites.ResolvePath(assetURL, in.ImageSet.Path))
+				ist.AddImage(sites.ResolvePath(assetURL, in.ImageSet.Path))
 			}
-			rcp.Steps = append(rcp.Steps, step)
+			rex.Instructions = append(rex.Instructions, ist)
 		}
 	}
 
-	return rcp, nil
+	return rex, nil
 }
 
-func NewParser() sites.Parser {
+func NewParser() sites.Parser2 {
 	return &parser{}
 }
