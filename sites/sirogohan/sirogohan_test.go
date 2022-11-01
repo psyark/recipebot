@@ -53,7 +53,7 @@ var tests = map[string]*rexch.Recipe{
 	"https://www.sirogohan.com/recipe/tukemono-hakusai/": {
 		Title:    "簡単！白菜の浅漬け",
 		Image:    "https://www.sirogohan.com/_files/recipe/images/tukemono-hakusai/tukemono-hakusaiyoko.JPG",
-		Servings: 0, // TODO
+		Servings: 0,
 		Ingredients: []rexch.Ingredient{
 			{Group: "", Name: "白菜", Amount: "300g(約1/8玉)", Comment: ""},
 			{Group: "", Name: "塩", Amount: "野菜の重さの2%", Comment: ""},
