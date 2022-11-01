@@ -2,7 +2,6 @@ package orangepage
 
 import (
 	"context"
-	"strconv"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
@@ -25,9 +24,8 @@ func (p *parser) ParseRecipes(ctx context.Context, url string) (*rexch.Recipe, e
 		Image: doc.Find(`.recipesDetailImg img`).AttrOr("src", ""),
 	}
 
-	if match := servingsRegex.FindStringSubmatch(doc.Find("h2.IngredientsTit").Text()); len(match) != 0 {
-		i, _ := strconv.Atoi(match[1])
-		rex.Servings = i
+	if servings, ok := sites.ParseServings(doc.Find(`h2.IngredientsTit`).Text()); ok {
+		rex.Servings = servings
 	}
 
 	doc.Find("[itemprop=recipeIngredient]").Each(func(i int, s *goquery.Selection) {

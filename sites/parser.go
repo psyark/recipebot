@@ -7,16 +7,20 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
+	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/kylelemons/godebug/pretty"
 	"github.com/psyark/recipebot/rexch"
+	"golang.org/x/text/width"
 )
 
 var (
 	errUnmatch        = errors.New("unmatch")
 	ErrUnsupportedURL = errors.New("unsupported url")
+	servingsRegex     = regexp.MustCompile(`(\d+)([~〜]\d+)?\s*(?:人分|servings)`)
 )
 
 type Parser interface {
@@ -45,6 +49,15 @@ func ResolvePath(baseURL, path string) string {
 		return u.Scheme + "://" + u.Host + path
 	}
 	return path
+}
+
+func ParseServings(src string) (int, bool) {
+	src = width.Fold.String(src)
+	if match := servingsRegex.FindStringSubmatch(src); len(match) != 0 {
+		i, _ := strconv.Atoi(match[1])
+		return i, true
+	}
+	return 0, false
 }
 
 func RecipeMustBe2(want, got *rexch.Recipe) error {

@@ -3,7 +3,6 @@ package jsonld
 import (
 	"context"
 	"regexp"
-	"strconv"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
@@ -15,7 +14,6 @@ import (
 type parser struct{}
 
 var (
-	servingsRegex    = regexp.MustCompile(`(\d+) servings`)
 	commonGroupRegex = regexp.MustCompile(`^([ABCＡＢＣ])(?:\s*)(.+)$`)
 )
 
@@ -54,10 +52,8 @@ func (p *parser) Parse(ctx context.Context, url string) (*rexch.Recipe, error) {
 
 			for _, yield := range ldRcp.RecipeYield {
 				if yield, ok := yield.(string); ok {
-					if match := servingsRegex.FindStringSubmatch(yield); len(match) != 0 {
-						if i, err := strconv.Atoi(match[1]); err == nil {
-							rex.Servings = i
-						}
+					if servings, ok := sites.ParseServings(yield); ok {
+						rex.Servings = servings
 					}
 				}
 			}

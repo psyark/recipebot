@@ -2,16 +2,23 @@ package cookpad
 
 import (
 	"context"
+	"fmt"
 	"regexp"
 	"strings"
 
 	"github.com/psyark/recipebot/rexch"
 	"github.com/psyark/recipebot/sites"
+	"golang.org/x/text/width"
 
 	"github.com/PuerkitoBio/goquery"
 )
 
 type parser struct{}
+
+var (
+	igrRegex = regexp.MustCompile(`^(.*)（(.+)）$`)
+	ngWords  = []string{"クックパッドニュース", "感謝", "発売", "掲載", "検索", "話題", "ありがとう", "年"}
+)
 
 func (p *parser) Parse(ctx context.Context, url string) (*rexch.Recipe, error) {
 	if !strings.HasPrefix(url, "https://cookpad.com/") {
@@ -28,7 +35,7 @@ func (p *parser) Parse(ctx context.Context, url string) (*rexch.Recipe, error) {
 		Image: getSrc(doc.Find(`#main-photo img`)),
 	}
 
-	igrRegex := regexp.MustCompile(`^(.*)（(.+)）$`)
+	fmt.Println(width.Fold.String(doc.Find(`.servings_for`).Text()))
 
 	doc.Find(`.ingredient_row`).Each(func(i int, s *goquery.Selection) {
 		igd := rexch.NewIngredient(s.Find(`.ingredient_name`).Text(), s.Find(`.ingredient_quantity`).Text())
@@ -51,7 +58,7 @@ func (p *parser) Parse(ctx context.Context, url string) (*rexch.Recipe, error) {
 		// 	stp.Images = append(stp.Images, src)
 		// })
 
-		for _, ngword := range []string{"クックパッドニュース", "感謝", "発売", "掲載", "検索", "話題", "ありがとう", "年"} {
+		for _, ngword := range ngWords {
 			if strings.Contains(text, ngword) {
 				return
 			}

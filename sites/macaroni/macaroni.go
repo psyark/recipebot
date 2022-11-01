@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"regexp"
-	"strconv"
 	"strings"
 
 	"github.com/psyark/jsonld"
@@ -17,9 +16,8 @@ import (
 type parser struct{}
 
 var (
-	groupRegex    = regexp.MustCompile(`^([ＡＢ])　(.+)$`)
-	servingsRegex = regexp.MustCompile(`(\d+)(〜\d+)?人分`)
-	newInstRegex  = regexp.MustCompile(`^(\d\. |[①-⑳])`)
+	groupRegex   = regexp.MustCompile(`^([ＡＢ])　(.+)$`)
+	newInstRegex = regexp.MustCompile(`^(\d\. |[①-⑳])`)
 )
 
 func (p *parser) Parse(ctx context.Context, url string) (*rexch.Recipe, error) {
@@ -57,9 +55,8 @@ func (p *parser) parseURL(ctx context.Context, url string, rex *rexch.Recipe) er
 			}
 			for _, yield := range obj.RecipeYield {
 				if yield, ok := yield.(string); ok {
-					if match := servingsRegex.FindStringSubmatch(yield); len(match) != 0 {
-						i, _ := strconv.Atoi(match[1])
-						rex.Servings = i
+					if servings, ok := sites.ParseServings(yield); ok {
+						rex.Servings = servings
 					}
 				}
 			}
@@ -116,9 +113,8 @@ func (p *parser) parseURL(ctx context.Context, url string, rex *rexch.Recipe) er
 				if mode == "intro" {
 					if strings.Contains(line, "材料") {
 						mode = "ingredients"
-						if match := servingsRegex.FindStringSubmatch(line); len(match) != 0 {
-							i, _ := strconv.Atoi(match[1])
-							rex.Servings = i
+						if servings, ok := sites.ParseServings(line); ok {
+							rex.Servings = servings
 						}
 					}
 					continue

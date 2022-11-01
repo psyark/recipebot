@@ -3,7 +3,6 @@ package buzzfeed
 import (
 	"context"
 	"regexp"
-	"strconv"
 	"strings"
 
 	"github.com/psyark/recipebot/rexch"
@@ -13,10 +12,9 @@ import (
 )
 
 var (
-	titleRegex    = regexp.MustCompile(`^【[^】]+】`)
-	servingsRegex = regexp.MustCompile(`(\d+)人分`)
-	stepRegex     = regexp.MustCompile(`^[①-⑩]\s*`)
-	groupRegex    = regexp.MustCompile(`^([ABC])(.+)$`)
+	titleRegex = regexp.MustCompile(`^【[^】]+】`)
+	stepRegex  = regexp.MustCompile(`^[①-⑩]\s*`)
+	groupRegex = regexp.MustCompile(`^([ABC])(.+)$`)
 )
 
 type parser struct{}
@@ -45,9 +43,8 @@ func (p *parser) Parse(ctx context.Context, url string) (*rexch.Recipe, error) {
 			s.Children().Each(func(i int, s *goquery.Selection) {
 				t := s.Text()
 				if mode == "" {
-					if match := servingsRegex.FindStringSubmatch(t); len(match) != 0 {
-						i, _ := strconv.Atoi(match[1])
-						rex.Servings = i
+					if servings, ok := sites.ParseServings(t); ok {
+						rex.Servings = servings
 					}
 				}
 				if mode == "" && t == "材料：" {

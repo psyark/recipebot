@@ -2,8 +2,6 @@ package sirogohan
 
 import (
 	"context"
-	"regexp"
-	"strconv"
 	"strings"
 
 	"github.com/psyark/recipebot/rexch"
@@ -11,8 +9,6 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 )
-
-var servingsRegex = regexp.MustCompile(`(\d+)(?:～.+)?人分`)
 
 type parser struct{}
 
@@ -34,10 +30,8 @@ func (p *parser) Parse(ctx context.Context, url string) (*rexch.Recipe, error) {
 		Image: doc.Find(`p#recipe-main img`).AttrOr("src", ""),
 	}
 
-	if match := (servingsRegex.FindStringSubmatch(doc.Find(`.material-ttl`).Text())); match != nil {
-		if servings, err := strconv.Atoi(match[1]); err == nil {
-			rex.Servings = servings
-		}
+	if servings, ok := sites.ParseServings(doc.Find(`.material-ttl`).Text()); ok {
+		rex.Servings = servings
 	}
 	doc.Find(`.material ul`).Each(func(i int, s *goquery.Selection) {
 		groupName := ""

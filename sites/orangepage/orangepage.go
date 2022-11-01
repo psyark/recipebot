@@ -10,7 +10,6 @@ import (
 )
 
 var (
-	servingsRegex    = regexp.MustCompile(`(\d+)(?:～\d+)?人分`)
 	instructionRegex = regexp.MustCompile(`^\(\d+\)`)
 )
 

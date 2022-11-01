@@ -3,7 +3,6 @@ package orangepage
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
@@ -50,9 +49,8 @@ func (p *parser) ParseYMSR(ctx context.Context, url string) (*rexch.Recipe, erro
 			switch mode {
 			case "intro":
 				if strings.Contains(line, "材料") {
-					if match := servingsRegex.FindStringSubmatch(line); len(match) != 0 {
-						i, _ := strconv.Atoi(match[1])
-						rex.Servings = i
+					if servings, ok := sites.ParseServings(line); ok {
+						rex.Servings = servings
 					}
 
 					if strings.Contains(line, "作り方") { // 材料を飛ばす場合がある

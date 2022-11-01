@@ -2,8 +2,6 @@ package ajinomotopark
 
 import (
 	"context"
-	"regexp"
-	"strconv"
 	"strings"
 
 	"github.com/psyark/recipebot/rexch"
@@ -11,8 +9,6 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 )
-
-var servingsRegex = regexp.MustCompile(`（(\d+)人分）`)
 
 type parser struct{}
 
@@ -51,9 +47,8 @@ func (p *parser) Parse(ctx context.Context, url string) (*rexch.Recipe, error) {
 		rex.Title = strings.TrimSpace(parts[1])
 	}
 
-	if match := servingsRegex.FindStringSubmatch(doc.Find(`.bigTitle_quantity`).Text()); len(match) != 0 {
-		i, _ := strconv.Atoi(match[1])
-		rex.Servings = i
+	if servings, ok := sites.ParseServings(doc.Find(`.bigTitle_quantity`).Text()); ok {
+		rex.Servings = servings
 	}
 
 	doc.Find(`.recipeMaterialList dl dt`).Each(func(i int, s *goquery.Selection) {
