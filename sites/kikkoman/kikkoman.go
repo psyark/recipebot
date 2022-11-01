@@ -20,7 +20,7 @@ var debrandMap = map[string]string{
 	"マンジョウ米麹こだわり仕込み本みりん":     "みりん",
 }
 
-func (p *parser) Parse2(ctx context.Context, url string) (*rexch.Recipe, error) {
+func (p *parser) Parse(ctx context.Context, url string) (*rexch.Recipe, error) {
 	if !strings.HasPrefix(url, "https://www.kikkoman.co.jp/homecook/") {
 		return nil, sites.ErrUnsupportedURL
 	}
@@ -67,6 +67,6 @@ func debrand(name string) string {
 	return name
 }
 
-func NewParser() sites.Parser2 {
+func NewParser() sites.Parser {
 	return &parser{}
 }

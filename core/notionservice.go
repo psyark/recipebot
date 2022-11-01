@@ -101,7 +101,7 @@ func (s *Service) GetRecipeByURL(ctx context.Context, url string) (*notionapi.Pa
 }
 
 func (s *Service) CreateRecipe(ctx context.Context, url string) (*notionapi.Page, error) {
-	rex, err := unitedParser.Parse2(ctx, url)
+	rex, err := unitedParser.Parse(ctx, url)
 	if err != nil {
 		return nil, err
 	}
@@ -142,7 +142,7 @@ func (s *Service) UpdateRecipe(ctx context.Context, pageID string) error {
 		url = *pv.URL
 	}
 
-	rex, err := unitedParser.Parse2(ctx, url)
+	rex, err := unitedParser.Parse(ctx, url)
 	if err != nil {
 		return err
 	}
@@ -187,7 +187,7 @@ func (s *Service) UpdateRecipeIngredients(ctx context.Context, pageID string, st
 		return nil, err
 	}
 
-	rex, err := unitedParser.Parse2(ctx, piop.(*notionapi.PropertyItem).URL)
+	rex, err := unitedParser.Parse(ctx, piop.(*notionapi.PropertyItem).URL)
 	if err != nil {
 		return nil, err
 	}

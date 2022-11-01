@@ -78,7 +78,7 @@ func TestNewParser(t *testing.T) {
 		t.Run(url, func(t *testing.T) {
 			t.Parallel()
 
-			rex, err := NewParser().Parse2(ctx, url)
+			rex, err := NewParser().Parse(ctx, url)
 			if err != nil {
 				t.Fatal(err)
 			}

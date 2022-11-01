@@ -12,7 +12,7 @@ import (
 
 type parser struct{}
 
-func (p *parser) Parse2(ctx context.Context, url string) (*rexch.Recipe, error) {
+func (p *parser) Parse(ctx context.Context, url string) (*rexch.Recipe, error) {
 	if !strings.HasPrefix(url, "https://www.kurashiru.com/recipes/") {
 		return nil, sites.ErrUnsupportedURL
 	}
@@ -62,6 +62,6 @@ func (p *parser) Parse2(ctx context.Context, url string) (*rexch.Recipe, error) 
 	return rex, nil
 }
 
-func NewParser() sites.Parser2 {
+func NewParser() sites.Parser {
 	return &parser{}
 }

@@ -23,7 +23,7 @@ import (
 	"github.com/psyark/recipebot/sites/sirogohan"
 )
 
-func NewParser() sites.Parser2 {
+func NewParser() sites.Parser {
 	return &parsers{
 		ajinomotopark.NewParser(),
 		buzzfeed.NewParser(),
@@ -43,11 +43,11 @@ func NewParser() sites.Parser2 {
 	}
 }
 
-type parsers []sites.Parser2
+type parsers []sites.Parser
 
-func (p parsers) Parse2(ctx context.Context, url string) (*rexch.Recipe, error) {
+func (p parsers) Parse(ctx context.Context, url string) (*rexch.Recipe, error) {
 	for _, c := range p {
-		if rex, err := c.Parse2(ctx, url); !errors.Is(err, sites.ErrUnsupportedURL) {
+		if rex, err := c.Parse(ctx, url); !errors.Is(err, sites.ErrUnsupportedURL) {
 			return rex, err
 		}
 	}

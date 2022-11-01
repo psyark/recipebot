@@ -16,7 +16,7 @@ var servingsRegex = regexp.MustCompile(`(\d+)(?:～.+)?人分`)
 
 type parser struct{}
 
-func (p *parser) Parse2(ctx context.Context, url string) (*rexch.Recipe, error) {
+func (p *parser) Parse(ctx context.Context, url string) (*rexch.Recipe, error) {
 	url = p.normalizeURL(url)
 
 	if !strings.HasPrefix(url, "https://www.sirogohan.com/recipe/") {
@@ -86,6 +86,6 @@ func (p *parser) normalizeURL(url string) string {
 	return url
 }
 
-func NewParser() sites.Parser2 {
+func NewParser() sites.Parser {
 	return &parser{}
 }

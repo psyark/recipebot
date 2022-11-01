@@ -19,9 +19,8 @@ var (
 	ErrUnsupportedURL = errors.New("unsupported url")
 )
 
-// TODO: リネーム
-type Parser2 interface {
-	Parse2(ctx context.Context, url string) (*rexch.Recipe, error)
+type Parser interface {
+	Parse(ctx context.Context, url string) (*rexch.Recipe, error)
 }
 
 func NewDocumentFromURL(ctx context.Context, url string) (*goquery.Document, error) {

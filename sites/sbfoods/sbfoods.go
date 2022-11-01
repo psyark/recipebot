@@ -15,7 +15,7 @@ var stepRegex = regexp.MustCompile(`^【[１２３４５６７８９０]+】`)
 
 type parser struct{}
 
-func (p *parser) Parse2(ctx context.Context, url string) (*rexch.Recipe, error) {
+func (p *parser) Parse(ctx context.Context, url string) (*rexch.Recipe, error) {
 	if !strings.HasPrefix(url, "https://www.sbfoods.co.jp/recipe/detail/") {
 		return nil, sites.ErrUnsupportedURL
 	}
@@ -57,6 +57,6 @@ func debrand(name string) string {
 	return strings.TrimPrefix(name, "S&B")
 }
 
-func NewParser() sites.Parser2 {
+func NewParser() sites.Parser {
 	return &parser{}
 }

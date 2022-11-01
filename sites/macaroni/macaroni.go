@@ -22,7 +22,7 @@ var (
 	newInstRegex  = regexp.MustCompile(`^(\d\. |[①-⑳])`)
 )
 
-func (p *parser) Parse2(ctx context.Context, url string) (*rexch.Recipe, error) {
+func (p *parser) Parse(ctx context.Context, url string) (*rexch.Recipe, error) {
 	if !strings.HasPrefix(url, "https://macaro-ni.jp/") {
 		return nil, sites.ErrUnsupportedURL
 	}
@@ -182,6 +182,6 @@ func (p *parser) parseURL(ctx context.Context, url string, rex *rexch.Recipe) er
 	return nil
 }
 
-func NewParser() sites.Parser2 {
+func NewParser() sites.Parser {
 	return &parser{}
 }
