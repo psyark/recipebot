@@ -55,6 +55,14 @@ func (p *parser) parseURL(ctx context.Context, url string, rex *rexch.Recipe) er
 				rex.Image = image.(string)
 				break
 			}
+			for _, yield := range obj.RecipeYield {
+				if yield, ok := yield.(string); ok {
+					if match := servingsRegex.FindStringSubmatch(yield); len(match) != 0 {
+						i, _ := strconv.Atoi(match[1])
+						rex.Servings = i
+					}
+				}
+			}
 			for _, igd := range obj.RecipeIngredient {
 				parts := strings.Split(igd.(string), " ")
 

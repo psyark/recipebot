@@ -76,7 +76,7 @@ var tests = map[string]*rexch.Recipe{
 	"https://macaro-ni.jp/90067": {
 		Title:    "わさびがポイント！お豆腐の大葉肉巻き",
 		Image:    "https://cdn.macaro-ni.jp/image/summary/90/90067/yw8njYPbCLPv97YaraNnNyHQQuliiNRYuGHAV9My.jpeg?p=1x1",
-		Servings: 0,
+		Servings: 2,
 		Ingredients: []rexch.Ingredient{
 			{Group: "", Name: "木綿豆腐", Amount: "300g", Comment: ""},
 			{Group: "", Name: "豚バラ肉", Amount: "200g", Comment: "薄切り"},
@@ -100,7 +100,7 @@ var tests = map[string]*rexch.Recipe{
 	"https://macaro-ni.jp/85520": {
 		Title:    "メイン食材1つ。豆腐のスティックフライ",
 		Image:    "https://cdn.macaro-ni.jp/image/summary/85/85520/488fa7c470eb630b98de98fc66548774.jpg?p=1x1",
-		Servings: 0,
+		Servings: 2,
 		Ingredients: []rexch.Ingredient{
 			{Group: "", Name: "木綿豆腐", Amount: "200g", Comment: ""},
 			{Group: "", Name: "片栗粉", Amount: "適量", Comment: ""},
@@ -212,7 +212,7 @@ var tests = map[string]*rexch.Recipe{
 	"https://macaro-ni.jp/45500": {
 		Title:    "ごはん無限レベル！豚肉とれんこんの甘辛炒め【作り置き】",
 		Image:    "https://cdn.macaro-ni.jp/image/summary/45/45500/7d761cc229abdcb5088e77942c7bc1ed.jpg?p=1x1",
-		Servings: 0,
+		Servings: 4,
 		Ingredients: []rexch.Ingredient{
 			{Group: "", Name: "豚こま切れ肉", Amount: "300g", Comment: ""},
 			{Group: "", Name: "れんこん", Amount: "200g", Comment: ""},
@@ -236,7 +236,7 @@ var tests = map[string]*rexch.Recipe{
 	"https://macaro-ni.jp/104118": {
 		Title:    "ランチにも♪ 豚こまガーリックライス",
 		Image:    "https://cdn.macaro-ni.jp/image/summary/104/104118/P55cvVVOQNXc4ze0Q967VN79JtjAPAOSrwNTSZAJ.jpg?p=1x1",
-		Servings: 0,
+		Servings: 2,
 		Ingredients: []rexch.Ingredient{
 			{Group: "", Name: "豚こま肉", Amount: "120g", Comment: ""},
 			{Group: "", Name: "ごはん", Amount: "400g", Comment: ""},
@@ -262,7 +262,7 @@ var tests = map[string]*rexch.Recipe{
 	"https://macaro-ni.jp/84903": {
 		Title:    "油揚げで簡単。豚こまとんかつ",
 		Image:    "https://cdn.macaro-ni.jp/image/summary/84/84903/2HcJACf7b2xi6FMYZqRyjxHRWUb7O6bUxTBcgO3r.jpeg?p=1x1",
-		Servings: 0, // TODO
+		Servings: 2,
 		Ingredients: []rexch.Ingredient{
 			{Group: "", Name: "豚こま肉", Amount: "240g", Comment: ""},
 			{Group: "", Name: "油揚げ", Amount: "2枚", Comment: ""},
@@ -285,7 +285,7 @@ var tests = map[string]*rexch.Recipe{
 	"https://macaro-ni.jp/104802": {
 		Title:    "豚こまで作る♪白菜のとんぺい焼き",
 		Image:    "https://cdn.macaro-ni.jp/image/summary/104/104802/TJjkBPAVvCIAKGFJ6tkvngGe2lbUuGCfzGlvygIs.jpg?p=1x1",
-		Servings: 0,
+		Servings: 1,
 		Ingredients: []rexch.Ingredient{
 			{Group: "", Name: "白菜", Amount: "180g", Comment: ""},
 			{Group: "", Name: "豚こま肉", Amount: "80g", Comment: ""},
@@ -313,7 +313,7 @@ var tests = map[string]*rexch.Recipe{
 	"https://macaro-ni.jp/94837": {
 		Title:    "食べ応え抜群♪生姜焼き豚つくね",
 		Image:    "https://cdn.macaro-ni.jp/image/summary/94/94837/LxT9jnKHHTrKofxUxgGz9XEJMbbJcIuzRipox9IP.jpg?p=1x1",
-		Servings: 0,
+		Servings: 2,
 		Ingredients: []rexch.Ingredient{
 			{Group: "", Name: "豚こま肉", Amount: "300g", Comment: ""},
 			{Group: "", Name: "玉ねぎ", Amount: "1/4個", Comment: ""},
