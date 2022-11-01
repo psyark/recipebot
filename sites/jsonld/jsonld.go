@@ -16,7 +16,7 @@ type parser struct{}
 
 var (
 	servingsRegex    = regexp.MustCompile(`(\d+) servings`)
-	commonGroupNames = []string{"A", "B", "C", "Ａ", "Ｂ", "Ｃ"}
+	commonGroupRegex = regexp.MustCompile(`^([ABCＡＢＣ])(?:\s*)(.+)$`)
 )
 
 func (p *parser) Parse(ctx context.Context, url string) (*rexch.Recipe, error) {
@@ -98,20 +98,18 @@ func (p *parser) Parse(ctx context.Context, url string) (*rexch.Recipe, error) {
 		return true
 	})
 
-	for _, groupName := range commonGroupNames {
-		count := 0
+	{ // 既知のプリフィックスに基づいてグループ化
+		groupCount := map[string]int{}
 		for _, igd := range rex.Ingredients {
-			if strings.HasPrefix(igd.Name, groupName) {
-				count++
+			if match := commonGroupRegex.FindStringSubmatch(igd.Name); len(match) != 0 {
+				groupCount[match[1]]++
 			}
 		}
-		if count >= 2 {
-			for i := range rex.Ingredients {
-				igd := &rex.Ingredients[i]
-				if strings.HasPrefix(igd.Name, groupName) {
-					igd.Group = groupName
-					igd.Name = strings.TrimPrefix(igd.Name, groupName)
-				}
+		for i := range rex.Ingredients {
+			igd := &rex.Ingredients[i]
+			if match := commonGroupRegex.FindStringSubmatch(igd.Name); len(match) != 0 && groupCount[match[1]] >= 2 {
+				igd.Group = match[1]
+				igd.Name = match[2]
 			}
 		}
 	}
