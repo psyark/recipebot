@@ -16,11 +16,11 @@ var tests = map[string]*rexch.Recipe{
 		Ingredients: []rexch.Ingredient{
 			{Group: "", Name: "牛こま切れ", Amount: "340g", Comment: ""},
 			{Group: "", Name: "水菜", Amount: "1束", Comment: ""},
-			{Group: "", Name: "Ａごま", Amount: "大さじ1", Comment: ""}, // TODO:
-			{Group: "", Name: "Ａポン酢", Amount: "大さじ1", Comment: ""},
-			{Group: "", Name: "Ａマヨネーズ", Amount: "大さじ1", Comment: ""},
-			{Group: "", Name: "Ａ砂糖", Amount: "大さじ1", Comment: ""},
-			{Group: "", Name: "Ａ味噌", Amount: "小さじ2分の1", Comment: ""},
+			{Group: "Ａ", Name: "ごま", Amount: "大さじ1", Comment: ""},
+			{Group: "Ａ", Name: "ポン酢", Amount: "大さじ1", Comment: ""},
+			{Group: "Ａ", Name: "マヨネーズ", Amount: "大さじ1", Comment: ""},
+			{Group: "Ａ", Name: "砂糖", Amount: "大さじ1", Comment: ""},
+			{Group: "Ａ", Name: "味噌", Amount: "小さじ2分の1", Comment: ""},
 			{Group: "", Name: "ポン酢", Amount: "適量", Comment: ""},
 		},
 		Instructions: []rexch.Instruction{

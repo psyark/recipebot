@@ -14,7 +14,10 @@ import (
 
 type parser struct{}
 
-var servingsRegex = regexp.MustCompile(`(\d+) servings`)
+var (
+	servingsRegex    = regexp.MustCompile(`(\d+) servings`)
+	commonGroupNames = []string{"A", "B", "C", "Ａ", "Ｂ", "Ｃ"}
+)
 
 func (p *parser) Parse(ctx context.Context, url string) (*rexch.Recipe, error) {
 	doc, err := sites.NewDocumentFromURL(ctx, url)
@@ -94,6 +97,24 @@ func (p *parser) Parse(ctx context.Context, url string) (*rexch.Recipe, error) {
 
 		return true
 	})
+
+	for _, groupName := range commonGroupNames {
+		count := 0
+		for _, igd := range rex.Ingredients {
+			if strings.HasPrefix(igd.Name, groupName) {
+				count++
+			}
+		}
+		if count >= 2 {
+			for i := range rex.Ingredients {
+				igd := &rex.Ingredients[i]
+				if strings.HasPrefix(igd.Name, groupName) {
+					igd.Group = groupName
+					igd.Name = strings.TrimPrefix(igd.Name, groupName)
+				}
+			}
+		}
+	}
 
 	if rex == nil {
 		return nil, sites.ErrUnsupportedURL
