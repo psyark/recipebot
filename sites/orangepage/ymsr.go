@@ -3,6 +3,7 @@ package orangepage
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
@@ -28,6 +29,10 @@ func (p *parser) ParseYMSR(ctx context.Context, url string) (*rexch.Recipe, erro
 
 	body := doc.Find("#opDailyBody")
 
+	if rex.Image == "" {
+		rex.Image = body.Find("img").AttrOr("src", "")
+	}
+
 	// script除去
 	body.Find("script").Remove()
 	body.Find("style").Remove()
@@ -42,13 +47,15 @@ func (p *parser) ParseYMSR(ctx context.Context, url string) (*rexch.Recipe, erro
 		}
 	})
 
+	ingredientRegex := regexp.MustCompile("^[【●]?材料")
+
 	mode := "intro"
 	for _, line := range strings.Split(body.Text(), "\n") {
 		line = strings.TrimSpace(line)
 		if line != "" {
 			switch mode {
 			case "intro":
-				if strings.Contains(line, "材料") {
+				if ingredientRegex.MatchString(line) {
 					if servings, ok := sites.ParseServings(line); ok {
 						rex.Servings = servings
 					}

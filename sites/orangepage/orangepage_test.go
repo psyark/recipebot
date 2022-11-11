@@ -90,6 +90,26 @@ var tests = map[string]*rexch.Recipe{
 			}},
 		},
 	},
+	"https://www.orangepage.net/ymsr/news/daily/posts/5925": {
+		Title:    "焦がしたうまみが最高！「じゃがいもとベーコンの塩だけ煮込み」が秋冬じゅう作りたいおいしさ。",
+		Image:    "https://images.orangepage.net/media/article/5925/images/3bcb73701558ddc363d8d896452fa378d3ad8547.jpg?w=1135",
+		Servings: 2,
+		Ingredients: []rexch.Ingredient{
+			{Group: "", Name: "じゃがいも", Amount: "3個(約450g)", Comment: ""},
+			{Group: "", Name: "ベーコン", Amount: "120g", Comment: "ブロック"},
+			{Group: "", Name: "ミニトマト", Amount: "12個", Comment: ""},
+			{Group: "", Name: "玉ねぎ", Amount: "1/4個(約50g)", Comment: ""},
+			{Group: "", Name: "ローリエ", Amount: "1枚", Comment: ""},
+			{Group: "", Name: "オリーブオイル", Amount: "", Comment: ""},
+			{Group: "", Name: "酒", Amount: "", Comment: ""},
+			{Group: "", Name: "塩", Amount: "", Comment: ""},
+		},
+		Instructions: []rexch.Instruction{
+			{Label: "", Elements: []rexch.InstructionElement{&rexch.TextInstructionElement{Text: "(1)材料の下ごしらえをする\nじゃがいもは皮をむき、幅1.5cmに切る。水に5分ほどさらし、水けをきる。玉ねぎは縦に薄切りにする。ミニトマトはへたを取る。ベーコンは幅1cmに切る。"}}},
+			{Label: "", Elements: []rexch.InstructionElement{&rexch.TextInstructionElement{Text: "(2)こんがりと焼く\nフライパンにオリーブオイル大さじ1を強めの中火で熱し、じゃがいもとベーコンを並べ入れて、こんがりとするまで両面を2分くらいずつ焼く。"}}},
+			{Label: "", Elements: []rexch.InstructionElement{&rexch.TextInstructionElement{Text: "(3)煮込む\n酒大さじ2をふり、玉ねぎを加えてさっと炒める。水1と1/2カップとローリエ、ミニトマトを加える。煮立ったらふたをし、弱火で10~15分煮込む。塩小さじ1/3を加え、中火でひと煮する。\n以上! こちら、煮込みだけどフライパンで作れちゃうのもうれしいですよね。\nちなみに煮込む時間は、じゃがいもの食感の好みで調節しちゃってOK。フレンチマスタードをつけて食べてもおいしいですよ。\nこれからの季節にリピートしたくなる「じゃがいもとかたまりベーコンの塩味煮込み」、早速本日いかがですか?\n(『オレンジページ』2022年11月2日号より)"}}},
+		},
+	},
 	"https://www.orangepage.net/recipes/detail_302394": {
 		Title:    "じゃがいものガレット",
 		Image:    "https://production-orp.s3.amazonaws.com/uploads/recipes/image/0000302394/20200907150806_w300hf.jpg",
