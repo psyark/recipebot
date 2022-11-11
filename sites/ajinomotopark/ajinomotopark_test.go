@@ -218,6 +218,37 @@ var tests = map[string]*rexch.Recipe{
 			{Elements: []rexch.InstructionElement{&rexch.TextInstructionElement{Text: "＊ベーキングパウダー入りの生地はすぐに焼かないとふくらみが悪くなるので、\u3000混ぜたらすぐに焼きましょう。"}}},
 		},
 	},
+	"https://park.ajinomoto.co.jp/recipe/card/710481/": {
+		Title:    "だし香る鮭のちゃんちゃん焼き",
+		Image:    "https://park.ajinomoto.co.jp/wp-content/uploads/2018/03/710481.jpeg",
+		Servings: 4,
+		Ingredients: []rexch.Ingredient{
+			{Group: "", Name: "生ざけ", Amount: "4切れ", Comment: ""},
+			{Group: "", Name: "和風だしの素", Amount: "小さじ1", Comment: ""},
+			{Group: "", Name: "キャベツ", Amount: "200g", Comment: ""},
+			{Group: "", Name: "もやし", Amount: "1袋", Comment: ""},
+			{Group: "", Name: "玉ねぎ", Amount: "1個", Comment: ""},
+			{Group: "", Name: "にんにく", Amount: "1かけ", Comment: ""},
+			{Group: "A", Name: "みそ", Amount: "大さじ3", Comment: ""},
+			{Group: "A", Name: "酒", Amount: "大さじ1", Comment: ""},
+			{Group: "A", Name: "和風だしの素", Amount: "小さじ2", Comment: ""},
+			{Group: "A", Name: "砂糖", Amount: "小さじ1", Comment: ""},
+			{Group: "A", Name: "おろしにんにく", Amount: "適量", Comment: "チューブ"},
+			{Group: "", Name: "バター", Amount: "10g", Comment: ""},
+			{Group: "", Name: "サラダ油", Amount: "小さじ2", Comment: ""},
+			{Group: "", Name: "一味唐がらし・好みで", Amount: "適量", Comment: ""},
+		},
+		Instructions: []rexch.Instruction{
+			{Label: "", Elements: []rexch.InstructionElement{&rexch.TextInstructionElement{Text: "さけの両面に「お塩控えめの・ほんだし」をふる。"}}},
+			{Label: "", Elements: []rexch.InstructionElement{&rexch.TextInstructionElement{Text: "キャベツは３ｃｍ角くらいに切り、玉ねぎはタテ半分に切って芯を取り、５ｍｍ幅の薄切りにする。にんにくは薄切りにする。"}}},
+			{Label: "", Elements: []rexch.InstructionElement{&rexch.TextInstructionElement{Text: "Ａを混ぜ合わせ、合わせみそを作る。"}}},
+			{Label: "", Elements: []rexch.InstructionElement{&rexch.TextInstructionElement{Text: "フライパンに油小さじ１を熱し、（１）のさけを入れ、両面香ばしい焼き色がつくまで焼いていったん皿に取り出す。"}}},
+			{Label: "", Elements: []rexch.InstructionElement{&rexch.TextInstructionElement{Text: "フライパンの汚れをキッチンペーパーで拭き取り、油小さじ１を入れて熱し、（２）のキャベツ・玉ねぎ・にんにく、もやしを加えて混ぜる。"}}},
+			{Label: "", Elements: []rexch.InstructionElement{&rexch.TextInstructionElement{Text: "（３）の合わせみそを数か所にのせてフタをし、弱めの中火でムラなく焼けるように時々混ぜながら、７分ほど蒸し焼きにする。"}}},
+			{Label: "", Elements: []rexch.InstructionElement{&rexch.TextInstructionElement{Text: "フライパンの中央をあけ、（４）のさけを戻し入れてフタをし、３分ほど蒸し焼きにし、さけの上にバターをちぎってのせる。好みで一味唐がらしをふる。"}}},
+			{Label: "", Elements: []rexch.InstructionElement{&rexch.TextInstructionElement{Text: "＊食卓へフライパンのまま豪快に出しても、お皿に盛りつけても。"}}},
+		},
+	},
 }
 
 func TestNewParser(t *testing.T) {
